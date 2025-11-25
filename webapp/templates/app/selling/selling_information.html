@@ -1,0 +1,74 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="sellinginformationpage">
+        <section class="sellinginfo1">
+            <div class="sellinginfo1_body">
+                <div class="sellinginfo1_left">
+                    <div class="sellingleft_body1">
+                        <div class="sellingleft_bold1">
+                            <p>Got a device you no longer need? </br> Trade it in with ease. </p>
+                        </div>
+                        <div class="sellingleft_text1">
+                            <p>We make it simple and transparent for you to trade it in your laptops, desktops, or PC parts. Whether you’re upgrading or just clearing space, our in-person evaluation process ensures you get a fair deal.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sellinginfo1_right">
+                    <img src="{% static 'images/computer1.jpg' %}" alt="">
+                </div>
+            </div>
+        </section>
+        <section class="sellinginfo2">
+            <div class="sellinginfo2_body">
+                <div class="sellinginfo2_upper">
+                    <h4>How It Works?</h4>
+                </div>
+                <div class="sellinginfo2_body2">
+                    <div class="sellingbody_bold2">
+                        <p>Fill Out The Trade-In Form</p>
+                    </div>
+                    <div class="sellingbody_text2">
+                        <p>Tell us about your device — brand, model, specs, and condition. Upload clear images and choose your preferred appointment time.</p>
+                        <p>Step 1: Tell Us About Your Device </br> Fill out a quick form with your device’s specs, condition, and photos.</p>
+                    </div>
+                </div>
+                <div class="sellinginfo2_bottom">
+                    <h4>Step</h4>
+                    <div class="sellinginfo2_step">
+                        <button>1</button>
+                        <button>2</button>
+                        <button>3</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="sellinginfo3">
+            <div class="sellinginfo3_body">
+                <div class="sellinginfo3_left">
+                    <img src="{% static 'images/computer2.jpg' %}" alt="">
+                </div>
+                <div class="sellinginfo3_right">
+                    <div class="sellingright_bold3">
+                        <h4>What You Need?</h4>
+                    </div>
+                    <div class="sellingright_text3">
+                        <div class="sellingtext3_p">
+                            <img src="{% static 'images/icon/check-blue.png' %}" alt=""><p>Your device and/or accessories</p>
+                        </div>
+                        <div class="sellingtext3_p">
+                            <img src="{% static 'images/icon/check-blue.png' %}" alt=""><p>A valid ID</p>
+                        </div>
+                        <div class="sellingtext3_p">
+                            <img src="{% static 'images/icon/check-blue.png' %}" alt=""><p>A confirmed appointment</p>
+                        </div>
+                    </div>
+                    <div class="sellingright_bottom3">
+                        <a href="{% url 'selling' %}">Sell Now</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock content %}

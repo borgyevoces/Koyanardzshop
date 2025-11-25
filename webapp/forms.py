@@ -1,0 +1,130 @@
+from django import forms
+from .models import CustomUser, Category, Brand, Product, ProductVariation, ProductReview, Appointment, Selling
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, AuthenticationForm
+from django.contrib.auth import get_user_model
+from datetime import date
+
+class RegisterForm(UserCreationForm):
+    email = forms.CharField(widget=forms.EmailInput(attrs={"placeholder": "Email Address", "class": "form-control"}))
+    username = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Username", "class": "form-control"}))
+    password1 = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={"placeholder": "Enter password", "class": "form-control"}))
+    password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput(attrs={"placeholder": "Confirm password", "class": "form-control"}))
+
+    class Meta:
+        model = get_user_model()
+        fields = ["email", "username", "password1", "password2"]
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput)
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['avatar', 'email', 'first_name', 'last_name', 'contact', 'address', 'username']
+
+class ProfileUpdateForm(UserChangeForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+    class Meta:
+        model = CustomUser
+        fields = ['avatar', 'email', 'first_name', 'last_name', 'contact', 'address', 'username', 'password']
+
+class Add(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+class AddCategory(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['category_name']
+
+class AddBrand(forms.ModelForm):
+    class Meta:
+        model = Brand
+        fields = ['brand']
+
+class AddVariantForm(forms.ModelForm):
+    class Meta:
+        model = ProductVariation
+        fields = ['product_variation', 'description', 'price', 'stock', 'image']
+        widgets = {
+            'product_variation': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 256GB / Red'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+            'image': forms.ClearableFileInput(attrs={'multiple': False}),
+        }
+
+class ProductReviewForm(forms.ModelForm):
+    class Meta:
+        model = ProductReview
+        fields = ["rating", "comment"]
+        widgets = {
+            "rating": forms.NumberInput(attrs={"min": 1, "max": 5}),
+            "comment": forms.Textarea(attrs={"rows": 3}),
+        }
+
+class AppointmentForm(forms.ModelForm):
+    TIME_CHOICES = [
+        ("10:00", "10:00 AM"),
+        ("11:00", "11:00 AM"),
+        ("12:00", "12:00 PM"),
+        ("13:00", "01:00 PM"),
+        ("14:00", "02:00 PM"),
+        ("15:00", "03:00 PM"),
+        ("16:00", "04:00 PM"),
+        ("17:00", "05:00 PM"),
+    ]
+
+    time = forms.ChoiceField(
+        choices=TIME_CHOICES,
+        widget=forms.Select()
+    )
+
+    class Meta:
+        model = Appointment
+        fields = ['first_name', 'last_name', 'contact', 'email', 'date', 'time']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Last Name'}),
+            'contact': forms.TextInput(attrs={'placeholder': 'Contact No.'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email'}),
+            'date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'min': date.today().isoformat()
+                    }),
+        }
+
+class SellingForm(forms.ModelForm):
+    agree = forms.BooleanField(required=True, label="I agree to the terms and conditions.")
+
+    class Meta:
+        model = Selling
+        fields = ['product_name', 'category', 'image', 'description', 'price', 'first_name', 'last_name', 'contact', 'address', 'email', 'selling_date', 'selling_time']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Last Name'}),
+            'contact': forms.TextInput(attrs={'placeholder': 'Phone Number'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email Address'}),
+            'address': forms.Textarea(attrs={
+                'placeholder': 'Address',
+                'rows': 4
+            }),
+            'selling_date': forms.DateInput(attrs={'type': 'date', 'placeholder': 'Select Appointment Date'}),
+            'selling_time': forms.TimeInput(attrs={'type': 'time', 'placeholder': 'Select Appointment Time'}),
+            'product_name': forms.TextInput(attrs={'placeholder': 'Product Type'}),
+            'category': forms.Select(attrs={'placeholder': 'Select Category'}),
+            'price': forms.NumberInput(attrs={'placeholder': 'Asking Price'}),
+            'description': forms.Textarea(attrs={
+                'placeholder': 'Specs & Description',
+                'rows': 4
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(SellingForm, self).__init__(*args, **kwargs)
+        for field_name in self.fields:
+            if field_name != 'agree':
+                self.fields[field_name].required = True

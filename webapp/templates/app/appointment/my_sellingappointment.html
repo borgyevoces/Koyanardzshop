@@ -1,0 +1,119 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="myappointmentpage">
+    <div class="myappointmentbody">
+        <div class="myappointment_left">
+            <div class="myappointment_leftbody">
+                <h3>My Appointments</h3>
+                <div class="myappointment_nav">
+                    <ul>
+                        <li><a href="{% url 'my_appointment' %}"><img src="{% static 'images/icon/pending.png' %}" alt="">Product Viewing Appointment</a></li>
+                        <li><a href="{% url 'my_sellingappointment' %}"><img src="{% static 'images/icon/trading.png' %}" alt="">Selling Device Appointment</a></li>
+                        <li><a href="{% url 'my_cancelledappointment' %}"><img src="{% static 'images/icon/cancel.png' %}" alt="">Cancelled Appointment</a></li>
+                        <li><a href="{% url 'my_historyappointment' %}"><img src="{% static 'images/icon/history.png' %}" alt="">History</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="myappointment_right">
+            <h3>Product Viewing Appointment</h3>
+            <div class="myappointment_rightsearch">
+            </div>
+            <div class="myappoinment_rightup">
+                <label>All appointments<p>( {{ count_all }} )</p></label>
+                <label>Pending<p>( {{ count_pending }} )</p></label>
+                <label>Completed<p>( {{ count_completed }} )</p></label>
+                <label>Cancelled<p>( {{ count_cancelled }} )</p></label>
+            </div>
+            {% if user.is_authenticated %}
+                {% if sellings %}
+                        <div class="myappointment_righttables">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Date & Time</th>
+                                        <th>Status</th>
+                                        <th>Price</th>
+                                        <th>Reference No.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for selling in sellings %}
+                                    <tr>
+                                        <td>
+                                            <img src="{{ selling.image.url }}" alt="">
+                                            {{ selling.product_name }}
+                                        </td>
+                                        <td>{{ selling.selling_date|date:"M d, Y" }} </br> {{ selling.selling_time|time:"h:i A" }}</td>
+                                        <td>{{ selling.status }}</td>
+                                        <td>₱{{ selling.price|intcomma }}</td>
+                                        <td>{{ selling.reference_number }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!--
+<div class="myappointmentpage">
+    <div class="myappointmentbody">
+        <div class="myappointment_left">
+            <div class="myappointment_navbar">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><a href="{% url 'my_appointment' %}">Product Viewing Appointment</a></th>
+                            <th><a href="{% url 'my_sellingappointment' %}">Selling Device Appointment</a></th>
+                            <th><a href="{% url 'my_cancelledappointment' %}">Cancelled Appointment</a></th>
+                            <th><a href="{% url 'my_historyappointment' %}">History</a></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="myappointment_body">
+            <section class="myappointment_section">
+                <div class="appointment-container">
+                    {% if user.is_authenticated %}
+                        {% if sellings %}
+                            {% for selling in sellings %}
+                            <div class="appointment-card">
+                                <p><span class="month">{{ selling.selling_date|date:"F" }}</span>
+                                    <span class="day">{{ selling.selling_date|date:"d" }}</span>
+                                    <span class="year">{{ selling.selling_date|date:"Y" }} <span>{{ selling.time|time:"h:i A" }}</span></span>
+                                </p>
+                                <div class="appointmentcard-hover">
+                                    <div class="appointmenthover_content">
+                                        <p>Product Name: {{ selling.product_name }}</p>
+                                        <h4>Price: ₱{{ selling.price|intcomma }}</h4>
+                                        <div class="containercart_bottom">
+                                            <p>Time: {{ selling.selling_time|time:"h:i A" }}</p>
+                                            <p>Reference Number: {{ selling.reference_number }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% elif no_sellings %}
+                            <p>No Appointments Found</p>
+                        {% endif %}
+                        {% else %}
+                            <div class="myappointment_login">
+                                <p>You need to <a href="{% url 'login' %}">log in</a> first.</p>
+                            </div>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+-->
+{% endblock content %}

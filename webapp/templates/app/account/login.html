@@ -1,0 +1,63 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="loginpage">
+    <div class="loginpage_body">
+        <div class="loginpage_left">
+            <div class="loginpage_leftbody">
+                <h4>Hello, Welcome!</h4>
+                <div class="loginleft_bodyp">
+                    <p>Join Koya Nardz to trade, build, or view computers with ease.</p>
+                </div>
+                <a href="{% url 'register' %}">Sign up</a>
+            </div>
+        </div>
+        <div class="loginpage_right">
+            <div class="loginpage_rightbody">
+                <h2>Sign In</h2>
+                {% if messages %}
+                <div class="alert alert-danger">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="username_or_email" placeholder="Username">
+                    <div class="password-wrapper">
+                        <input type="password" name="password" id="password-field" placeholder="Password">
+                        <img src="{% static 'images/icon/password-hide.png' %}" class="toggle-password" id="togglePassword" alt="Show Password">
+                    </div>
+                    <a href="{% url 'forgot_password' %}" class="forgot-password-link">Forgot Password?</a>
+                    <button type="submit">Sign In</button>
+                </form>
+                <div class="login_otheracc">
+                    <p>or signin with</p>
+                    <div class="loginacc_logo">
+                        <a href="#"><img src="{% static 'images/icon/facebook-blue.png' %}" alt="Facebook"></a>
+                        <a href="#"><img src="{% static 'images/icon/google-symbol.png' %}" alt="Facebook"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const passwordField = document.getElementById("password-field");
+    const toggleBtn = document.getElementById("togglePassword");
+
+    toggleBtn.addEventListener("click", () => {
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            toggleBtn.src = "{% static 'images/icon/password-visible.png' %}";
+        } else {
+            passwordField.type = "password";
+            toggleBtn.src = "{% static 'images/icon/password-hide.png' %}";
+        }
+    });
+</script>
+
+{% endblock content %}

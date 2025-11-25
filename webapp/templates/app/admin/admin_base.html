@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/app-style.css' %}" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/sidebar-menu.css' %}" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/pace.min.css' %}" rel="stylesheet">
+    <link href="{% static 'themewagon/dashtreme/assets/css/icons.css' %}" rel="stylesheet">
+    <script src="{% static 'themewagon/dashtreme/assets/js/jquery.min.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/popper.min.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/sidebar-menu.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/Chart.min.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/app-script.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/index.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/chartjs-script.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/bootstrap.js' %}"></script>
+    <script src="{% static 'themewagon/dashtreme/assets/js/pace.min.js' %}"></script>
+    <script src="{% static 'js/admin.js' %}"></script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-theme bg-theme1">
+    <div class="wrapper" id="wrapper">
+        {% include 'app/admin/admin_header.html' %}
+
+        <div class="content-wrapper">
+            {% include 'app/admin/admin_navigation.html' %}
+            <div class="container-fluid">
+            {% block content %}
+
+            {% endblock %}
+            </div>
+        </div>
+    </div> 
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

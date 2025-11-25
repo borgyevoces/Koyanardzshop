@@ -1,0 +1,148 @@
+{% extends 'app/admin/admin_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="admin_tradepage">
+    <div class="uppertrade">
+        <div class="trade_filter">
+    
+        </div>
+        <div class="admintrade_search">
+            <form action="" method="GET">
+                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
+            </form>
+            <div class="trade_status">
+                <form method="get" class="selling-filters">
+                    <select name="status">
+                        <option value="">All Status</option>
+                        <option value="Pending" {% if status_filter == "Pending" %}selected{% endif %}>Pending</option>
+                        <option value="Completed" {% if status_filter == "Completed" %}selected{% endif %}>Completed</option>
+                        <option value="Cancelled" {% if status_filter == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                    </select>
+                    <button type="submit">Apply</button>
+                </form>
+            </div>
+        </div>
+        <div class="popup" id="cancel_popup">
+            <button onclick="closeCancelPopup()">X</button>
+            <div class="pop_wrapper">
+                <div class="pop_content">
+                    <h3>Cancel Trade</h3>
+                    <form id="cancel_form">
+                        {% csrf_token %}
+                        <input type="hidden" id="cancel_id" name="selling_id">
+                        <label>Reason for cancellation:</label>
+                        <textarea id="cancel_reason" name="cancel_reason" required></textarea>
+                        <button type="submit">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tradetable">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Reference Number</th>
+                    <th>Product Name</th>
+                    <th>Customer Name</th>
+                    <th>Contact</th>
+                    <th>Email</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            {% for selling in sellings %}
+            <tbody>
+                <tr data-id="{{ produkto.id }}">
+                    <td>{{ selling.id }}</td>
+                    <td>{{ selling.reference_number }}</td>
+                    <td>{{ selling.product_name }}</td>
+                    <td>{{ selling.first_name }} {{ selling.last_name }}</td>
+                    <td>{{ selling.contact }}</td>
+                    <td>{{ selling.email }}</td>
+                    <td>{{ selling.selling_date|date:"M d, Y" }}</td>
+                    <td>{{ selling.selling_time|time:"h:i A" }}</td>
+                    <td>₱{{ selling.price|intcomma }}</td>
+                    <td>
+                        {% if selling.status == "Cancelled" %}
+                        <span style="color: red;">Cancelled</span>
+                        {% elif selling.status == "Completed" %}
+                        <span style="color: green;">Completed</span>
+                        {% else %}
+                        <form method="post" action="{% url 'complete_trade' selling.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit">Complete</button>
+                        </form>
+                        <button type="button" class="cancel_btn" data-id="{{ selling.id }}">Cancel</button>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<script>
+    function openCancelPopup(id) {
+        document.getElementById('cancel_id').value = id;
+        document.getElementById('cancel_reason').value = '';
+        document.getElementById('cancel_popup').style.display = 'block';
+    }
+    function closeCancelPopup() {
+        document.getElementById('cancel_popup').style.display = 'none';
+    }
+    document.querySelectorAll('.cancel_btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.dataset.id;
+            openCancelPopup(id);
+        });
+    });
+    document.getElementById('cancel_form').addEventListener('submit', function(e) {
+        e.preventDefault();
+    
+        const id = document.getElementById('cancel_id').value;
+        const reason = document.getElementById('cancel_reason').value;
+        const csrfToken = getCookie('csrftoken');
+    
+        fetch(`/admin_selling/${id}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ cancel_reason: reason })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Trading cancelled!');
+                location.reload();
+            } else {
+                alert('Error cancelling appointment.');
+            }
+        });
+    });
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+</script>
+    
+    
+{% endblock %}

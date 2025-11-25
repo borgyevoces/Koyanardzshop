@@ -1,0 +1,81 @@
+{% extends 'app/admin/admin_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="inventorypage">
+    <div class="upperinventory">
+        <div class="inventory_filter">
+            <form action="" method="GET">
+                <select name="category">
+                    <option value="">Categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>{{ category.category_name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="brand">
+                    <option value="">Brands</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.brand }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Filter</button>
+            </form>
+        </div>
+        <div class="inventory_search">
+            <form action="" method="GET">
+                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
+            </form>
+        </div>
+    </div>
+    <div class="inventorytable">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Product Name</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if products %}
+                {% for produkto in products %}
+                <tr>
+                    <td>{{ produkto.id }}</td>
+                    <td>{{ produkto.product_name }}</td>
+                    <td>{{ produkto.stock }}</td>
+                    <td>₱{{ produkto.price|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <div class="bottominventory">
+        <div class="left_inventory">
+
+        </div>
+        <div class="right_inventory">
+            <a href="javascript:void(0);" id="download-pdf">
+                <button>Download PDF</button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+<script>
+    document.getElementById('download-pdf').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const table = document.querySelector('.inventorytable table');
+        doc.autoTable({ html: table });
+        doc.save('inventory-list.pdf');
+    });
+</script>
+{% endblock content %}

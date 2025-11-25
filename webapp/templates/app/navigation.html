@@ -1,0 +1,206 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+
+
+</head>
+<body>
+    <header>
+        <div class="header">
+            <div class="navbar">
+                <div class="navbar_logo">
+                    <a href="{% url 'home' %}"><img src="{% static 'images/LOGO.png' %}" alt=""></a>
+                    <div class="navbar_logotext">
+                        <a href="{% url 'home' %}">
+                            <p>Koya Nardz</p>
+                            <p>Computer Trading</p>
+                        </a>
+                    </div>
+                </div>
+                <div class="navbar_nav">
+                    <ul>
+                        <li>
+                            <a href="{% url 'product' %}">Product</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'selling' %}">Sell</a>
+                            <ul class="sellnav">
+                                <li><a href="{% url 'selling_information' %}">How to Sell?</a></li>
+                                <li><a href="{% url 'selling' %}">Sell</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{% url 'my_appointment' %}">Appointment</a></li>
+                    </ul>
+                </div>
+                <div class="accountbar">
+                    <ul>
+                        <li><a href="{% url 'cart' %}"><img src="{% static 'images/icon/cart-white.png' %}" alt="cart"></a></li>
+                        <li class="dropdown">
+    <a href="javascript:void(0);" class="favorite-dropbtn" onclick="toggleFavoriteDropdown()">
+        <img src="{% static 'images/icon/heart.png' %}" alt="">
+    </a>
+
+    <div id="favoriteDropdown" class="dropdown-content favorite-dropdown-box">
+        {% if products_favorite %}
+            {% for produkto in products_favorite %}
+            <div class="fav-item">
+                
+                <div class="fav-left">
+                    <a href="{% url 'product_item' produkto.id %}">
+                        <img src="{{ produkto.image.url }}" width="40" height="40">
+                    </a>
+                    <span>{{ produkto.product_name }}</span>
+                </div>
+
+                <div class="fav-right">
+
+                    <!-- REMOVE from favorites -->
+                    <button class="fav-remove-btn"
+                        data-product-id="{{ produkto.id }}">
+                        ✕
+                    </button>
+
+                    <!-- ADD to Cart -->
+                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                        {% csrf_token %}
+                        <button class="fav-cart-btn">🛒</button>
+                    </form>
+
+                </div>
+
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-fav">No favorites yet</p>
+        {% endif %}
+    </div>
+</li>
+
+
+                        <li class="dropdown">
+                            {% if user.is_authenticated %}
+                            <a href="javascript:void(0);" class="dropbtn" onclick="toggleDropdown()">
+                                {% if user.avatar %}
+                                <img src="{% static 'images/icon/user_default.png' %}" alt="Avatar" class="avatar-img">
+                                {% else %}
+                                <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img">
+                                {% endif %}
+                            </a>
+                            <div id="userDropdown" class="dropdown-content">
+                                <div class="useravatar">
+                                    {% if user.avatar %}
+                                    <img src="{% static 'images/icon/user_default.png' %}" alt="Avatar" class="avatar-img">
+                                    {% else %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img">
+                                    {% endif %}
+                                    <p>{{ user.username }}</p>
+                                </div>
+                                <a href="{% url 'profile' %}">Profile</a>
+                                <a href="{% url 'logout' %}">Logout</a>
+                            </div>
+                            {% else %}
+                            <a href="{% url 'login' %}">
+                                <img src="{% static 'images/icon/user-white.png' %}" alt="Avatar" class="avatar-img">
+                            </a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% block content %}
+    {% endblock content %}
+    <footer class="fixed-bottom mt-5">
+        <div class="footer">
+            <div class="footer_logo">
+                <p>Connect with us</p>
+                <div class="footer_icon">
+                    <a href="#"><img src="{% static 'images/icon/facebook.png' %}" alt="No image"></a>
+                    <a href="#"><img src="{% static 'images/icon/social.png' %}" alt="No image"></a>
+                </div>
+            </div>
+            <div class="footer_services">
+                <h3 class="footer_h3">Services & Support</h3>
+                <div class="footer_nav">
+                    <ul>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer_shop">
+                <h3 class="footer_h3">Shop</h3>
+                <div class="footer_nav">
+                    <ul>
+                        <li><a href="{% url 'product' %}">Hot Deals</a></li>
+                        <li><a href="{% url 'product' %}">Computer</a></li>
+                        <li><a href="{% url 'product' %}">Laptop</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+    function toggleFavoriteDropdown() {
+        const drop = document.getElementById("favoriteDropdown");
+        drop.style.display = (drop.style.display === "block") ? "none" : "block";
+    }
+
+    window.addEventListener('click', function(event) {
+        const favDrop = document.getElementById("favoriteDropdown");
+        const favBtn = document.querySelector('.favorite-dropbtn');
+
+        if (favDrop && favBtn &&
+            !favBtn.contains(event.target) &&
+            !favDrop.contains(event.target)) {
+            favDrop.style.display = "none";
+        }
+    });
+
+    // REMOVE FROM FAVORITE using AJAX
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('fav-remove-btn')) {
+
+            const productId = e.target.dataset.productId;
+
+            fetch(`/toggle_favorite/${productId}/`)
+            .then(res => res.json())
+            .then(data => {
+                window.location.reload();
+            });
+        }
+    });
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById("userDropdown");
+            dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
+        }
+        window.addEventListener('click', function(event) {
+            const dropdown = document.getElementById("userDropdown");
+            const button = document.querySelector('.dropbtn');
+    
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

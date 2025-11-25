@@ -1,0 +1,948 @@
+/* BASE, HEADER, NAVIGATION */
+body{
+    margin: 0;
+    font-family: Afacad;
+    background-color: whitesmoke;
+}
+header{
+    color: white;
+    background-color: #4F9FBA;
+}
+.headerpage{
+    display: flex;
+}
+.headerpage .headerbody{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 1rem;
+    gap: .5rem;
+}
+.headerimage img{
+    width: 4.5rem;
+    height: 5.5rem;
+}
+.headerpage .headeraccount{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+}
+.headerpage .headeraccount a{
+    text-decoration: none;
+    color: black;
+}
+.main-layout{
+    display: flex;
+    margin: 1rem;
+}
+.sidebar{
+    position: fixed;
+    padding: 1rem;
+    width: 200px;
+    border-radius: 1rem;
+    background-color: #1560bd;
+    color: white;
+}
+.sidebar ul{
+    margin-top: 3rem;
+    padding: 0;
+    text-align: center;
+    list-style: none;
+}
+.sidebar ul li{
+    padding: 1rem;
+}
+.sidebar ul li a{
+    padding: 1rem 2rem;
+    text-decoration: none;
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: white;
+}
+.sidebar ul li:nth-child(5){
+    text-align: left;
+}
+.sidebar ul li a::after{
+    content: "";
+    background-color: whitesmoke;
+    opacity: 0;
+}
+.sidebar ul li a:not(:active):hover, .sidebar ul li a:focus{
+    border-left: .2rem solid whitesmoke;
+    border-right: .2rem solid whitesmoke;
+}
+.sidebar ul li a:focus, .sidebar ul li a:active{
+    border-left: 2px solid whitesmoke;
+    border-right: 2px solid whitesmoke;
+}
+.sidebar ul li a:focus::after, .sidebar ul li a:active::after{
+    opacity: 1;
+}
+.adminnavigation_logo{
+    text-align: center;
+}
+.adminnavigation_logo img{
+    width: 7.5rem;
+    height: 8.5rem;
+}
+.adminnavigation_logo p{
+    margin-top: -1rem;
+    padding: 0;
+    text-transform: capitalize;
+}
+.main-content{
+    flex-grow: 1;
+    margin-left: 10rem;
+    padding: 1.2rem;
+}
+
+/* Dashboard */
+.admin_dashboardupper{
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+    gap: 2.5rem;
+}
+.dashboardupper_notification{
+    width: 35rem;
+    background-color: white;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .3);
+}
+.dashboard_notificationupper h4{
+    margin-left: 1rem;
+}
+.dashboard_notificationlink{
+    position: relative;
+    display: block;
+    margin-left: 1rem;
+}
+.dashboard_notificationlink a{
+    display: block;
+    padding-left: 1rem;
+    text-decoration: none;
+    color: black;
+}
+.dashboard_notificationlink a span{
+    position: absolute;
+    right: 0;
+    margin-right: 1rem;
+}
+.dashboardupper_appointment{
+    position: relative;
+    display: block;
+    width: 15rem;
+    text-align: center;
+    border-radius: 1.5rem;
+    background-color: white;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .3);
+}
+.dashboardupper_appointment p{
+    font-family: Afacad;
+    font-size: 2rem;
+}
+.dashboardupper_appointment h4{
+    font-family: Montserrat;
+}
+.dashboardupper_selling{
+    position: relative;
+    display: block;
+    width: 15rem;
+    text-align: center;
+    border-radius: 1.5rem;
+    background-color: white;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .3);
+}
+.dashboardupper_selling p{
+    font-family: Afacad;
+    font-size: 2rem;
+}
+.dashboardupper_selling h4{
+    font-family: Montserrat;
+}
+.admin_dashboardbody{
+    display: flex;
+    margin-top: 2rem;
+    margin-left: 6rem;
+}
+.dashboardbody_sales{
+    width: 50rem;
+}
+
+/* Inventory */
+/* CONTAINER */
+.inventorypage {
+    margin: 1.5rem 6rem;
+    font-family: "Montserrat", sans-serif;
+}
+
+/* FILTERS + SEARCH */
+.upperinventory {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.inventory_filter {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.inventory_filter form select {
+    width: 8rem;
+    height: 2.3rem;
+    font-size: 1.1rem;
+    border-radius: 1rem;
+    border: 1px solid #1b3b6f;
+    background-color: #e8f0ff;
+    padding-left: 0.7rem;
+    cursor: pointer;
+    appearance: none;
+    transition: 0.3s;
+}
+.inventory_filter form select option{
+    background-color: whitesmoke;
+}
+
+.inventory_filter form select:hover {
+    border-color: #003b8e;
+}
+
+.inventory_filter form button {
+    height: 2.3rem;
+    padding: 0 1rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-family: "Montserrat", sans-serif;
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    background: linear-gradient(90deg, #001a40, #003b8e);
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.inventory_filter form button:hover {
+    background: linear-gradient(90deg, #003b8e, #001a40);
+}
+
+.inventory_search {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.inventory_search input {
+    width: 22rem;
+    height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 2rem;
+    border: 1px solid #1b3b6f;
+    font-size: 1.1rem;
+    transition: 0.3s;
+    background: #f9fbff;
+}
+
+.inventory_search input:focus {
+    outline: none;
+    border-color: #003b8e;
+    box-shadow: 0 0 8px rgba(0, 59, 142, 0.5);
+}
+
+/* TABLE */
+.inventorytable {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.inventorytable table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 26, 64, 0.12);
+    background: white;
+    font-size: 1.1rem;
+}
+
+.inventorytable thead {
+    background: linear-gradient(90deg, #001a40, #003b8e);
+    color: white;
+}
+
+.inventorytable thead th {
+    padding: 1rem 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    font-family: "Montserrat", sans-serif;
+}
+
+.inventorytable thead th:nth-child(1) {
+    border-top-left-radius: 1rem;
+}
+
+.inventorytable thead th:nth-child(2) {
+    text-align: left;
+    padding-left: 2rem;
+    width: 40%;
+}
+
+.inventorytable thead th:nth-child(4) {
+    border-top-right-radius: 1rem;
+}
+
+.inventorytable tbody tr {
+    color: black;
+    border-bottom: 1px solid #e5e5e5;
+    transition: background-color 0.25s ease;
+}
+
+.inventorytable tbody tr:hover {
+    background-color: #f0f6ff;
+}
+
+.inventorytable tbody td {
+    padding: 0.8rem 1.2rem;
+    text-align: center;
+    vertical-align: middle;
+    font-family: "Montserrat", sans-serif;
+}
+
+.inventorytable tbody td:nth-child(2) {
+    text-align: left;
+}
+
+/* BUTTONS */
+.bottominventory {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 6rem;
+    margin-right: 6rem;
+}
+
+.right_inventory a button {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    color: #a4a4a4;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font-family: "Montserrat", sans-serif;
+    transition: color 0.3s ease;
+}
+
+.right_inventory a button:hover {
+    color: #001a40;
+}
+
+/* Product */
+.admin_productpage {
+    margin-left: 5rem;
+    font-family: "Montserrat", sans-serif;
+    color: #222;
+}
+
+/* TOP BAR: FILTERS + ACTIONS + SEARCH */
+.upperproduct {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.adminproduct_left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* FILTER FORM */
+.product_filter {
+    width: 100%;
+    max-width: 320px;
+}
+
+.product_filter form {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.product_filter form select {
+    flex: 1;
+    min-width: 110px;
+    height: 2.5rem;
+    padding: 0 1rem;
+    font-size: 1.1rem;
+    border-radius: 1rem;
+    border: 1.5px solid #004080;
+    background-color: #e7f0ff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    appearance: none;
+}
+
+.product_filter form select:hover,
+.product_filter form select:focus {
+    border-color: #002a66;
+    outline: none;
+}
+
+.product_filter form button {
+    min-width: 90px;
+    height: 2.5rem;
+    border: none;
+    border-radius: 1.3rem;
+    background: linear-gradient(90deg, #001a40, #004080);
+    color: white;
+    font-weight: 600;
+    font-family: "Montserrat", sans-serif;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.product_filter form button:hover {
+    background: linear-gradient(90deg, #003366, #001a40);
+}
+
+/* EDIT / DELETE BUTTONS */
+.product_editdelete {
+    margin: 0 1rem 0 0;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.action-buttons button {
+    background: transparent;
+    border: none;
+    color: whitesmoke;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.25s ease;
+}
+
+.action-buttons button:hover {
+    color: #001a40;
+}
+
+/* SEARCH INPUT */
+.adminproduct_right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.adminproduct_search {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.adminproduct_search input {
+    width: 22rem;
+    height: 2.6rem;
+    padding: 0 1rem;
+    border-radius: 2rem;
+    border: 1.5px solid #001a40;
+    font-size: 1.1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #f9fbff;
+}
+
+.adminproduct_search input:focus {
+    outline: none;
+    border-color: #003366;
+    box-shadow: 0 0 10px rgba(0, 51, 102, 0.5);
+}
+.popup{
+    position: absolute;
+    display: none;
+    margin: 12rem 40rem;
+    top: 0;
+    left: 0;
+    padding: 1rem;
+    border-radius: 1.5rem;
+    background-color: whitesmoke;
+    color: black;
+    box-shadow: 2px 2px 1rem #000;
+    z-index: 1;
+}
+.popup button{
+    position: absolute;
+    justify-content: right;
+    right: 0;
+    width: 2rem;
+    height: 2rem;
+    margin: -1.5rem -.7rem;
+    font-family: Montserrat;
+    font-size: 1.2rem;
+    background-color: whitesmoke;
+    border: 1px solid black;
+    border-radius: 1rem;
+    cursor: pointer;
+}
+.popup .pop_wrapper{
+    display: block;
+    justify-content: center;
+    align-items: center;
+}
+.popup .pop_wrapper .pop_content{
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+.popup .pop_wrapper .pop_content h3{
+    text-align: center;
+    font-family: Montserrat;
+    color: black;
+}
+.popup .pop_wrapper .pop_content form p{
+    color: black;
+}
+.popup .pop_wrapper .pop_content form p label{
+    font-weight: 600;
+    color: black;
+}
+.popup .pop_wrapper .pop_content form p input{
+    margin-top: .5rem;
+    margin-left: .5rem;
+    padding-left: .5rem;
+    width: 12rem;
+    height: 1.5rem;
+    border-radius: 1rem;
+}
+.popup .pop_wrapper .pop_content form p textarea{
+    height: 4rem;
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    resize: none;
+}
+.popup .pop_wrapper .pop_content form button{
+    position: relative;
+    display: block;
+    margin: .5rem 0 0 0;
+    width: 6rem;
+    height: 2.5rem;
+    border: none;
+    color: white;
+    background-color: #001A40;
+}
+.producttable {
+    display: block; /* allows horizontal scroll */
+    width: 100%;
+    overflow-x: auto; /* horizontal scroll if needed */
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.producttable table {
+    width: 100%;
+    min-width: 900px; /* ensures all columns are shown */
+    border-collapse: collapse;
+}
+
+.producttable thead {
+    background: linear-gradient(90deg, #001a40, #004080);
+    color: white;
+    font-weight: 700;
+}
+
+.producttable thead th {
+    padding: 0.8rem 1rem;
+    text-align: center;
+}
+
+.producttable thead th:nth-child(1) {
+    width: 50px; /* checkbox */
+}
+
+.producttable thead th:nth-child(2) {
+    width: 50px; /* ID */
+}
+
+.producttable thead th:nth-child(3) {
+    width: 80px; /* image */
+}
+
+.producttable thead th:nth-child(4) {
+    text-align: left;
+    padding-left: 1rem; /* product name */
+}
+
+.producttable thead th:nth-child(5),
+.producttable thead th:nth-child(6),
+.producttable thead th:nth-child(7),
+.producttable thead th:nth-child(8) {
+    width: 100px; /* category, brand, quantity, price */
+}
+
+.producttable tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.producttable tbody td {
+    text-align: center;
+    padding: 0.8rem 1rem;
+}
+
+.producttable tbody td:nth-child(4) {
+    text-align: left;
+    padding-left: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.producttable tbody td img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 0.25rem;
+}
+
+/* checkbox styling */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* hover effect for rows */
+.producttable tbody tr:hover {
+    background-color: #f0f6ff;
+}
+
+/* responsive for small screens */
+@media (max-width: 800px) {
+    .producttable table {
+        min-width: 700px; /* ensures scroll even on small screens */
+    }
+}
+
+/* APPOINTMENT */
+.admin_appointmentpage {
+    margin-left: 5rem;
+    padding: 1rem;
+    color: black;
+}
+
+/* Search + Filter Section */
+.adminappointment_search input {
+    width: 20rem;
+    height: 2.3rem;
+    padding: 0 1rem;
+    margin: .5rem;
+    border-radius: 2rem;
+    border: 1px solid #1b3b6f;
+    background: #f9fbff;
+    transition: 0.3s;
+}
+
+.adminappointment_search input:focus {
+    outline: none;
+    border-color: #003b8e;
+    box-shadow: 0 0 5px rgba(0, 70, 160, 0.5);
+}
+
+.adminappointment_search .appointment_status select {
+    width: 9rem;
+    height: 2.3rem;
+    padding-left: .5rem;
+    font-size: 1rem;
+    border-radius: 1rem;
+    border: 1px solid #1b3b6f;
+    background-color: #e8f0ff;
+    cursor: pointer;
+}
+
+.adminappointment_search .appointment_status button {
+    width: 5rem;
+    height: 2rem;
+    color: white;
+    border: none;
+    border-radius: .5rem;
+    background-color: #003b8e;
+    transition: 0.2s;
+}
+
+.adminappointment_search .appointment_status button:hover {
+    background-color: #002a66;
+}
+
+/* TABLE */
+.appointmenttable {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+    color: black;
+}
+
+.appointmenttable table {
+    width: 100%;
+    max-width: 95rem;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* HEADER */
+.appointmenttable thead {
+    text-align: center;
+    background: linear-gradient(90deg, #001a40, #003b8e);
+    color: white;
+}
+
+.appointmenttable thead tr th {
+    padding: 1rem .5rem;
+    font-size: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.appointmenttable thead tr th:last-child {
+    border-right: none;
+}
+
+/* BODY */
+.appointmenttable tbody tr {
+    transition: background 0.2s;
+}
+
+.appointmenttable tbody tr:hover {
+    background: #f2f6ff;
+}
+
+.appointmenttable tbody td {
+    padding: .7rem;
+    text-align: center;
+    border-bottom: 1px solid #e5e5e5;
+    font-family: 'Montserrat';
+    font-size: .95rem;
+}
+
+.appointmenttable tbody td:nth-child(2),
+.appointmenttable tbody td:nth-child(3),
+.appointmenttable tbody td:nth-child(4) {
+    text-align: left;
+}
+
+/* Status Tag Styles */
+.status-tag {
+    padding: .3rem .7rem;
+    border-radius: .7rem;
+    font-weight: 600;
+    font-size: .9rem;
+}
+
+.status-cancelled {
+    background: #ffe1e1;
+    color: #bf0000;
+}
+
+.status-finished {
+    background: #d9f7d9;
+    color: #117a00;
+}
+
+/* Buttons inside table */
+.appointmenttable table tbody tr td button {
+    padding: .2rem .8rem;
+    border: none;
+    border-radius: .7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.appointmenttable table tbody tr td form button {
+    background-color: #003b8e;
+    color: white;
+}
+
+.appointmenttable table tbody tr td form button:hover {
+    background-color: #002a66;
+}
+
+.cancel_btn {
+    background-color: #c90000;
+    color: white !important;
+}
+
+.cancel_btn:hover {
+    background-color: #8b0000;
+}
+
+/* TRADES */
+/* MAIN CONTAINER */
+.admin_tradepage {
+    padding: 1rem 2rem;
+}
+
+/* SEARCH + FILTER */
+.admintrade_search input {
+    width: 20rem;
+    height: 2.3rem;
+    padding: 0 1rem;
+    border-radius: 2rem;
+    border: 1px solid #1b3b6f;
+    background: #f9fbff;
+    transition: 0.3s;
+}
+
+.admintrade_search input:focus {
+    outline: none;
+    border-color: #003b8e;
+    box-shadow: 0 0 5px rgba(0, 70, 160, 0.5);
+}
+
+.admintrade_search .trade_status select {
+    width: 9rem;
+    height: 2.3rem;
+    margin: .5rem;
+    font-size: 1rem;
+    border-radius: 1rem;
+    border: 1px solid #1b3b6f;
+    background-color: #e8f0ff;
+}
+.admintrade_search .trade_status select option{
+    background-color: whitesmoke;
+}
+
+.admintrade_search .trade_status button {
+    width: 5rem;
+    height: 2rem;
+    color: white;
+    border: none;
+    border-radius: .5rem;
+    background-color: #003b8e;
+    transition: .2s;
+}
+
+.admintrade_search .trade_status button:hover {
+    background-color: #002a66;
+}
+
+/* TABLE WRAPPER */
+.tradetable {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+/* TABLE */
+.tradetable table {
+    width: 100%;
+    max-width: 90rem;
+    border-collapse: collapse;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* HEADER */
+.tradetable thead {
+    text-align: center;
+    background: linear-gradient(90deg, #001a40, #003b8e);
+    color: white;
+}
+
+.tradetable thead th {
+    padding: 1rem .5rem;
+    font-size: 1rem;
+    font-family: "Montserrat", sans-serif;
+}
+
+.tradetable thead th:last-child {
+    border-right: none;
+}
+
+/* BODY */
+.tradetable tbody tr {
+    transition: background .2s;
+    color: black;
+}
+
+.tradetable tbody tr:hover {
+    background: #f2f6ff;
+}
+
+.tradetable tbody td {
+    padding: .7rem;
+    text-align: center;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: .95rem;
+    font-family: "Montserrat";
+}
+
+.tradetable tbody td:nth-child(2),
+.tradetable tbody td:nth-child(3),
+.tradetable tbody td:nth-child(4) {
+    text-align: left;
+}
+
+/* STATUS TAGS */
+.status-tag {
+    padding: .3rem .7rem;
+    font-weight: 600;
+    font-size: .9rem;
+    border-radius: .7rem;
+}
+
+.status-cancelled {
+    background: #ffe1e1;
+    color: #bf0000;
+}
+
+.status-completed {
+    background: #d9f7d9;
+    color: #117a00;
+}
+
+/* ACTION BUTTONS */
+.cancel_btn {
+    background-color: transparent;
+    color: red !important;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.cancel_btn:hover {
+    background-color: #8b0000;
+}
+
+.tradetable table tbody tr td form button {
+    padding: .2rem .8rem;
+    font-weight: 600;
+    color: white;
+    border-radius: .7rem;
+    background-color: #003b8e;
+    border: none;
+    cursor: pointer;
+}
+
+.tradetable table tbody tr td form button:hover {
+    background-color: #002a66;
+}

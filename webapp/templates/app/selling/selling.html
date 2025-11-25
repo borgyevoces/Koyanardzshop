@@ -1,0 +1,227 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+    <div class="sellingpage">
+        <div class="selling_body">
+            <div class="selling_left">
+                <div id="stepleft1" class="step-box active">
+                    <div class="sellingleft_bottom">
+                        <div class="selling_left1" onclick="goToStep(1)">
+                            <p>Terms & Agreement</p>
+                            <h3>1</h3>
+                        </div>
+                        <div class="selling_left2" onclick="goToStep(2)">
+                            <p>Personal Information</p>
+                            <h3>2</h3>
+                        </div>
+                        <div class="selling_left3" onclick="goToStep(3)">
+                            <p>Product Information</p>
+                            <h3>3</h3>
+                        </div>
+                    </div>
+                </div>
+                <div id="stepleft2" class="step-box">
+                    <div class="sellingleft_bottom">
+                        <div class="selling_left1" onclick="goToStep(1)">
+                            <p>Terms & Aggreement</p>
+                            <h3>1</h3>
+                        </div>
+                        <div class="selling_left2" onclick="goToStep(2)">
+                            <p>Personal Information</p>
+                            <h3>2</h3>
+                        </div>
+                        <div class="selling_left3" onclick="goToStep(3)">
+                            <p>Product Information</p>
+                            <h3>3</h3>
+                        </div>
+                    </div>
+                </div>
+                <div id="stepleft3" class="step-box">
+                    <div class="sellingleft_bottom">
+                        <div class="selling_left1" onclick="goToStep(1)">
+                            <p>Terms & Aggreement</p>
+                            <h3>1</h3>
+                        </div>
+                        <div class="selling_left2" onclick="goToStep(2)">
+                            <p>Personal Information</p>
+                            <h3>2</h3>
+                        </div>
+                        <div class="selling_left3" onclick="goToStep(3)">
+                            <p>Product Information</p>
+                            <h3>3</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="selling_right">
+                <form id="sellForm" method="POST" enctype="multipart/form-data" action="">
+                    {% csrf_token %}
+                    <div id="step1" class="step-box" style="display: block;">
+                        <div class="sellingright_body">
+                            <h4>Terms & Aggreement</h4>
+                            <p>Please read and accept our trade-in terms before submitting your request. This ensures transparency and sets expectations for the in-person evaluation.</p>
+                        </div>
+                        <div class="stepthree">
+                            <h3>Instructions:</h3>
+                            <p>Please read the following terms carefully. By checking the box below, you agree to comply with our trade-in guidelines.</p>
+                        </div>
+                        <div class="stepthree_instructions">
+                            <p>Terms & Conditions: </p>
+                            <p> 1. All items submitted for trade-in or selling must undergo in-person evaluation at our physical store.</br>
+                                2. You must present a valid government-issued ID during your appointment for verification.</br>
+                                3. Koya Nardz Computer Trading does not accept stolen, fake, or tampered devices. Legal action may be taken for fraudulent submissions.</br>
+                                4. Final pricing will be determined after inspection by our technician. Submitted specs and condition must be accurate.</br>
+                                5. Devices must be complete (e.g., charger, battery, if applicable), unless declared missing during submission.</br>
+                                6. Cosmetic damage or undisclosed issues may affect the final offer or result in rejection of the trade-in.</br>
+                                7. Appointments may be rescheduled or declined depending on store availability.</br>
+                            </p>
+                            {{ form.agree.errors }}
+                            <label>
+                                {{ form.agree }} I confirm that the information I provided is true and accurate, and I agree to the terms and conditions stated above.
+                            </label>
+                        </div>
+                        <button type="button" class="button" onclick="nextStep(1)">Next</button>
+                    </div>
+                    <div id="step2" class="step-box active" style="display: none;">
+                         <div class="sellingright_body">
+                            <h4>Personal Information</h4>
+                            <p>Enter your personal information to help us contact you and verify your identity. This will also be used to confirm your appointment schedule.</p>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                {{ form.first_name }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.last_name }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.contact }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.email }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.address }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.selling_date }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.selling_time }}
+                            </div>
+                        </div>
+                        <button type="button" class="button" onclick="nextStep(2)">Next</button>
+                    </div>
+                    <div id="step3" class="step-box" style="display: none;">
+                        <div class="sellingright_body">
+                            <h4>Product Information</h4>
+                            <p>Provide the details of the device you wish to sell or trade in. Accurate specifications and clear images will help us assess your item faster.</p>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                {{ form.product_name }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.category.label_tag }} {{ form.category }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.price|intcomma }}
+                            </div>
+                            <div class="form-group">
+                                {{ form.image }}
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                             {{ form.description }}
+                        </div>
+                        <button type="submit" class="button">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let highestStepReached = 1;
+
+    function nextStep(current) {
+    const form = document.getElementById("sellForm");
+    const currentStepRight = document.getElementById(`step${current}`);
+    const errorMessages = currentStepRight.querySelectorAll(".error-message");
+    errorMessages.forEach(msg => msg.remove());
+
+    let isValid = true;
+    const fields = currentStepRight.querySelectorAll("[required]");
+
+    fields.forEach(field => {
+        if (!field.value.trim()) {  
+            isValid = false;
+            const errorMessage = document.createElement("div");
+            errorMessage.classList.add("error-message");
+            errorMessage.style.position = "absolute";
+            errorMessage.style.marginTop = "-1.2rem";
+            errorMessage.style.color = "red";
+            errorMessage.textContent = `${field.placeholder || "This field"} is required`;
+
+            field.parentElement.insertBefore(errorMessage, field);
+        }
+    });
+
+    if (current === 1) {
+        const agreeCheckbox = document.querySelector('input[name="agree"]');
+        const existingError = document.getElementById("agree-error");
+
+        if (existingError) existingError.remove();
+
+        if (!agreeCheckbox.checked) {
+            isValid = false;
+
+            const errorMessage = document.createElement("div");
+            errorMessage.id = "agree-error";
+            errorMessage.style.color = "red";
+            errorMessage.style.marginTop = "0.5rem";
+            errorMessage.textContent = "You must agree to the terms before continuing.";
+
+            agreeCheckbox.parentElement.appendChild(errorMessage);
+        }
+    }
+
+    if (!isValid) return;
+
+    highestStepReached = Math.max(highestStepReached, current + 1);
+
+    currentStepRight.style.display = 'none';
+    currentStepRight.classList.remove('active');
+
+    const nextStepRight = document.getElementById(`step${current + 1}`);
+    nextStepRight.style.display = 'block';
+    nextStepRight.classList.add('active');
+
+    document.querySelector(`#stepleft${current}`).classList.remove('active');
+    document.querySelector(`#stepleft${current + 1}`).classList.add('active');
+}
+
+
+    function goToStep(stepNumber) {
+    if (stepNumber > highestStepReached) {
+        return; 
+    }
+
+    document.querySelectorAll(".selling_right .step-box").forEach(step => {
+        step.style.display = "none";
+        step.classList.remove("active");
+    });
+
+    document.querySelector(`#step${stepNumber}`).style.display = "block";
+    document.querySelector(`#step${stepNumber}`).classList.add("active");
+    document.querySelectorAll(".selling_left1, .selling_left2, .selling_left3")
+        .forEach(btn => btn.classList.remove("active"));
+
+    document.querySelector(`.selling_left${stepNumber}`).classList.add("active");
+}
+
+</script>
+
+{% endblock content %}

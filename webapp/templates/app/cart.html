@@ -1,0 +1,141 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="cartpage">
+    <div class="uppercart">
+        <ul>
+            <li>Cart</li>
+            <p>></p>
+            <li>Appointment</li>
+            <p>></p>
+            <li>Checkout</li>
+            <p>></p>
+            <li>Appointment Complete</li>
+        </ul>
+    </div>
+    <div class="cartbody">
+        <div class="cartbody_body">
+            <p>Shopping Cart</p>
+        {% if cart_products %}
+            {% for product_id, produkto in cart_products.items %}
+            <div class="cartbody_product">
+                <div class="cartleft">
+                    <div class="cartleft_upper">
+                        <button class="favorite_btn {% if product.id in favorites %}favorited{% endif %}" data-product-id="{{ product_id }}" type="button"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+                        <form action="{% url 'remove_from_cart' product_id %}" method="POST">
+                            {% csrf_token %}
+                            <button><img src="{% static 'images/icon/trash-red.png' %}" alt=""></button>
+                        </form>
+                    </div>
+                    <div class="cartleft_image">
+                        {% if produkto.image %}
+                        <img src="{{ produkto.image }}" alt="Product">
+                        {% endif %}
+                        <div class="cartleft_text">
+                            <p>{{ produkto.category_name }}</p>
+                            <p>{{ produkto.product_name }}</p>
+                        </div>
+                        <form action="{% url 'update_cart' product_id %}" method="POST" class="quantity-form">
+                            {% csrf_token %}
+                            <div class="text_quantity">
+                                <button class="quantity-btn" name="action" value="decrease">-</button>
+                                <input type="number" value="{{ produkto.quantity }}" min="1" readonly>
+                                <button class="quantity-btn" name="action" value="increase">+</button>
+                            </div>
+                        </form>
+                        <div class="cartleft_price">
+                            <p>₱{{ produkto.sub_total|floatformat:2|intcomma }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="cartright">
+            <h2>Summary</h2>
+            <div class="cartright_body">
+                <h4>Item(s)</h4>
+                {% for product_id, produkto in cart_products.items %}
+                <div class="cartright_text">
+                    <ul class="cartright_textbody">
+                        <li>• {{ produkto.product_name }}</li>
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="cartright_button">
+                <h3>Total Price: <span>₱{{ total_price|floatformat:2|intcomma }}</span></h3>
+                <div class="cartright_buttonbutton">
+                    <button><a href="{% url 'appointment' %}">Checkout</a></button>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="cartpage_empty">
+            <div class="cartpage_emptybody">
+                <h3>Your cart is empty</h3>
+                <div class="cartpage_emptybutton">
+                    <button><a href="{% url 'product' %}">Login/ Signup</a></button>
+                    <button><a href="{% url 'product' %}">Shop Now</a></button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<div class="cart_bottom">
+        <h3>You might also like</h3>
+        <div class="product-container">
+        {% if products %}
+            {% for produkto in products %}
+            <div class="product-card">
+                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+                {% if produkto.image %}
+                <a href="{% url 'product_item' produkto.id %}">
+                    <img src="{{ produkto.image.url }}" alt="Product Image">
+                </a>
+                {% endif %}
+                <div class="product-name">
+                    <h4>{{ produkto.product_name }}</h4>
+                    <p>₱{{ produkto.price|intcomma }}</p>
+                    <div class="productcard-button">
+                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                            {% csrf_token %}
+                            <button>Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.favorite_btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const productId = this.getAttribute('data-product-id');
+
+            fetch(`/toggle_favorite/${productId}/`, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.classList.add('favorited');
+                } else if (data.status === 'removed') {
+                    this.classList.remove('favorited');
+
+                    const card = this.closest('.favorites');
+                    if (card) card.remove(); 
+                }
+            })
+            .catch(err => console.error('Error toggling favorite:', err));
+        });
+    });
+});
+</script>
+{% endblock content %}

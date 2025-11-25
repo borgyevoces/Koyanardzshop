@@ -1,0 +1,239 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="appointmentpage">
+    <div class="upperappointment">
+        <a href="{% url 'cart' %}"><img src="{% static 'images/icon/black-back.png' %}" alt=""> Back to Cart</a>
+        <ul>
+            <li>Cart</li>
+            <p>></p>
+            <li>Appointment</li>
+            <p>></p>
+            <li>Checkout</li>
+            <p>></p>
+            <li>Appointment Complete</li>
+        </ul>
+    </div>
+    <div class="appointment_body">
+        <h3>Make an Appointment</h3>
+        <div class="appointment_bodybody">
+            <div class="appointment_left">
+                <p>Select Date:</p>
+                <div id="appointment-calendar">
+
+                </div>
+            </div>
+            <div class="appointment_right">
+                <p>Input Your Information</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="apppointment_rightform">
+                        <img src="{% static 'images/icon/appointment-user.png' %}" alt=""><p>{{ form.first_name }}</p>
+                        <p>{{ form.last_name }}</p>
+                    </div>
+                    <div class="apppointment_rightform">
+                    <img src="{% static 'images/icon/appointment-phone.png' %}" alt=""><p>{{ form.contact }}</p>
+                    </div>
+                    <div class="apppointment_rightform">
+                    <img src="{% static 'images/icon/appointment-gmail.png' %}" alt=""><p>{{ form.email }}</p>
+                    </div>
+
+                    {{ form.date.as_hidden }}
+                    {{ form.time.as_hidden }}
+
+                    <div id="time-dropdown" class="time-dropdown disabled">
+                        <div class="timedropdown-button">
+                            <label class="appointmentright_selecttime">Select Time:</label>
+                            <button id="time-toggle" type="button">▼</button>
+                        </div>
+                        <div id="time-options" class="options">
+                        </div>
+                    </div>
+                    <button class="apppointmentright_formbutton" type="submit">Checkout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const dateField = document.getElementById("id_date");
+        const timeField = document.getElementById("id_time");
+
+        dateField.addEventListener("change", function() {
+            const selectedDate = this.value;
+
+            fetch(`/get-available-times/?date=` + selectedDate)
+            .then(response => response.json())
+            .then(data => {
+                const available = data.available_times;
+
+                timeField.innerHTML = "";
+
+                if (available.length === 0) {
+                    let opt = document.createElement("option");
+                    opt.value = "";
+                    opt.text = "No available times";
+                    timeField.appendChild(opt);
+                    return;
+                }
+
+                available.forEach(time => {
+                    let opt = document.createElement("option");
+                    opt.value = time;
+                    opt.text = formatTime(time);
+                    timeField.appendChild(opt);
+                });
+            });
+        });
+
+        function formatTime(time) {
+            const [h, m] = time.split(":");
+            let hour = parseInt(h);
+            const suffix = hour >= 12 ? "PM" : "AM";
+            hour = hour > 12 ? hour - 12 : hour;
+            return `${hour}:${m} ${suffix}`;
+        }
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('appointment-calendar');
+
+        fetch('/get-booked-dates/')
+        .then(res => res.json())
+        .then(data => {
+            const blocked = data.blocked_dates;
+            const today = new Date().toISOString().split("T")[0];
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                validRange: { 
+                    start: new Date().toISOString().split("T")[0] 
+                },  
+
+                dateClick(info) {
+
+    resetTimePicker();
+
+    if (info.date.getDay() === 0) {
+        alert("Sorry, Sunday is not available.");
+        return;
+    }
+    if (blocked.includes(info.dateStr)) {
+        alert("This date is fully booked.");
+        return;
+    }
+
+    calendar.getEvents().forEach(e => e.remove());
+    calendar.addEvent({
+        start: info.dateStr,
+        display: 'background',
+        color: '#38728F'
+    });
+
+    loadTimes(info.dateStr);
+},
+
+
+                dayCellDidMount(info) {
+                    if (info.date.getDay() === 0) {
+                        info.el.style.background = "#eee";
+                        info.el.style.color = "#999";
+                    }
+                    if (blocked.includes(info.date.toISOString().split("T")[0])) {
+                        info.el.style.background = "#ffcdd2";
+                    }
+                }
+            });
+            calendar.render();
+        });
+    });
+
+    function loadTimes(date) {
+
+    document.getElementById("id_date").value = date;
+
+    fetch(`/get-available-times/?date=${date}`)
+        .then(res => res.json())
+        .then(data => {
+
+            const available = data.available_times;
+
+            enableTimePicker();
+
+            timeOptions.innerHTML = "";
+
+            if (available.length === 0) {
+                timeOptions.innerHTML = "<p>No available times</p>";
+                hiddenTime.value = "";
+                return;
+            }
+
+            available.forEach(t => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.classList.add("time-btn");
+                btn.dataset.time = t;
+                btn.textContent = formatTime(t);
+
+                btn.addEventListener("click", () => {
+                    hiddenTime.value = t;
+                    timeToggle.textContent = formatTime(t) + " ▼";
+                    timeDropdown.classList.remove("active");
+                });
+
+                timeOptions.appendChild(btn);
+            });
+
+            // default selected
+            hiddenTime.value = available[0];
+            timeToggle.textContent = formatTime(available[0]) + " ▼";
+        });
+}
+
+
+document.addEventListener("change", function() {
+    const displayTime = document.getElementById("display_time");
+    const hiddenTimeField = document.getElementById("id_time");
+    hiddenTimeField.value = displayTime.value;
+});
+
+function formatTime(t) {
+    let [h,m] = t.split(":");
+    h = parseInt(h);
+    const am = h >= 12 ? "PM" : "AM";
+    h = h > 12 ? h - 12 : h;
+    return `${h}:${m} ${am}`;
+}
+
+let timeDropdown = document.getElementById("time-dropdown");
+let timeToggle = document.getElementById("time-toggle");
+let timeOptions = document.getElementById("time-options");
+let hiddenTime = document.getElementById("id_time");
+
+// Disable until date is chosen
+function resetTimePicker() {
+    timeDropdown.classList.add("disabled");
+    timeOptions.innerHTML = "";
+    timeToggle.innerText = "Select Time ▼";
+}
+
+// When date is selected, enable the dropdown
+function enableTimePicker() {
+    timeDropdown.classList.remove("disabled");
+}
+
+// Toggle dropdown open/close
+timeToggle.addEventListener("click", function() {
+    if (timeDropdown.classList.contains("disabled")) {
+        alert("Please select a date first.");
+        return;
+    }
+    timeDropdown.classList.toggle("active");
+});
+
+
+</script>
+{% endblock content %}

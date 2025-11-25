@@ -1,0 +1,305 @@
+{% extends 'app/admin/admin_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="admin_dashboard">
+    <div class="card mt-3">
+    <div class="card-content">
+        <div class="row row-group m-0">
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+                <div class="card-body">
+                  <h5 class="text-white mb-0">9526 <span class="float-right"><i class="fa fa-shopping-cart"></i></span></h5>
+                    <div class="progress my-3" style="height:3px;">
+                       <div class="progress-bar" style="width:55%"></div>
+                    </div>
+                  <p class="mb-0 text-white small-font" style="font-size: 1.1rem;">Total Orders</p>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+                <div class="card-body">
+                  <h5 class="text-white mb-0">₱{{ total_sales|intcomma }}<span class="float-right"><i class="fa fa-usd"></i></span></h5>
+                    <div class="progress my-3" style="height:3px;">
+                       <div class="progress-bar" style="width:55%"></div>
+                    </div>
+                  <p class="mb-0 text-white small-font" style="font-size: 1.1rem;">Total Sales</p>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+                <div class="card-body">
+                  <h5 class="text-white mb-0">{{ appointed }} <span class="float-right"><i class="zmdi zmdi-calendar-check"></i></span></h5>
+                    <div class="progress my-3" style="height:3px;">
+                       <div class="progress-bar" style="width:55%"></div>
+                    </div>
+                  <a class="mb-0 text-white small-font" href="{% url 'admin_appointment' %}" style="font-size: 1.1rem;">Pending Appointment</a>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6 col-xl-3 border-light">
+                <div class="card-body">
+                  <h5 class="text-white mb-0">{{ traded }}<span class="float-right"><i class="zmdi zmdi-calendar-check"></i></span></h5>
+                    <div class="progress my-3" style="height:3px;">
+                       <div class="progress-bar" style="width:55%"></div>
+                    </div>
+                  <a class="mb-0 text-white small-font" href="{% url 'admin_selling' %}" style="font-size: 1.1rem;">Pending Trade</a>
+                </div>
+            </div>
+        </div>
+    </div>
+ </div>  
+	  
+	<div class="row">
+     <div class="col-12 col-lg-8 col-xl-8">
+	    <div class="card">
+		 <div class="card-header" style="font-size: 1.1rem;">Sales
+		 </div>
+		 <div class="card-body">
+		    <ul class="list-inline">
+			  <li class="list-inline-item"><i class="fa fa-circle mr-2 text-white"></i>Appointment</li>
+			  <li class="list-inline-item"><i class="fa fa-circle mr-2 text-light"></i>Trade</li>
+			</ul>
+			<div class="chart-container-1">
+			  <canvas id="chart1" style="color: rgb(37, 37, 37);"></canvas>
+			</div>
+		 </div>
+		 
+		 <div class="row m-0 row-group text-center border border-light-3">
+		   <div class="col-12 col-lg-4">
+		     <div class="p-3">
+		       <h5 class="mb-0" style="font-size: 1.2rem;">{{ total_appointments }}</h5>
+			   <small class="mb-0" style="font-size: 1rem;">Total Appointment</small>
+		     </div>
+		   </div>
+		   <div class="col-12 col-lg-4">
+		     <div class="p-3">
+		       <h5 class="mb-0"></h5>
+			   <small class="mb-0"></small>
+		     </div>
+		   </div>
+		   <div class="col-12 col-lg-4">
+		     <div class="p-3">
+		       <h5 class="mb-0" style="font-size: 1.2rem;">{{ total_trades }}</h5>
+			   <small class="mb-0" style="font-size: 1rem;">Total Trades</small>
+		     </div>
+		   </div>
+		 </div>
+		</div>
+	 </div>
+
+     <div class="col-12 col-lg-4 col-xl-4">
+        <div class="card">
+           <div class="card-header">Top Categories
+             <div class="card-action">
+             </div>
+           </div>
+           <div class="card-body">
+		     <div class="chart-container-2">
+            <canvas id="chart2"></canvas>
+			    </div>
+           </div>
+           <div class="table-responsive">
+             <table class="table align-items-center">
+               <tbody>
+                 {% for c in category_list %}
+                  <tr>
+                    <td style="font-size: 1.1rem;">{{ c.category_name }}</td>
+                    <td>{{ c.total_sold }}</td>
+                  </tr>
+                 {% endfor %}
+               </tbody>
+             </table>
+           </div>
+         </div>
+     </div>
+	</div>
+  <!--End Row-->
+	
+	<div class="row">
+	 <div class="col-12 col-lg-12">
+	   <div class="card">
+	     <div class="card-header" style="font-size: 1.5rem; text-transform: uppercase;">All Appointments
+		  
+		 </div>
+	       <div class="table-responsive">
+                 <table class="table align-items-center table-flush table-borderless" style="border-radius: 1rem;">
+    <thead>
+        <tr>
+          <th style="font-size: .9rem;">Type</th>
+          <th style="font-size: .9rem;">Photo</th>
+          <th style="font-size: .9rem;">Product</th>
+          <th style="font-size: .9rem;">Amount</th>
+          <th style="font-size: .9rem;">Date</th>
+          <th style="font-size: .9rem;">Reference No.</th>
+          <th style="font-size: .9rem;">Progress</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in all_orders %}
+        <tr style="padding: 0 .3rem; font-size: 1rem;">
+            <td>{{ order.type }}</td>
+            <td>
+              {% if order.photo %}
+                <img src="{{ order.photo }}" class="product-img" alt="product img" style="width: 5rem; height: fit-content;">
+              {% endif %}
+            </td>
+            <td style="max-width: 20rem; overflow: hidden;">{{ order.product }}</td>
+            <td>₱{{ order.amount|intcomma }}</td>
+            <td>{{ order.date|date:"d M Y H:i" }}</td>
+            <td>{{ order.product_id }}</td>
+            <td>
+                <div class="progress shadow" style="height: 3px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ order.shipping_progress }}%"></div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+               </div>
+	   </div>
+	 </div>
+	</div>
+
+    <!--
+    <div class="admin_dashboardupper">
+        <div class="dashboardupper_notification">
+            <div class="dashboard_notificationupper">
+                <h4>New</h4>
+            </div>
+            <div class="dashboard_notificationlink">
+                <a href="{% url 'admin_appointment' %}">Appointment <span>{{ appointed }}</span></a>
+                <a href="{% url 'admin_selling' %}">Selling <span>{{ traded }}</span></a>
+            </div>
+        </div>
+        <div class="dashboardupper_appointment">
+            <p>{{ total_appointments }}</p>
+            <h4>Total Appointment</h4>
+        </div>
+        <div class="dashboardupper_selling">
+            <p>{{ total_trades }}</p>
+            <h4>Total Trades</h4>
+        </div>
+    </div>
+    <div class="admin_dashboardbody">
+        <div class="dashboardbody_sales">
+            <canvas id="combinedLineChart" width="400" height="200"></canvas>
+        </div>
+        <div class="dashboardbody_categories">
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    const linegraph = document.getElementById('combinedLineChart').getContext('2d');
+    const chart = new Chart(linegraph, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [
+                {
+                label: 'Appointments',
+                data: {{ appointment_chart_data|safe }},
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                tension: 0.3,
+                fill: true
+                },
+                {
+                label: 'Sellings',
+                data: {{ selling_chart_data|safe }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.3,
+                fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+-->
+
+<script>
+$(function() {
+    "use strict";
+
+    // chart 1
+    var ctx1 = document.getElementById('chart1').getContext('2d');
+    var myChart1 = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Appointment',
+                data: {{ appointment_chart_data|safe }},
+                backgroundColor: '#fff',
+                borderColor: "#fff",
+                pointRadius :"0",
+                borderWidth: 3
+            }, {
+                label: 'Trade',
+                data: {{ selling_chart_data|safe }},
+                backgroundColor: "grey",
+                borderColor: "grey",
+                pointRadius :"0",
+                borderWidth: 2
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins:{
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    var ctx2 = document.getElementById("chart2").getContext('2d');
+
+    var bgColors = [
+        "#f79256",
+        "#fbd1a2",
+        "#7dcfb6",   
+        "#00b2ca",    
+        "#1d4e89"   
+    ];
+
+    var myChart2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                backgroundColor: bgColors.slice(0, {{ category_data|length }}),
+                data: {{ category_data|safe }},
+                borderWidth: 1,
+                borderColor: "#222"
+            }]
+        },
+        options: {
+          responsive: true,
+            maintainAspectRatio: false,
+            plugins:{
+                legend: {
+                    display: true,
+                    position:"bottom"
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+
+
+{% endblock %}

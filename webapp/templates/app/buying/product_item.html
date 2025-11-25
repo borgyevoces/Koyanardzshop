@@ -1,0 +1,270 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="product_itempage">
+    <div class="upperitem">
+        <a href="{% url 'product' %}"><img src="{% static 'images/icon/black-back.png' %}" alt=""></a>
+    {% if produkto %}
+        <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+    </div>
+    <div class="product_itembody">
+        <div class="product_itemleft">
+            <div class="productleft_upper">
+                {% if produkto.images.all %}
+                <img id="main_image" src="{{ produkto.images.first.product_image.url }}" alt="no image">
+                {% endif %}
+            </div>
+            <div class="productleft_bottom">
+                <div class="leftbottom_image">
+                    {% for img in produkto.images.all %}
+                        <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img.product_image.url }}" data-image="{{ img.product_image.url }}" alt="Thumbnail {{ forloop.counter }}">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="product_itemright">
+            <h3>{{ produkto.product_name }}</h3>
+            <div class="productitem_rating">
+                <p id="average_rating_text">⭐ {{ average_rating }} / 5 ({{ reviews.count }} reviews)</p>
+            </div>
+            {% if variations %}
+            <div class="variant_section">
+                <h4>Specification:</h4>
+                <div class="variant_list">
+                {% for variant in variations %}
+                    <a class="variant_btn" href="{% url 'product_item' variant.product.id %}?variant={{ variant.id }}">{{ variant.product_variation }}</a>
+                {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            <div class="bodyitem">
+                <h4>Description: </h4>
+                <p>{{ produkto.description }}</p>
+            </div>
+            <div class="itemright_bottom">
+                <div class="itemright_total">
+                    <p id="itemright_total">Stock(s): {{ stock }}</p>
+                    <h4>₱{{ price|intcomma }}</h4>
+                </div>
+                <div class="itemright_button">
+                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                        {% csrf_token %}
+                        <button>Add to Cart</button>
+                    </form>
+                    <button><a href="{% url 'appointment' %}">Checkout</a></button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    </div>
+    <div class="productitem_bottom">
+        <div class="productitem_suggest">
+            <h4>You might also like</h4>
+            <div class="product-container">
+                {% if products %}
+                    {% for produkto in products %}
+                        <div class="product-card">
+                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+                            {% if produkto.image %}
+                                <a href="{% url 'product_item' produkto.id %}">
+                                <img src="{{ produkto.image.url }}" alt="Product Image">
+                                </a>
+                            {% endif %}
+                            <div class="product-name">
+                                <h4>{{ produkto.product_name }}</h4>
+                                <p>₱{{ produkto.price|intcomma }}</p>
+                                <div class="productcard-button">
+                                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                                        {% csrf_token %}
+                                        {% if selected_variant %}
+                                            <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
+                                        {% endif %}
+                                        <button>Add to Cart</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="productitem_bottomreview">
+            <div class="item_bottomreview">
+                <h4>Ratings:</h4>
+                {% if user.is_authenticated %}
+                    <div class="star-rating" id="star_container" data-current-rating="{{ user_review.rating|default:0 }}">
+                        <input type="hidden" name="rating" id="ratingValue">
+                        <div class="stars">
+                            <span data-star="1">★</span>
+                            <span data-star="2">★</span>
+                            <span data-star="3">★</span>
+                            <span data-star="4">★</span>
+                            <span data-star="5">★</span>
+                        </div>
+                    </div>
+                {% endif %}
+                {% if average_rating %}
+                    <p>⭐ {{ average_rating }} / 5 ({{ reviews.count }} reviews)</p>
+                {% else %}
+                    <p>No reviews yet</p>
+                {% endif %}
+            </div>
+            <div class="item_bottomcomment">
+                <h4>Comments</h4>
+                <div class="item_bottomcomms">
+                {% if user.is_authenticated %}
+                    <form method="POST" id="comment_form">
+                    {% csrf_token %}
+                        <textarea name="comment" rows="3" placeholder="Write a comment...">{{ user_review.comment }}</textarea>
+                        <button type="submit"><img src="{% static 'images/icon/paper-plane-top.png' %}" alt=""></button>
+                    </form>
+                {% else %}
+                    <p><a href="{% url 'login' %}">Login to leave a review</a></p>
+                {% endif %}
+
+                </div>
+                {% for review in reviews %}
+                <div class="review_box">
+                    <p><strong>{{ review.user.username }} </strong><span>{{ review.rating }} ★</span>({{ review.created_at|date:"M d, Y" }})</p>
+                    <p>{{ review.comment }}</p>
+                </div>
+                {% empty %}
+                    <p>No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('main_image');
+        const variantButtons = document.querySelectorAll('.variant_btn');
+        const priceText = document.querySelector('.itemright_total h4');
+        const stockText = document.querySelector('.bodyitem p:nth-of-type(2)');
+        let currentIndex = 0;
+        let timer;
+
+        const showImage = (index) => {
+            const selected = thumbnails[index];
+            if (!selected) return;
+            mainImage.src = selected.dataset.image;
+            thumbnails.forEach(t => t.classList.remove('active-thumb'));
+            selected.classList.add('active-thumb');
+            currentIndex = index;
+        };
+
+        const nextImage = () => {
+            currentIndex = (currentIndex + 1) % thumbnails.length;
+            showImage(currentIndex);
+        };
+
+        const startAutoSlide = () => {
+            timer = setInterval(nextImage, 5000); 
+        };
+
+        const stopAutoSlide = () => clearInterval(timer);
+        thumbnails.forEach((thumbnail, index) => {
+            thumbnail.addEventListener('click', () => {
+                stopAutoSlide();
+                showImage(index);
+                thumbnail.addEventListener('click', () => {
+                    stopAutoSlide();
+                    showImage(index);
+                });
+ 
+            });
+        });
+        if (thumbnails.length > 1) startAutoSlide();
+    });
+
+    const stars = document.querySelectorAll(".stars span");
+const starContainer = document.getElementById("star_container");
+const currentRating = parseInt(starContainer.dataset.currentRating);
+
+if (currentRating > 0) {
+    for (let i = 0; i < currentRating; i++) {
+        stars[i].classList.add("selected");
+        stars[i].classList.add("glow");
+
+        // Remove glow after animation
+        setTimeout(() => {
+            stars[i].classList.remove("glow");
+        }, 500);
+    }
+}
+
+// CLICK event
+stars.forEach(star => {
+    star.addEventListener("click", () => {
+        const val = star.dataset.star;
+
+        // Remove previous
+        stars.forEach(s => s.classList.remove("selected"));
+
+        // Reapply selected + animation
+        for (let i = 0; i < val; i++) {
+            stars[i].classList.add("selected");
+
+            // Trigger animation
+            stars[i].classList.add("animate-pop");
+            stars[i].classList.add("glow");
+
+            // Remove animation classes
+            setTimeout(() => {
+                stars[i].classList.remove("animate-pop");
+                stars[i].classList.remove("glow");
+            }, 300);
+        }
+
+        // Save rating
+        fetch("{% url 'submit_rating_ajax' produkto.id %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `rating=${val}`,
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Rating saved:", data.rating);
+        });
+    });
+});
+
+    const commentForm = document.getElementById("comment_form");
+    commentForm.addEventListener("submit", function(e){
+        e.preventDefault();
+        const formData = new FormData(commentForm);
+
+        fetch("{% url 'submit_comment_ajax' produkto.id %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const reviewBox = document.createElement("div");
+                reviewBox.classList.add("review_box");
+                reviewBox.innerHTML = `
+                    <p><strong>${data.username}</strong> - ${data.created}</p>
+                    <p>${data.rating ?? ''} ★</p>
+                    <p>${data.comment}</p>
+                `;
+                const container = document.querySelector(".item_bottomcomment");
+                container.insertBefore(reviewBox, container.children[container.children.length - 1]);
+
+                commentForm.querySelector("textarea").value = "";
+            }
+        });
+    });
+
+</script>
+
+{% endblock content %}

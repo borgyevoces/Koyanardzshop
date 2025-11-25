@@ -1,0 +1,76 @@
+
+{% extends 'app/navigation.html' %}
+{% load static %}
+{% load humanize %}
+
+
+{% block content %}
+
+<div class="favoritespage">
+    <div class="favorite_body">
+        <div class="favorite_bodybody">
+        {% if products %}
+            {% for produkto in products  %}
+            <div class="favorites">
+                <div class="favoritesbody">
+                    <div class="favorites_upper">
+                        <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}"><img src="{% static 'images/icon/trash.png' %}" alt=""></button>
+                    </div>
+                    <div class="favorites_image">
+                        <img src="{{ produkto.image.url }}" alt="Product">
+                        <div class="favorites_text">
+                            <a href="{% url 'product_item' produkto.id %}"><p>{{ produkto.product_name }}</p></a>
+                            <div class="text_quantity">
+                                <button class="quantity-btn">-</button>
+                                <input type="number" value="1" min="1">
+                                <button class="quantity-btn">+</button>
+                            </div>
+                            <div class="favorites_price">
+                                <p>Price: ₱{{ produkto.price|floatformat:2|intcomma }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="favoritespage_empty">
+            <div class="favoritespage_emptybody">
+                <h3>No favorite products yet</h3>
+                <div class="favoritespage_emptybutton">
+                    <button><a href="{% url 'product' %}">Login/ Signup</a></button>
+                    <button><a href="{% url 'product' %}">Shop Now</a></button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    </div>
+    <div class="complete_bottom">
+        <div class="product-container">
+        {% if products %}
+            {% for produkto in products %}
+            <div class="product-card">
+                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+                {% if produkto.image %}
+                <a href="{% url 'product_item' produkto.id %}">
+                    <img src="{{ produkto.image.url }}" alt="Product Image">
+                </a>
+                {% endif %}
+                <div class="product-name">
+                    <h4>{{ produkto.product_name }}</h4>
+                    <p>₱{{ produkto.price|intcomma }}</p>
+                    <div class="productcard-button">
+                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                            {% csrf_token %}
+                            <button>Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: BuynSell
+    runtime: python
+    runtimeVersion: 3.13.4
+    rootDir: ./
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate && gunicorn BuynSell.wsgi:application --bind 0.0.0.0:10000 --workers 2
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.4
+      - key: DJANGO_SETTINGS_MODULE
+        value: BuynSell.settings
+      - key: PORT
+        value: 10000

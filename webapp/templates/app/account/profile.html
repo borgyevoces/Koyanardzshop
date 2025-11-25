@@ -1,0 +1,100 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+
+{% block content %}
+<div class="profilepage">
+  <div class="profilebody">
+    <div class="profilebody_image">
+      <img src="{% if user.avatar %}{% static 'images/icon/user_default.png' %}{% else %}{{ user.avatar.url }}{% endif %}" alt="User Avatar" width="100">
+    </div>
+    <div class="profilebody_text">
+      <p>User Profile</p>
+      <form method="POST" enctype="multipart/form-data" id="profileForm">
+        {% csrf_token %}
+        <fieldset id="profileFieldset" disabled>
+          <div class="profiletext_body">
+            <div class="profilebody_left">
+              <label>Email Address:</label>
+                <img src="{% static 'images/icon/mail-blue.png' %}" alt="">
+                <input type="email" name="email" value="{{ user.email }}" placeholder="Email Address">
+              <label>First Name:</label>
+                <img src="{% static 'images/icon/identity-blue.png' %}" alt="">
+                <input type="text" name="first_name" value="{{ user.first_name|default:'' }}" placeholder="First Name">
+              <label>Last Name:</label>
+                <img src="{% static 'images/icon/identity-blue.png' %}" alt="">
+                <input type="text" name="last_name" value="{{ user.last_name|default:'' }}" placeholder="Last Name">
+              <label>Contact:</label>
+                <img src="{% static 'images/icon/phone-blue.png' %}" alt="">
+                <input type="number" name="contact" value="{{ user.contact|default:'' }}" placeholder="Contact">
+            </div>
+            <div class="profilebody_right">
+              <label>Address:</label>
+                <img src="{% static 'images/icon/location-blue.png' %}" alt="">
+                <input type="text" name="address" value="{{ user.address|default:'' }}" placeholder="Full Address">
+              <label>Username:</label>
+                <img src="{% static 'images/icon/user-blue.png' %}" alt="">
+                <input type="text" value="{{ user.username }}" placeholder="Username">
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <div id="buttonGroup" class="profilebutton">
+        <button id="editBtn" type="button">Edit Profile</button>
+        <button id="updateBtn" type="submit" name="save_profile" form="profileForm" style="display:none;">Update</button>
+        <button id="cancelBtn" type="button" style="display:none;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const editBtn = document.getElementById('editBtn');
+  const updateBtn = document.getElementById('updateBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const fieldset = document.getElementById('profileFieldset');
+
+  editBtn.addEventListener('click', () => {
+    fieldset.disabled = false;
+    editBtn.style.display = 'none';
+    updateBtn.style.display = 'inline-block';
+    cancelBtn.style.display = 'inline-block';
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    fieldset.disabled = true;
+    updateBtn.style.display = 'none';
+    cancelBtn.style.display = 'none';
+    editBtn.style.display = 'inline-block';
+  });
+
+  profileForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    
+    const formData = new FormData(profileForm);
+    
+    fetch("{% url 'profile' %}", {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Profile updated successfully!');
+        document.querySelector('input[name="first_name"]').value = data.first_name;
+        document.querySelector('input[name="last_name"]').value = data.last_name;
+        document.querySelector('input[name="contact"]').value = data.contact;
+        document.querySelector('input[name="address"]').value = data.address;
+        fieldset.disabled = true;
+        editBtn.style.display = 'inline-block';
+        updateBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+      } else {
+        alert('Error updating profile!');
+      }
+    })
+    .catch(error => {
+      alert('Something went wrong. Please try again.');
+    });
+  });
+</script>
+{% endblock content %}

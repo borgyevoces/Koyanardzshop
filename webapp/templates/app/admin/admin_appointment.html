@@ -1,0 +1,160 @@
+{% extends 'app/admin/admin_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="admin_appointmentpage">
+    <div class="upperappointment">
+        <div class="inventory_filter">
+            
+        </div>
+        <div class="adminappointment_search">
+            <form action="" method="GET">
+                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
+            </form>
+            <div class="appointment_status">
+                <form method="get" class="appointment-filters">
+                    <select name="status">
+                        <option value="" style="background-color: whitesmoke;" cursor: pointer;>All Status</option>
+                        <option value="Pending" {% if status_filter == "Pending" %}selected{% endif %} style="background-color: whitesmoke; cursor: pointer;">Pending</option>
+                        <option value="Finished" {% if status_filter == "Finished" %}selected{% endif %} style="background-color: whitesmoke; cursor: pointer;">Completed</option>
+                        <option value="Cancelled" {% if status_filter == "Cancelled" %}selected{% endif %} style="background-color: whitesmoke; cursor: pointer;">Cancelled</option>
+                    </select>
+                    <button type="submit">Apply</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="popup" id="cancel_popup">
+        <button onclick="closeCancelPopup()">X</button>
+        <div class="pop_wrapper">
+            <div class="pop_content">
+                <h3>Cancel Appointment</h3>
+                <form id="cancel_form">
+                    {% csrf_token %}
+                    <input type="hidden" id="cancel_id" name="appointment_id">
+                    <label>Reason for cancellation:</label>
+                    <textarea id="cancel_reason" name="cancel_reason" required></textarea>
+                    <button type="submit">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="appointmenttable">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Reference Number</th>
+                    <th>Product Name</th>
+                    <th>Customer Name</th>
+                    <th>Contact</th>
+                    <th>Email</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                    {% for produkto in appointment.products.all %}
+                    <tr>
+                        <td>{{ appointment.id }}</td>
+                        <td>{{ appointment.reference_number }}</td>
+                        <td>{{ produkto.product.product_name }}</td>
+                        <td>{{ appointment.last_name }} {{ appointment.first_name }}</td>
+                        <td>{{ appointment.contact }}</td>
+                        <td>{{ appointment.email }}</td>
+                        <td>{{ appointment.date|date:"M d, Y" }}</td>
+                        <td>{{ appointment.time|time:"h:i A" }}</td>
+                        <td>{{ produkto.quantity }}</td>
+                        <td>₱{{ produkto.price|intcomma }}</td>
+                        <td>
+                            {% if appointment.status == "Cancelled" %}
+                            <span class="status-tag status-cancelled">Cancelled</span>
+                            {% elif appointment.status == "Finished" %}
+                            <span class="status-tag status-finished">Completed</span>
+                            {% else %}
+                            <form method="POST" action="{% url 'finished_appointment' appointment.id %}" style="display:inline;">
+                            {% csrf_token %}
+                                <button type="submit">Complete</button>
+                            </form>
+                            <button type="button" class="cancel_btn" data-id="{{ appointment.id }}">Cancel</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="bottominventory">
+        <div class="left_inventory">
+            
+        </div>
+        <div class="right_inventory">
+
+        </div>
+    </div>
+</div>
+<script>
+    function openCancelPopup(id) {
+        document.getElementById('cancel_id').value = id;
+        document.getElementById('cancel_reason').value = '';
+        document.getElementById('cancel_popup').style.display = 'block';
+    }
+    function closeCancelPopup() {
+        document.getElementById('cancel_popup').style.display = 'none';
+    }
+    document.querySelectorAll('.cancel_btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const id = button.dataset.id;
+            openCancelPopup(id);
+        });
+    });
+    document.getElementById('cancel_form').addEventListener('submit', function(e) {
+        e.preventDefault();
+    
+        const id = document.getElementById('cancel_id').value;
+        const reason = document.getElementById('cancel_reason').value;
+        const csrfToken = getCookie('csrftoken');
+    
+        fetch(`/admin_appointment/${id}/cancel/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({ cancel_reason: reason })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Appointment cancelled!');
+                location.reload();
+            } else {
+                alert('Error cancelling appointment.');
+            }
+        });
+    });
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+</script>
+    
+{% endblock content %}

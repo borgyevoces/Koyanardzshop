@@ -1,0 +1,295 @@
+{% extends 'app/admin/admin_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<div class="admin_productpage">
+    <div class="upperproduct">
+        <div class="adminproduct_left">
+            <div class="product_filter">
+                <form action="" method="GET">
+                    <select name="category">
+                        <option value="">Categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>{{ category.category_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="brand">
+                        <option value="">Brands</option>
+                        {% for brand in brands %}
+                            <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.brand }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Filter</button>
+                </form>
+            </div>
+            <div class="product_editdelete">
+                <div class="action-buttons">
+                    <button id="edit_btn">Edit</button>
+                    <button id="delete_btn">Delete</button>
+                </div>
+                <div class="popup" id="edit_product_popup" style="display:none;">
+                    <button onclick="closeEditProduct()">X</button>
+                    <div class="pop_wrapper">
+                        <div class="pop_content">
+                            <h3>Edit Product</h3>
+                            <form id="edit_form" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" id="edit_id" name="id">
+                                <label>Product Name</label>
+                                <input type="text" id="edit_name" name="product_name">
+                                <label>Stock</label>
+                                <input type="number" id="edit_stock" name="stock">
+                                <label>Price</label>
+                                <input type="number" step="0.01" id="edit_price" name="price">
+                                <button type="submit">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="adminproduct_right">
+            <div class="adminproduct_search">
+                <form action="" method="GET">
+                    <input type="text" name="search" placeholder="Search..." value="{{ search_query }}" >
+                </form>
+            </div>
+            <div class="adminproduct_adding">
+                <div class="adminproduct_addcategory">
+                    <a href="#" onclick="openAddCategory()">Category +</a>
+                    <div class="popup" id="add_category_popup">
+                        <button onclick="closeAddCategory()">X</button>
+                        <div class="pop_wrapper">
+                            <div class="pop_content">
+                                <h3>New Category</h3>
+                                <form action="{% url 'add_product' %}" method="POST">
+                                    {% csrf_token %}
+                                    {{ category_form.as_p }}
+                                    <button type="submit" name="add_category">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="adminproduct_addbrand">
+                    <a href="#" onclick="openAddBrand()">Brand +</a>
+                    <div class="popup" id="add_brand_popup">
+                        <button onclick="closeAddBrand()">X</button>
+                        <div class="pop_wrapper">
+                            <div class="pop_content">
+                                <h3>New Brand</h3>
+                                <form action="{% url 'add_product' %}" method="POST">
+                                    {% csrf_token %}
+                                    {{ brand_form.as_p }}
+                                    <button type="submit" name="add_brand">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="adminproduct_addproduct">
+                    <a href="#" onclick="openAddProduct()" class="add_products">New Product</a>
+                    <div class="popup" id="add_product_popup">
+                        <button onclick="closeAddProduct()">X</button>
+                        <div class="pop_wrapper">
+                            <div class="pop_content">
+                                <h3>New Product</h3>
+                                <form action="{% url 'add_product' %}" method="POST" enctype="multipart/form-data" id="add_form">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <label for="id_images">Product Image(s):</label>
+                                    <input type="file" name="images" id="id_images" accept="image/*" multiple>
+                                    <button type="submit" name="add_product">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="adminproduct_addvariant">
+                    <a href="#" onclick="openAddVariant()">Product Variant +</a>
+                    <div class="popup" id="add_variant_popup">
+                        <button onclick="closeAddVariant()">X</button>
+                        <div class="pop_wrapper">
+                            <div class="pop_content">
+                                <h3>New Variant</h3>
+                                <form action="{% url 'add_product' %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ variant_form.as_p }}
+                                    <input type="hidden" name="product_id">
+                                    <label for="id_images">More Image(s):</label>
+                                    <input type="file" name="images" id="id_images" accept="image/*" multiple>
+                                    <button type="submit" name="add_variant">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+    <div class="producttable">
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select_all"></th>
+                    <th>ID</th>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Brand</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            {% if products %}
+                {% for produkto in products %}
+            <tbody>
+                <tr data-id="{{ produkto.id }}">
+                    <td><input type="checkbox" class="row_checkbox"></td>
+                    <td>{{ produkto.id }}</td>
+                    {% if produkto.image %}
+                    <td><img src="{{ produkto.image.url }}" alt=""></td>
+                    {% endif %}
+                    <td class="prod_name">{{ produkto.product_name }}</td>
+                    <td>{{ produkto.category_name }}</td>
+                    <td>{{ produkto.brand }}</td>
+                    <td class="prod_stock">{{ produkto.stock }}</td>
+                    <td class="prod_price">₱{{ produkto.price|intcomma }}</td>
+                </tr>
+            </tbody>
+                {% endfor %}
+            {% endif %}
+        </table>
+    </div>
+    <div class="bottominventory">
+        <div class="left_inventory">
+
+        </div>
+        <div class="right_inventory">
+
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    const selectAll = document.getElementById('select_all');
+    const checkboxes = document.querySelectorAll('.row_checkbox');
+
+    selectAll.addEventListener('change', function () {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    function getSelectedIds() {
+        return [...document.querySelectorAll('.row_checkbox:checked')]
+            .map(cb => cb.closest('tr').getAttribute('data-id'));
+    }
+
+    document.getElementById('edit_btn').addEventListener('click', function () {
+        const selected = getSelectedIds();
+        console.log('Selected for edit:', selected);
+    });
+
+    document.getElementById('delete_btn').addEventListener('click', function () {
+        const selected = getSelectedIds();
+            if (selected.length === 0) {
+                alert('No product selected.');
+                return;
+            }
+        
+            if (confirm(`Are you sure you want to delete ${selected.length} product(s)?`)) {
+                fetch('/delete_products/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ ids: selected }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload(); 
+                    } else {
+                        alert('Something went wrong.');
+                    }
+                });
+            }    
+        });
+    });
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+document.getElementById('edit_btn').addEventListener('click', function () {
+    const selected = getSelectedIds();
+    if (selected.length !== 1) {
+        alert('Please select only one product to edit.');
+        return;
+    }
+
+    const row = document.querySelector(`tr[data-id="${selected[0]}"]`);
+    const id = selected[0];
+    const name = row.querySelector('.prod_name').textContent;
+    const stock = row.querySelector('.prod_stock').textContent;
+    const price = row.querySelector('.prod_price').textContent;
+
+    document.getElementById('edit_id').value = id;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_stock').value = stock;
+    document.getElementById('edit_price').value = price;
+
+    document.getElementById('edit_product_popup').style.display = 'block';
+});
+
+function closeEditProduct() {
+    document.getElementById('edit_product_popup').style.display = 'none';
+}
+document.getElementById('edit_form').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch('/update_product/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Product updated!');
+            location.reload();
+        } else {
+            alert('Failed to update.');
+        }
+    });
+});
+function openAddVariant() {
+    const selected = getSelectedIds();
+    if (selected.length !== 1) {
+        alert("Please select one product to add a variant.");
+        return;
+    }
+    document.querySelector('#add_variant_popup input[name="product_id"]').value = selected[0];
+    document.getElementById('add_variant_popup').style.display = 'block';
+}
+function closeAddVariant() {
+    document.getElementById('add_variant_popup').style.display = 'none';
+}
+</script>
+{% endblock content %}

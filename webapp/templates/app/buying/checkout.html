@@ -1,0 +1,183 @@
+{% extends 'app/navigation.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="checkoutpage">
+    <div class="uppercheckout">
+        <a href="{% url 'appointment' %}">Appointment</a>
+        <ul>
+            <li>Cart</li>
+            <p>></p>
+            <li>Appointment</li>
+            <p>></p>
+            <li>Checkout</li>
+            <p>></p>
+            <li>Appointment Complete</li>
+        </ul>
+    </div>
+    <div class="checkout_body">
+        <div class="checkout_left_wrapper">
+            <div class="checkout_slider">
+                <div class="checkout_slides">
+                    {% for produkto in cart_products %}
+                    <div class="checkout_slide">
+                        {% if produkto.image %}
+                            <img src="{{ produkto.image }}" class="checkout_image">
+                        {% endif %}
+                        <div class="checkoutleft_bottom">
+                            <p>{{ produkto.product_name }}</p>
+                            <p>₱{{ produkto.price|floatformat:2|intcomma }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="checkout_nav_buttons">
+                    <button id="prevBtn"><</button>
+                    <button id="nextBtn">></button>
+                </div>
+            </div>
+        </div>
+        <div class="checkout_right">
+            <div class="checkoutright_upper">
+                <div class="checkoutright_uppertitle">
+                    <p>Account Information</p>
+                </div>
+                <div class="checkoutright_upperbody">
+                    <div class="checkoutupper_bodyleft">
+                        <p>Full Name</p>
+                        <p>Contact Number</p>
+                        <p>Email Address</p>
+                        <p>Date & Time</p>
+                    </div>
+                    <div class="checkoutupper_bodyright">
+                        <p>{{ appointment_datas.first_name }} {{ appointment_datas.last_name }}</p>
+                        <p>{{ appointment_datas.contact }}</p>
+                        <p>{{ appointment_datas.email }}</p>
+                        <p>{{ appointment_datas.date}} / {{ appointment_datas.time }}</p>
+                    </div>
+                </div>
+            </div>
+            {% if request.session.cart %}
+                {% for item in request.session.cart %}
+                    {% if item.type == "pc_build" %}
+                        <script id="pc-build-data" type="application/json">{{ item.build_data|safe }}</script>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <div class="checkoutright_bottom">
+                <p>Your Cart</p>
+                <div class="checkoutright_body">
+                    <div id="pc-build-summary" style="margin-top: 15px; display:none;">
+                        <p style="font-size: 18px; font-weight: bold;">Custom PC Build</p>
+                        <div id="build-components"></div>
+                        <p id="build-total" style="font-size: 20px; font-weight: bold; margin-top: 10px;"></p>
+                    </div>
+                    <div class="checkoutright_bodyupper">
+                        <p>Products</p>
+                        <p>Price</p>
+                    </div>
+                    {% for produkto in cart_products %}
+                    <div class="checkoutright_bodybody">
+                        <p>{{ produkto.product_name }}</p>
+                        {% if not is_direct %}
+                        <form action="{% url 'update_cart' produkto.product_id %}" method="POST" class="quantity-form">
+                            {% csrf_token %}
+                            <div class="text_quantity">
+                                <button class="quantity-btn" name="action" value="decrease">-</button>
+                                <input type="number" value="{{ produkto.quantity }}" min="1" readonly>
+                                <button class="quantity-btn" name="action" value="increase">+</button>
+                            </div>
+                        </form>
+                        {% endif %}
+                        <p>₱{{ produkto.sub_total|floatformat:2|intcomma }}</p>
+                    </div>
+                    {% endfor %}
+                    <div class="checkoutright_price">
+                        <p>Total</p>
+                        <p>₱{{ total_price|floatformat:2|intcomma }}</p>
+                    </div>
+                    <form action="{% url 'appointment_complete' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Confirm Appointment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const slides = document.querySelectorAll('.checkout_slide');
+    const slider = document.querySelector('.checkout_slides');
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    let currentIndex = 0;
+    let slideCount = slides.length;
+
+    function updateSlider() {
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+
+    nextBtn.addEventListener("click", function () {
+        currentIndex = (currentIndex + 1) % slideCount;
+        updateSlider();
+        resetAutoSlide();
+    });
+
+    prevBtn.addEventListener("click", function () {
+        currentIndex = (currentIndex - 1 + slideCount) % slideCount;
+        updateSlider();
+        resetAutoSlide();
+    });
+
+    // Auto-slide every 5 seconds
+    let autoSlide = setInterval(() => {
+        currentIndex = (currentIndex + 1) % slideCount;
+        updateSlider();
+    }, 5000);
+
+    function resetAutoSlide() {
+        clearInterval(autoSlide);
+        autoSlide = setInterval(() => {
+            currentIndex = (currentIndex + 1) % slideCount;
+            updateSlider();
+        }, 5000);
+    }
+
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const dataTag = document.getElementById("pc-build-data");
+    if (!dataTag) return;
+
+    const build = JSON.parse(dataTag.textContent);
+
+    const summaryBox = document.getElementById("pc-build-summary");
+    const container = document.getElementById("build-components");
+    const totalEl = document.getElementById("build-total");
+
+    summaryBox.style.display = "block";
+
+    let total = 0;
+
+    for (const [type, comp] of Object.entries(build)) {
+        if (type === "total") continue;
+
+        const row = document.createElement("p");
+        row.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${comp.name} — ₱${comp.price.toLocaleString()}`;
+        container.appendChild(row);
+
+        total += comp.price;
+    }
+
+    totalEl.textContent = "Total PC Build: ₱" + total.toLocaleString();
+});
+
+</script>
+
+{% endblock content %}
