@@ -16,7 +16,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'replace-me-with-a-secure-secret-in-prod')
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('1', 'true', 'yes')
 
 # ALLOWED_HOSTS: comma-separated list in env, falling back to sensible locals
-ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'https://koyanardzshop.onrender.com/' 'localhost,127.0.0.1').split(',') if h.strip()]
 
 # Ensure Render hostname is allowed (add without scheme if user provided full URL)
 RENDER_HOST = 'kuyanardzshop.onrender.com'
