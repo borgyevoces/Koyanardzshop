@@ -119,6 +119,65 @@ document.addEventListener('DOMContentLoaded', function() {
     calendar.render();
 });
 
+/* Navigation Menu Toggle */
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.main-nav');
+    
+    if (toggle) {
+        toggle.addEventListener('click', function(){
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', String(!expanded));
+            nav.classList.toggle('open');
+        });
+    }
+
+    // Favorite dropdown
+    const favBtn = document.getElementById('favToggle');
+    const favPanel = document.getElementById('favoriteDropdown');
+    if (favBtn) {
+        favBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            const open = favPanel.style.display === 'block';
+            favPanel.style.display = open ? 'none' : 'block';
+        });
+    }
+
+    // User dropdown toggle
+    const userBtn = document.getElementById('userToggle');
+    const userPanel = document.getElementById('userDropdown');
+    if (userBtn) {
+        userBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block';
+        });
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', function(e){
+        if(favPanel && !favPanel.contains(e.target) && e.target.id !== 'favToggle') favPanel.style.display = 'none';
+        if(userPanel && !userPanel.contains(e.target) && e.target.id !== 'userToggle') userPanel.style.display = 'none';
+    });
+
+    // Mobile buttons that live inside the nav overlay
+    const favBtnMobile = document.getElementById('favToggleMobile');
+    const userBtnMobile = document.getElementById('userToggleMobile');
+    if (favBtnMobile) {
+        favBtnMobile.addEventListener('click', function(e){
+            e.stopPropagation();
+            nav.classList.add('open');
+            favPanel && (favPanel.style.display = favPanel.style.display === 'block' ? 'none' : 'block');
+        });
+    }
+    if (userBtnMobile) {
+        userBtnMobile.addEventListener('click', function(e){
+            e.stopPropagation();
+            nav.classList.add('open');
+            userPanel && (userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block');
+        });
+    }
+});
+
 /* AIBOT */
 function sendMessage() {
     var userMessage = document.getElementById('ai_input').value;
@@ -134,9 +193,12 @@ function sendMessage() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('ai_input').addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    const aiInput = document.getElementById('ai_input');
+    if (aiInput) {
+        aiInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
 });

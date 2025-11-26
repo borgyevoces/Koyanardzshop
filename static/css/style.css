@@ -4,7 +4,7 @@
     box-sizing: border-box;
 }
 html, body {
-  height: 100%;
+  height: auto;
 }
 
 body {
@@ -419,6 +419,10 @@ footer .footer .footer_shop {
     display: block;
     text-align: center;
     margin: 2.5rem;
+}
+.hp-section-head a{
+    text-decoration: none;
+    color: gray;
 }
 .home_newproducts h3{
     justify-content: center;
@@ -1269,6 +1273,7 @@ footer .footer .footer_shop {
 .favorite_btn{
     cursor: pointer;
     transition: color 0.2s ease;
+    z-index: 1;
 }
 .favorite_popup{
     position: fixed;
@@ -2684,7 +2689,6 @@ footer .footer .footer_shop {
 .sellinginformationpage{
     position: relative;
     display: block;
-    top: 5.5rem;
     margin-bottom: 5.5rem;
     background: linear-gradient(180deg,rgba(245, 245, 245, 1) 40%, rgba(32, 97, 130, 0.5) 100%);
 }
