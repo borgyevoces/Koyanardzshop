@@ -26,8 +26,7 @@ wheels/
 .env.local
 db.sqlite3
 celery_messages.sqlite
-/media/
-/staticfiles/
+
 *.log
 .DS_Store
 .vscode/
