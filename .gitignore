@@ -24,7 +24,6 @@ wheels/
 *.egg
 .env
 .env.local
-db.sqlite3
 celery_messages.sqlite
 *.log
 .DS_Store
