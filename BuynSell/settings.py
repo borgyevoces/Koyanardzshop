@@ -92,9 +92,17 @@ DATABASES = {
 # Override if DATABASE_URL is provided (Postgres on Render)
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
-    }
+    # Parse the DATABASE_URL environment variable (e.g. provided by Render)
+    # and ensure SSL is required in production (when DEBUG is False).
+    db_config = dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    if not DEBUG:
+        # Ensure SSL for production Postgres (Render provides a secure endpoint)
+        # dj-database-url doesn't always set sslmode; set it explicitly.
+        options = db_config.get('OPTIONS', {})
+        # Use 'require' to enforce SSL/TLS
+        options.setdefault('sslmode', 'require')
+        db_config['OPTIONS'] = options
+    DATABASES = {'default': db_config}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
