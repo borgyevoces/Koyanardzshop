@@ -51,7 +51,7 @@ header .header .navbar .navbar_logo{
     height: 5rem;
 }
 header .header .navbar .navbar_logo img{
-    width: 5rem;
+    width: 7rem;
     height: auto;
     margin-top: -1rem;
     margin-left: 2rem;
@@ -2885,7 +2885,6 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
-    margin-bottom: 14rem;
 }
 .selling_body{
     display: flex;
@@ -2923,10 +2922,11 @@ footer .footer .footer_shop {
 .selling_left .step-box .sellingleft_bottom .selling_left1{
     display: flex;
     justify-content: center;
-    margin: 5rem 0;
+    margin: 4rem 0;
     cursor: pointer;
 }
 .selling_left .step-box .sellingleft_bottom .selling_left1 h3{
+    height: 2.8rem;
     padding: 0 .8rem;
     border: 1px solid #4F9FBA;
     background-color: #4F9FBA;

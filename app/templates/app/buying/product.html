@@ -204,16 +204,25 @@
                 e.preventDefault();
                 const productId = this.dataset.productId;
                 const el = this;
-                fetch(`/toggle_favorite/${productId}/`, { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                fetch(`/toggle_favorite/${productId}/`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({})
+                })
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'added') el.classList.add('favorited');
                         else if (data.status === 'removed') el.classList.remove('favorited');
+                        else if (data.status === 'error') {
+                            alert(data.message || 'Please log in to add favorites');
+                        }
                     })
                     .catch(err => {
                         console.error('Error toggling favorite:', err);
-                        // fallback: toggle locally
-                        el.classList.toggle('favorited');
+                        alert('Error updating favorite');
                     });
             });
         });

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, CreateView
-from .models import OtpToken, Category, Brand, Product, ProductImage, ProductReview, Appointment, AppointmentProduct, Selling
+from .models import OtpToken, Category, Brand, Product, ProductImage, ProductReview, Appointment, AppointmentProduct, Selling, Favorite
 from .forms import RegisterForm, LoginForm, ProfileForm, ProfileUpdateForm, AddCategory, AddBrand, Add, AddVariantForm, ProductReviewForm, AppointmentForm, SellingForm
 from .serializers import ProductSerializer
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -206,7 +206,7 @@ def register(request):
                                 It expires in 5 minutes. Use the URL below to return to the website:
                                 http://127.0.0.1:8000/signup/{user.username}
                             """
-                sender = settings.EMAIL_HOST_USER
+                sender = "koyanardzshop@gmail.com"
                 receiver = [user.email]
 
                 send_mail(subject, message, sender, receiver, fail_silently=False)
@@ -542,7 +542,11 @@ def direct_checkout(request):
         return redirect('appointment')
     return redirect('product')
 
+@csrf_exempt
 def toggle_favorite(request, product_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"status": "error", "message": "Login required"}, status=401)
+    
     user = request.user
     product = get_object_or_404(Product, id=product_id)
 
@@ -560,7 +564,7 @@ def toggle_favorite(request, product_id):
             "product": {
                 "id": product.id,
                 "name": product.product_name,
-                "img": product.image.url
+                "img": product.image.url if product.image else ""
             }
         })
 
