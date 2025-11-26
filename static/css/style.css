@@ -1489,7 +1489,6 @@ footer .footer .footer_shop {
 .appointmentpage{
     position: relative;
     display: block;
-    top: 7rem;
     padding-bottom: 10rem;
 }
 .upperappointment{
@@ -3431,7 +3430,6 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
-    top: 10rem;
 }
 .loginpage_body{
     display: flex;
