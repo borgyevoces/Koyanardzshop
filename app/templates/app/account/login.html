@@ -3,6 +3,19 @@
 
 {% block content %}
 
+
+<style>
+    /* Hide global header/navigation and footer for the login page only */
+    header, nav, .navbar, .site-header, .topbar, .main-nav, .navigation, .header, .site-navigation,
+    footer, .site-footer, .page-footer, .footer, .footer-wrapper, .bottom-footer { display: none !important; }
+    /* Home button */
+    .login-home-btn{ position: fixed; left: 14px; top: 14px; z-index: 1200; background: #fff; color:#222; padding:8px 12px; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); text-decoration:none; display:flex; align-items:center; gap:8px; font-weight:600 }
+    .loginpage{ padding-top: 0; }
+    @media (min-width: 768px){ .login-home-btn{ left: 24px; top: 24px } }
+</style>
+
+<a class="login-home-btn" href="{% url 'product' %}"><i class="fa fa-home"></i> Home</a>
+
 <div class="loginpage">
     <div class="loginpage_body">
         <div class="loginpage_left">
