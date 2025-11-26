@@ -5,7 +5,12 @@ services:
     runtimeVersion: 3.13.4
     rootDir: ./
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: python manage.py migrate && gunicorn BuynSell.wsgi:application --bind 0.0.0.0:10000 --workers 2
+    # Run migrations as a post-deploy step so failures are visible in deploy logs
+    postdeploy:
+      - python manage.py migrate --noinput
+      - python manage.py collectstatic --noinput
+    # Start only the application process here. Migrations run in postdeploy.
+    startCommand: gunicorn BuynSell.wsgi:application --bind 0.0.0.0:10000 --workers 2
     envVars:
       - key: PYTHON_VERSION
         value: 3.13.4
