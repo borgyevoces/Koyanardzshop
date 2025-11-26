@@ -206,7 +206,7 @@ def register(request):
                                 It expires in 5 minutes. Use the URL below to return to the website:
                                 http://127.0.0.1:8000/signup/{user.username}
                             """
-                sender = "youremail@example.com"
+                sender = settings.EMAIL_HOST_USER
                 receiver = [user.email]
 
                 send_mail(subject, message, sender, receiver, fail_silently=False)
