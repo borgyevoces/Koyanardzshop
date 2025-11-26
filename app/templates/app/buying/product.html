@@ -5,102 +5,136 @@
 {% block content %}
 
 <div class="productpage">
-    <div class="product_upper">
-        <div class="searchbar">
-            <form action="" method="GET">
-                <input type="text" name="search" value="{{ search_query }}" placeholder="Search">
-            </form>
+    <div class="product-header">
+        <div class="product-title">
+            <h1>Products</h1>
+            <p class="muted">Browse our latest items</p>
         </div>
-    </div>
-    <div class="productbar">
-        <div class="filterbar">
-            <div class="filter_nav">
-                <form action="" method="GET">
+
+        <div class="product-controls">
+            <form class="search-form" action="" method="GET">
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Search products" aria-label="Search products">
+            </form>
+
+            <div class="controls-right">
+                <form class="sort-form" action="" method="get">
                     <input type="hidden" name="search" value="{{ search_query }}">
                     <input type="hidden" name="category" value="{{ category_filter }}">
-                    <input type="hidden" name="brand_filter" value="{{ brand_filter }}">
+                    <input type="hidden" name="brand" value="{{ brand_filter }}">
                     <input type="hidden" name="component" value="{{ component_filter }}">
+                    <select class="pricingitem" name="price_order" id="priceOrder">
+                        <option value="">Sort</option>
+                        <option value="high" {% if request.GET.price_order == 'high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="low" {% if request.GET.price_order == 'low' %}selected{% endif %}>Price: Low to High</option>
+                    </select>
+                </form>
+                <button id="filterToggle" class="btn-sm">Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-panel" aria-hidden="true">
+        <div class="filter-panel-inner">
+            <button id="filterClose" class="btn-sm filter-close">Close</button>
+            <form action="" method="GET" class="filter-form">
+                <input type="hidden" name="search" value="{{ search_query }}">
+                <div class="filter-row">
+                    <label>Category</label>
                     <select class="categoryitem" name="category" id="categorySelect">
                         <option value="">All Categories</option>
                         {% for category in categories %}
                             <option value="{{ category.id }}" {% if category.id == request.GET.category %} selected {% endif %}>{{ category.category_name }}</option>
                         {% endfor %}
                     </select>
-                    <select class="pricingitem" name="price_order" id="priceOrder">
-                        <option value="high" {% if request.GET.price_order == 'high' %}selected{% endif %}>High Price</option>
-                        <option value="low" {% if request.GET.price_order == 'low' %}selected{% endif %}>Lowest Price</option>
-                    </select>
-                </form>
-            </div>
-            <form id="brandDropdownForm" action="" method="GET" style="display:none;">
-                <input type="hidden" name="category" value="{{ category_filter }}">
-                <input type="hidden" name="price_order" value="{{ price_order }}">
-                <select name="brand" id="brandDropdown">
-                <option value="">Select Brand</option>
-                {% for brand in brands %}
-                    <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:'s' %}selected{% endif %}>{{ brand.brand|escape }}</option>
-                {% endfor %}
-                </select>
-            </form>
-            <div class="filtername">
-                <form id="brandForm" action="" method="GET">
-                    <input type="hidden" name="brand" id="brand_filter_input" value="{{ brand_filter }}">
-                    <input type="hidden" name="category" value="{{ category_filter }}">
-                    <input type="hidden" name="price_order" value="{{ price_order }}">
-                    <ul id="brand_filter">
-                        {% for brand in brands %}
-                            <li data-id="{{ brand.id }}" class="brand-item {% if brand_filter == brand.id|stringformat:'s' %}selected{% endif %}">{{ brand.brand|escape }}</li>
-                        {% endfor %}
-                    </ul>
-                </form>
-                <ul id="component_filter_list" style="display:none;">
-    <li data-id="cpu">CPU</li>
-    <li data-id="gpu">GPU</li>
-    <li data-id="ram">RAM / Memory</li>
-    <li data-id="motherboard">Motherboard</li>
-    <li data-id="storage">Storage</li>
-    <li data-id="psu">Power Supply</li>
-    <li data-id="case">PC Case</li>
-    <li data-id="cooling">Cooling</li>
-</ul>
-            </div>
-        </div>
+                </div>
 
-        <section>
-            <div class="box">
+                <div class="filter-row">
+                    <label>Brand</label>
+                    <form id="brandDropdownForm" action="" method="GET" style="display:none;">
+                        <input type="hidden" name="category" value="{{ category_filter }}">
+                        <input type="hidden" name="price_order" value="{{ price_order }}">
+                        <select name="brand" id="brandDropdown">
+                            <option value="">Select Brand</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:'s' %}selected{% endif %}>{{ brand.brand|escape }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+
+                    <div class="brand-list">
+                        <form id="brandForm" action="" method="GET">
+                            <input type="hidden" name="brand" id="brand_filter_input" value="{{ brand_filter }}">
+                            <input type="hidden" name="category" value="{{ category_filter }}">
+                            <input type="hidden" name="price_order" value="{{ price_order }}">
+                            <ul id="brand_filter">
+                                {% for brand in brands %}
+                                    <li data-id="{{ brand.id }}" class="brand-item {% if brand_filter == brand.id|stringformat:'s' %}selected{% endif %}">{{ brand.brand|escape }}</li>
+                                {% endfor %}
+                            </ul>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="component_filter_list" class="component-list" style="display:none;">
+                    <label>Components</label>
+                    <ul>
+                        <li data-id="cpu">CPU</li>
+                        <li data-id="gpu">GPU</li>
+                        <li data-id="ram">RAM / Memory</li>
+                        <li data-id="motherboard">Motherboard</li>
+                        <li data-id="storage">Storage</li>
+                        <li data-id="psu">Power Supply</li>
+                        <li data-id="case">PC Case</li>
+                        <li data-id="cooling">Cooling</li>
+                    </ul>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <main class="products-main">
+        <div class="product-grid">
             {% if products %}
-                {% for produkto in products %}
-                    <div class="containerbox">
-                        <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="productfavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt="" class="heart_favorite"></button>
-                        <a href="{% url 'product_item' produkto.id %}" class="containerbox_a">
-                        <div class="containerimage">
-                            {% if produkto.image %}
-                            <img src="{{ produkto.image.url }}" alt="">
+                {% for p in products %}
+                    <article class="product-card">
+                        <button class="favorite_btn {% if p.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites">
+                            <i class="fa fa-heart"></i>
+                        </button>
+                        <a href="{% url 'product_item' p.id %}" class="product-thumb">
+                            {% if p.image %}
+                                <img src="{{ p.image.url }}" alt="{{ p.product_name }}">
+                            {% else %}
+                                <img src="{% static 'images/products/placeholder.png' %}" alt="{{ p.product_name }}">
                             {% endif %}
-                        </div>
                         </a>
-                        </a>
-                        <div class="containercontent">
-                            <p>{{ produkto.product_name }}</p>
-                            <div class="containercart">
-                                <h4>₱{{ produkto.price|intcomma }}</h4>
-                                <div class="containercart_button">
-                                    <form action="{% url 'direct_checkout' %}" method="POST">
+                        <div class="card-body">
+                            <h3 class="card-title">{{ p.product_name }}</h3>
+                            <div class="card-meta">
+                                <span class="price">₱{{ p.price|intcomma }}</span>
+                            </div>
+                            <div class="card-actions">
+                                <form class="add-cart-form" method="post" action="{% url 'add_to_cart' p.id %}">
                                     {% csrf_token %}
-                                        <input type="hidden" name="product_id" value="{{ produkto.id }}">
-                                        <button type="submit">Buy Now</button>
-                                    </form>
-                                    <button class="add-to-cart-btn" data-product-id="{{ produkto.id }}" type="button"><img src="{% static 'images/icon/cart.png' %}" alt="Cart"></button>
-                                </div>
+                                    <button type="submit" class="btn-sm">Buy Now</button>
+                                </form>
+                                <button class="add-to-cart-btn" data-product-id="{{ p.id }}" aria-label="Add to cart"><i class="fa fa-shopping-cart"></i></button>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 {% endfor %}
+            {% else %}
+                <p>No products found.</p>
             {% endif %}
-            </div>
-        </section>
-    </div>
+        </div>
+
+        <div style="margin-top:12px"> {% if is_paginated %}
+            {% include "app/pagination.html" %}
+        {% endif %}</div>
+    </main>
+
 </div>
+
 <div id="cart-popup" class="cart-popup">
     <div class="cart-popup-content">
         <span class="cart-popup-message">Added to cart!</span>
@@ -108,19 +142,18 @@
 </div>
 
 
-    <script src="https://cdn.botpress.cloud/webchat/v3.4/inject.js"></script>
-    <script src="https://files.bpcontent.cloud/2025/11/05/07/20251105070326-3GYR6OU8.js" defer></script>
-    <script>
-        window.botpressWebChat.init({
-        botId: '4b04a836-814b-48e0-a021-3f5e77b25de4',                        
-        hostUrl: 'https://premorning-unadvantaged-melvin.ngrok-free.dev/',     
-        enableQuickReplies: true,                     
-        showConversationsButton: true,    
-        })
-    </script> 
-        
-    
-    
+<script src="https://cdn.botpress.cloud/webchat/v3.4/inject.js"></script>
+<script src="https://files.bpcontent.cloud/2025/11/05/07/20251105070326-3GYR6OU8.js" defer></script>
+<script>
+    window.botpressWebChat.init({
+        botId: '4b04a836-814b-48e0-a021-3f5e77b25de4',
+        hostUrl: 'https://premorning-unadvantaged-melvin.ngrok-free.dev/',
+        enableQuickReplies: true,
+        showConversationsButton: true,
+    })
+</script>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         function getCookie(name) {
@@ -139,14 +172,12 @@
         }
         const csrftoken = getCookie('csrftoken');
 
+        // Add to cart (AJAX fallback) - buttons still submit forms for graceful degradation
         const cartButtons = document.querySelectorAll('.add-to-cart-btn');
-
         cartButtons.forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
-
                 const productId = this.dataset.productId;
-
                 fetch(`/add-to-cart/${productId}`, {
                     method: 'POST',
                     headers: {
@@ -157,79 +188,82 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('Product added to cart!');
-
                     const cartCountElement = document.getElementById('cart-count');
-                    if (cartCountElement) {
-                        cartCountElement.textContent = data.cart_count;
-                    }
-
+                    if (cartCountElement) cartCountElement.textContent = data.cart_count;
                     const popup = document.getElementById('cart-popup');
-                    if (popup) {
-                        popup.classList.add('show');
-                        setTimeout(() => popup.classList.remove('show'), 2200);
-                    }
+                    if (popup) { popup.classList.add('show'); setTimeout(() => popup.classList.remove('show'), 2200); }
                 })
                 .catch(error => console.error('Error:', error));
             });
         });
 
+        // Favorite buttons - call server toggle endpoint and update UI
+        const favButtons = document.querySelectorAll('.favorite_btn');
+        favButtons.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const productId = this.dataset.productId;
+                const el = this;
+                fetch(`/toggle_favorite/${productId}/`, { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'added') el.classList.add('favorited');
+                        else if (data.status === 'removed') el.classList.remove('favorited');
+                    })
+                    .catch(err => {
+                        console.error('Error toggling favorite:', err);
+                        // fallback: toggle locally
+                        el.classList.toggle('favorited');
+                    });
+            });
+        });
+
+        // Sidebar / filter panel toggle
+        const filterToggle = document.getElementById('filterToggle');
+        const filterClose = document.getElementById('filterClose');
+        const productPage = document.querySelector('.productpage');
+        const filterPanel = document.querySelector('.filter-panel');
+
+        if (filterToggle) filterToggle.addEventListener('click', function () { if (filterPanel) { filterPanel.classList.add('open'); filterPanel.setAttribute('aria-hidden','false'); } });
+        if (filterClose) filterClose.addEventListener('click', function () { if (filterPanel) { filterPanel.classList.remove('open'); filterPanel.setAttribute('aria-hidden','true'); } });
+
+        // Brand & component filter interactions (preserve existing logic)
         const categorySelect = document.getElementById("categorySelect");
         const priceSelect = document.getElementById("priceOrder");
-
         const brandList = document.getElementById("brand_filter");
         const componentList = document.getElementById("component_filter_list");
-
         const brandItems = document.querySelectorAll("#brand_filter li");
         const brandInput = document.getElementById("brand_filter_input");
         const brandForm = document.getElementById("brandForm");
-
         const COMPUTER_PARTS_CATEGORY_ID = "15";
 
         function updateSidebarFilter() {
+            if (!categorySelect) return;
             if (categorySelect.value === COMPUTER_PARTS_CATEGORY_ID) {
-                brandList.style.display = "none";
-                componentList.style.display = "block";
-            }   
-            else{
-                brandList.style.display = "block";
-                componentList.style.display = "none";
+                if (brandList) brandList.style.display = "none";
+                if (componentList) componentList.style.display = "block";
+            } else {
+                if (brandList) brandList.style.display = "block";
+                if (componentList) componentList.style.display = "none";
             }
         }
         updateSidebarFilter();
+        if (categorySelect) categorySelect.addEventListener("change", function () { updateSidebarFilter(); this.form.submit(); });
+        if (priceSelect) priceSelect.addEventListener("change", function () { this.form.submit(); });
 
-        categorySelect.addEventListener("change", function () {
-            updateSidebarFilter();
-            this.form.submit();
-        });
-
-    
-        priceSelect.addEventListener("change", function () {
-            this.form.submit();
-        });
-
-
-    
         brandItems.forEach(item => {
             item.addEventListener("click", function () {
                 brandItems.forEach(i => i.classList.remove("selected"));
                 this.classList.add("selected");
-
-                brandInput.value = this.dataset.id;
-                brandForm.submit();
+                if (brandInput) { brandInput.value = this.dataset.id; brandForm.submit(); }
             });
         });
 
-
-    
-        const componentItems = componentList.querySelectorAll("li");
-
+        const componentItems = componentList ? componentList.querySelectorAll("li") : [];
         componentItems.forEach(item => {
             item.addEventListener("click", function () {
-
                 componentItems.forEach(i => i.classList.remove("selected"));
                 this.classList.add("selected");
-
                 const params = new URLSearchParams(window.location.search);
                 params.set("component", this.dataset.id);
                 window.location.search = params.toString();
@@ -239,5 +273,5 @@
     });
 
 </script>
-    
+
 {% endblock content %}

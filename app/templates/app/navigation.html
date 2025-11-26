@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>{% block title %}Koya Nardz{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
@@ -17,190 +19,169 @@
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-
-
 </head>
 <body>
-    <header>
-        <div class="header">
-            <div class="navbar">
-                <div class="navbar_logo">
-                    <a href="{% url 'home' %}"><img src="{% static 'images/LOGO.png' %}" alt=""></a>
-                    <div class="navbar_logotext">
-                        <a href="{% url 'home' %}">
-                            <p>Koya Nardz</p>
-                            <p>Computer Trading</p>
-                        </a>
+
+    <header class="site-header">
+        <div class="header-inner container">
+            <a class="brand-link" href="{% url 'home' %}">
+                <img src="{% static 'images/LOGO.png' %}" alt="Koya Nardz" class="brand-logo">
+                <div class="brand-text">
+                    <span class="brand-title">Koya Nardz</span>
+                    <small class="brand-sub">Computer Trading</small>
+                </div>
+            </a>
+
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span class="hamburger"></span>
+            </button>
+
+            <nav class="main-nav" aria-label="Primary navigation">
+                <ul class="nav-list">
+                    <li><a href="{% url 'product' %}"><i class="fa-solid fa-box-open" aria-hidden="true"></i><span>Products</span></a></li>
+                    <li class="has-sub">
+                        <a href="{% url 'selling' %}"><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><span>Sell</span></a>
+                        <ul class="subnav">
+                            <li><a href="{% url 'selling_information' %}">How to Sell?</a></li>
+                            <li><a href="{% url 'selling' %}">Sell</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'my_appointment' %}"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i><span>Appointment</span></a></li>
+                        <!-- Mobile-only action links: cart, favorites, account/sign-in -->
+                        <li class="nav-actions-mobile"><a href="{% url 'cart' %}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Cart</span></a></li>
+                        <li class="nav-actions-mobile"><button id="favToggleMobile" class="action-btn-mobile"><i class="fa-regular fa-heart" aria-hidden="true"></i><span>Favorites</span></button></li>
+                        <li class="nav-actions-mobile">{% if user.is_authenticated %}<button id="userToggleMobile" class="action-btn-mobile"><i class="fa-solid fa-user" aria-hidden="true"></i><span>Account</span></button>{% else %}<a href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Sign in</span></a>{% endif %}</li>
+                </ul>
+            </nav>
+
+            <div class="header-actions">
+                <a class="action-btn" href="{% url 'cart' %}" title="Cart"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></a>
+
+                <div class="dropdown favorite-dropdown">
+                    <button id="favToggle" class="action-btn" aria-haspopup="true" aria-expanded="false"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
+                    <div id="favoriteDropdown" class="dropdown-panel">
+                        {% if products_favorite %}
+                            {% for produkto in products_favorite %}
+                            <div class="fav-item">
+                                <a href="{% url 'product_item' produkto.id %}"><img src="{{ produkto.image.url }}" width="40" height="40" alt="{{ produkto.product_name }}"></a>
+                                <div class="fav-meta">{{ produkto.product_name }}</div>
+                                <div class="fav-actions">
+                                    <button class="fav-remove-btn" data-product-id="{{ produkto.id }}">✕</button>
+                                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">{% csrf_token %}<button>🛒</button></form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-fav">No favorites yet</p>
+                        {% endif %}
                     </div>
                 </div>
-                <div class="navbar_nav">
-                    <ul>
-                        <li>
-                            <a href="{% url 'product' %}">Product</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'selling' %}">Sell</a>
-                            <ul class="sellnav">
-                                <li><a href="{% url 'selling_information' %}">How to Sell?</a></li>
-                                <li><a href="{% url 'selling' %}">Sell</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="{% url 'my_appointment' %}">Appointment</a></li>
-                    </ul>
-                </div>
-                <div class="accountbar">
-                    <ul>
-                        <li><a href="{% url 'cart' %}"><img src="{% static 'images/icon/cart-white.png' %}" alt="cart"></a></li>
-                        <li class="dropdown">
-    <a href="javascript:void(0);" class="favorite-dropbtn" onclick="toggleFavoriteDropdown()">
-        <img src="{% static 'images/icon/heart.png' %}" alt="">
-    </a>
 
-    <div id="favoriteDropdown" class="dropdown-content favorite-dropdown-box">
-        {% if products_favorite %}
-            {% for produkto in products_favorite %}
-            <div class="fav-item">
-                
-                <div class="fav-left">
-                    <a href="{% url 'product_item' produkto.id %}">
-                        <img src="{{ produkto.image.url }}" width="40" height="40">
-                    </a>
-                    <span>{{ produkto.product_name }}</span>
-                </div>
-
-                <div class="fav-right">
-
-                    <!-- REMOVE from favorites -->
-                    <button class="fav-remove-btn"
-                        data-product-id="{{ produkto.id }}">
-                        ✕
-                    </button>
-
-                    <!-- ADD to Cart -->
-                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
-                        {% csrf_token %}
-                        <button class="fav-cart-btn">🛒</button>
-                    </form>
-
-                </div>
-
-            </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-fav">No favorites yet</p>
-        {% endif %}
-    </div>
-</li>
-
-
-                        <li class="dropdown">
-                            {% if user.is_authenticated %}
-                            <a href="javascript:void(0);" class="dropbtn" onclick="toggleDropdown()">
+                <div class="dropdown user-dropdown">
+                    {% if user.is_authenticated %}
+                        <button id="userToggle" class="action-btn"><i class="fa-solid fa-user" aria-hidden="true"></i></button>
+                        <div id="userDropdown" class="dropdown-panel">
+                            <div class="user-card">
                                 {% if user.avatar %}
-                                <img src="{% static 'images/icon/user_default.png' %}" alt="Avatar" class="avatar-img">
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="avatar-img">
                                 {% else %}
-                                <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img">
+                                    <img src="{% static 'images/icon/user_default.png' %}" alt="{{ user.username }}" class="avatar-img">
                                 {% endif %}
-                            </a>
-                            <div id="userDropdown" class="dropdown-content">
-                                <div class="useravatar">
-                                    {% if user.avatar %}
-                                    <img src="{% static 'images/icon/user_default.png' %}" alt="Avatar" class="avatar-img">
-                                    {% else %}
-                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img">
-                                    {% endif %}
-                                    <p>{{ user.username }}</p>
-                                </div>
-                                <a href="{% url 'profile' %}">Profile</a>
-                                <a href="{% url 'logout' %}">Logout</a>
+                                <div class="user-info">{{ user.username }}</div>
                             </div>
-                            {% else %}
-                            <a href="{% url 'login' %}">
-                                <img src="{% static 'images/icon/user-white.png' %}" alt="Avatar" class="avatar-img">
-                            </a>
-                            {% endif %}
-                        </li>
-                    </ul>
+                            <a href="{% url 'profile' %}">Profile</a>
+                            <a href="{% url 'logout' %}">Logout</a>
+                        </div>
+                    {% else %}
+                        <a class="action-btn" href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i></a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </header>
-    {% block content %}
-    {% endblock content %}
-    <footer class="fixed-bottom mt-5">
-        <div class="footer">
-            <div class="footer_logo">
-                <p>Connect with us</p>
-                <div class="footer_icon">
-                    <a href="#"><img src="{% static 'images/icon/facebook.png' %}" alt="No image"></a>
-                    <a href="#"><img src="{% static 'images/icon/social.png' %}" alt="No image"></a>
+
+    <main class="content-wrapper">{% block content %}{% endblock %}</main>
+
+    <footer class="site-footer">
+        <div class="footer-inner container">
+            <div class="footer-col footer-about">
+                <h4>About</h4>
+                <p>Koya Nardz Computer Trading — trusted tech shop since 2016. New and secondhand laptops, desktops, and PC parts.</p>
+                <div class="socials">
+                    <a href="#" class="social" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+                    <a href="#" class="social" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                    <a href="#" class="social" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
                 </div>
             </div>
-            <div class="footer_services">
-                <h3 class="footer_h3">Services & Support</h3>
-                <div class="footer_nav">
-                    <ul>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                    </ul>
-                </div>
+            <div class="footer-col footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{% url 'product' %}">Products</a></li>
+                    <li><a href="{% url 'selling' %}">Sell</a></li>
+                    <li><a href="{% url 'my_appointment' %}">Appointment</a></li>
+                </ul>
             </div>
-            <div class="footer_shop">
-                <h3 class="footer_h3">Shop</h3>
-                <div class="footer_nav">
-                    <ul>
-                        <li><a href="{% url 'product' %}">Hot Deals</a></li>
-                        <li><a href="{% url 'product' %}">Computer</a></li>
-                        <li><a href="{% url 'product' %}">Laptop</a></li>
-                    </ul>
-                </div>
+            <div class="footer-col footer-contact">
+                <h4>Contact</h4>
+                <p>Address: Bacoor, Cavite</p>
+                <p>Email: support@koyanardzshop.com</p>
             </div>
         </div>
+        <div class="footer-bottom">
+            <div class="container">© {% now "Y" %} Koya Nardz — All rights reserved.</div>
+        </div>
     </footer>
+
     <script>
-    function toggleFavoriteDropdown() {
-        const drop = document.getElementById("favoriteDropdown");
-        drop.style.display = (drop.style.display === "block") ? "none" : "block";
-    }
-
-    window.addEventListener('click', function(event) {
-        const favDrop = document.getElementById("favoriteDropdown");
-        const favBtn = document.querySelector('.favorite-dropbtn');
-
-        if (favDrop && favBtn &&
-            !favBtn.contains(event.target) &&
-            !favDrop.contains(event.target)) {
-            favDrop.style.display = "none";
-        }
-    });
-
-    // REMOVE FROM FAVORITE using AJAX
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('fav-remove-btn')) {
-
-            const productId = e.target.dataset.productId;
-
-            fetch(`/toggle_favorite/${productId}/`)
-            .then(res => res.json())
-            .then(data => {
-                window.location.reload();
+        // Mobile nav toggle
+        (function(){
+            const toggle = document.querySelector('.nav-toggle');
+            const nav = document.querySelector('.main-nav');
+            toggle && toggle.addEventListener('click', function(){
+                const expanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', String(!expanded));
+                nav.classList.toggle('open');
             });
-        }
-    });
 
-        function toggleDropdown() {
-            const dropdown = document.getElementById("userDropdown");
-            dropdown.style.display = (dropdown.style.display === "block") ? "none" : "block";
-        }
-        window.addEventListener('click', function(event) {
-            const dropdown = document.getElementById("userDropdown");
-            const button = document.querySelector('.dropbtn');
-    
-            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
+            // Favorite dropdown
+            const favBtn = document.getElementById('favToggle');
+            const favPanel = document.getElementById('favoriteDropdown');
+            favBtn && favBtn.addEventListener('click', function(e){
+                e.stopPropagation();
+                const open = favPanel.style.display === 'block';
+                favPanel.style.display = open ? 'none' : 'block';
+            });
+
+            // User dropdown toggle
+            const userBtn = document.getElementById('userToggle');
+            const userPanel = document.getElementById('userDropdown');
+            userBtn && userBtn.addEventListener('click', function(e){
+                e.stopPropagation();
+                userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdowns on outside click
+            document.addEventListener('click', function(e){
+                if(favPanel && !favPanel.contains(e.target) && e.target.id !== 'favToggle') favPanel.style.display = 'none';
+                if(userPanel && !userPanel.contains(e.target) && e.target.id !== 'userToggle') userPanel.style.display = 'none';
+            });
+
+            // Mobile buttons that live inside the nav overlay
+            const favBtnMobile = document.getElementById('favToggleMobile');
+            const userBtnMobile = document.getElementById('userToggleMobile');
+            favBtnMobile && favBtnMobile.addEventListener('click', function(e){
+                e.stopPropagation();
+                // ensure nav overlay stays open
+                nav.classList.add('open');
+                favPanel && (favPanel.style.display = favPanel.style.display === 'block' ? 'none' : 'block');
+            });
+            userBtnMobile && userBtnMobile.addEventListener('click', function(e){
+                e.stopPropagation();
+                nav.classList.add('open');
+                userPanel && (userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block');
+            });
+        })();
     </script>
 </body>
 </html>
+            

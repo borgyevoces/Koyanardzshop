@@ -4,119 +4,112 @@
 
 {% block content %}
 
-<div class="homepage">
-    <div class="home">
-        <div class="hometext">
-            <div class="hometext_upper">
-                <p class="hometextupper_p">POWERED <span class="hometextupper_span">by</span><p>
-                <p>Passion</p>
-                <p class="hometextupper_p">DRIVEN <span>by</span><p>
-                <p>Performance</p>
+<section class="hp-hero">
+    <div class="container hp-hero-inner">
+        <div class="hero-copy">
+            <h1>Reliable PCs &amp; Laptops — Curated for Performance</h1>
+            <p class="lead">Shop tested new &amp; secondhand computers, parts, and custom builds. We carefully inspect every item, provide honest photos and descriptions, and offer local pickup and support in Bacoor.</p>
+            <p class="hero-sublead">From budget student systems to high-performance gaming and workstation builds — find the right fit for your needs. We help you with setup, upgrades, and after-sale support.</p>
+            <div class="hero-ctas">
+                <a class="btn btn-primary" href="{% url 'product' %}">Shop Products</a>
+                <a class="btn btn-outline" href="{% url 'selling' %}">Sell Your Device</a>
             </div>
-            <div class="hometext_bottom">
-                <p>Discover affordable and high-performance computers, laptops, and custom PC builds--handpicked to meet your needs.</p>
-            </div>
-            <div class="hometext_button">
-                <a href="{% url 'product' %}">
-                    <p>Buy Now</p>
-                </a>
-                
-            </div>
+            <ul class="hero-features">
+                <li><i class="fa-solid fa-truck-fast"></i><span>Fast local pickup</span></li>
+                <li><i class="fa-solid fa-shield-halved"></i><span>Inspected &amp; tested</span></li>
+                <li><i class="fa-solid fa-headset"></i><span>Support &amp; warranty</span></li>
+                <li><i class="fa-solid fa-tools"></i><span>Upgrade & repair services</span></li>
+            </ul>
         </div>
-        <div class="homeimages">
-            <img src="{% static 'images/system1drop.png' %}" alt="">
+        <div class="hero-media">
+            <img src="{% static 'images/system1drop.png' %}" alt="Featured build">
         </div>
     </div>
-    <div class="home_newproducts">
-        <h3>What's New?</h3>
-        <div class="home_newupper">
-            <a href="{% url 'product' %}">See more...</a>
-        </div>
-        <div class="product-container">
+</section>
+
+<section class="hp-products container">
+    <div class="hp-section-head">
+        <h2>Featured &amp; New Arrivals</h2>
+        <a class="see-more" href="{% url 'product' %}">See all</a>
+    </div>
+    <div class="product-grid">
         {% if products %}
             {% for produkto in products %}
-            <div class="product-card">
-                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
-                {% if produkto.image %}
-                <a href="{% url 'product_item' produkto.id %}">
-                    <img src="{{ produkto.image.url }}" alt="Product Image">
-                </a>
-                {% endif %}
-                <div class="product-name">
-                    <h4>{{ produkto.product_name }}</h4>
-                    <p>₱{{ produkto.price|intcomma }}</p>
-                    <div class="productcard-button">
-                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
-                            {% csrf_token %}
-                            <button>Add to Cart</button>
-                        </form>
+                <article class="card product-card">
+                    <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                    <a class="product-thumb" href="{% url 'product_item' produkto.id %}">
+                        {% if produkto.image %}
+                            <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}">
+                        {% else %}
+                            <img src="{% static 'images/products/placeholder.png' %}" alt="placeholder">
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <h3 class="card-title">{{ produkto.product_name }}</h3>
+                        <p class="price">₱{{ produkto.price|intcomma }}</p>
+                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button class="btn btn-sm">Add to cart</button></form>
                     </div>
-                </div>
-            </div>
+                </article>
             {% endfor %}
+        {% else %}
+            <p>No products available right now.</p>
         {% endif %}
+    </div>
+</section>
+
+<section class="hp-about container">
+        <div class="about-grid">
+        <div>
+            <h3>About Koya Nardz</h3>
+            <p>We provide new and secondhand computers, parts, and custom PC builds with careful testing, local pickup, and honest pricing. Since 2016 we've helped students, creators and small businesses find the right setup.</p>
+            <div class="about-cta-row">
+                <a class="btn btn-outline" href="#store-map">Find our store</a>
+                <a class="btn" href="{% url 'product' %}">Browse products</a>
+            </div>
+            <div class="about-highlights">
+                <div class="highlight"><i class="fa-solid fa-magnifying-glass-chart"></i><strong>Inspected items</strong><span>All products are tested</span></div>
+                <div class="highlight"><i class="fa-solid fa-shield-check"></i><strong>Warranty</strong><span>Local support & limited warranty</span></div>
+                <div class="highlight"><i class="fa-solid fa-credit-card"></i><strong>Flexible payment</strong><span>Installments available</span></div>
+            </div>
+        </div>
+        <div class="about-media">
+            <img src="{% static 'images/KNCT.png' %}" alt="Koya Nardz">
         </div>
     </div>
-    <div class="home_sell">
-        <div class="homesell_left">
-            <img src="{% static 'images/computer.png' %}" alt="No image">
-        </div>
-        <div class="homesell_right">
-            <div class="sellright_upper">
-                <h4>Got a laptop or PC to Sell?</h4>
+
+    <section id="store-map" class="hp-map">
+        <div class="map-grid container">
+            <div class="map-container">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.8979824317407!2d120.9755040750075!3d14.433042386033703!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d374c991d945%3A0xd6ebfddd6f74cb60!2sKOYA%20NARDZ%20COMPUTER%20TRADING!5e0!3m2!1sen!2sph!4v1764142154625!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             </div>
-            <div class="sellright_body">
-                <p>Turn your old tech into cash or trade it in for an upgrade! Schedule an appointment and let us evaluate your device in-store.</p>
-            </div>
-            <div class="sellright_button">
-                <a href="{% url 'selling' %}">
-                    <p>Sell Now</p>
-                </a>
+            <div class="store-details">
+                <h4>Visit our store</h4>
+                <p><strong>Address:</strong> Bacoor, Cavite</p>
+                <p><strong>Hours:</strong> Mon–Sat 9:00 — 18:00</p>
+                <p><strong>Email:</strong> <a href="mailto:support@koyanardzshop.com">support@koyanardzshop.com</a></p>
+                <p>Tap <em>Get directions</em> to open Google Maps with navigation to our area.</p>
+                <a class="btn btn-primary" href="https://www.google.com/maps/dir/?api=1&destination=Bacoor%20Cavite" target="_blank">Get directions</a>
             </div>
         </div>
-    </div>
-    <div class="home_about">
-        <div class="homeabout_body">
-            <div class="homeabout_left">
-                <h4>About Us</h4>
-                <div class="aboutleft_text">        
-                    <p>Koya Nardz Computer Trading is a trusted tech shop in Bacoor, Cavite, offering brand-new and secondhand laptops, desktops, and PC parts. Since 2016, we’ve served students, profprofessionals, and businesses with reliable, tested and budget-friendly computer products. with a passing for technology and customer service, we help every customer find the setup that fits their needs.</p>
-                </div>
-                <div class="aboutleft_bottom">
-                    <p>Find us here</p>
-                    <img src="{% static 'images/maps.png' %}" alt="">
-                </div>
-            </div>
-            <div class="homeabout_right">
-                <img src="{% static 'images/KNCT.png' %}" alt="">
-            </div>
-        </div>
-    </div>
-</div>
+    </section>
+</section>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.favorite_btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const productId = this.getAttribute('data-product-id');
-
-            fetch(`/toggle_favorite/${productId}/`, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'added') {
-                    this.classList.add('favorited');
-                } else if (data.status === 'removed') {
-                    this.classList.remove('favorited');
-
-                    const card = this.closest('.favorites');
-                    if (card) card.remove(); 
-                }
-            })
-            .catch(err => console.error('Error toggling favorite:', err));
+            fetch(`/toggle_favorite/${productId}/`, { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'added') this.classList.add('favorited');
+                    else if (data.status === 'removed') this.classList.remove('favorited');
+                }).catch(() => {});
         });
     });
 });
 </script>
+
 {% endblock content %}
