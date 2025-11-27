@@ -1,5 +1,6 @@
 {% extends 'app/navigation.html' %}
 {% load static %}
+{% load socialaccount %}
 
 {% block content %}
 
@@ -11,7 +12,26 @@
     /* Home button */
     .signup-home-btn{ position: fixed; left: 14px; top: 14px; z-index: 1200; background: #fff; color:#222; padding:8px 12px; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); text-decoration:none; display:flex; align-items:center; gap:8px; font-weight:600 }
     .signuppage{ padding-top: 0; }
+    
+    /* Error message styling */
+    .errorlist { list-style: none; padding: 0; margin: 0.5rem 0; }
+    .errorlist li { background-color: #fee; color: #c33; padding: 0.6rem 0.8rem; border-radius: 0.4rem; border-left: 4px solid #c33; margin-bottom: 0.4rem; font-size: 0.9rem; line-height: 1.4; }
+    
+    .signup_leftbody small { display: block; color: #c33; font-size: 0.85rem; margin-top: 0.3rem; padding: 0.4rem 0.6rem; background-color: #fee; border-radius: 0.3rem; border-left: 3px solid #c33; }
+    
+    /* Form field styling */
+    .signup_leftbody div { margin-bottom: 1rem; }
+    .signup_leftbody input, .signup_leftbody select { width: 100%; box-sizing: border-box; }
+    .signup_leftbody input.form-control { border: 1px solid #ddd; padding: 0.7rem; border-radius: 0.4rem; }
+    .signup_leftbody input.form-control:focus { border-color: #0b84c6; outline: none; box-shadow: 0 0 0 2px rgba(11, 132, 198, 0.1); }
+    
     @media (min-width: 768px){ .signup-home-btn{ left: 24px; top: 24px } }
+    
+    @media (max-width: 768px) {
+        .signup-home-btn{ left: 10px; top: 10px; padding: 6px 10px; font-size: 0.85rem; }
+        .errorlist li { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
+        .signup_leftbody small { font-size: 0.8rem; padding: 0.3rem 0.5rem; }
+    }
 </style>
 
 <a class="signup-home-btn" href="{% url 'product' %}"><i class="fa fa-home"></i> Home</a>
@@ -34,24 +54,25 @@
                         {% endif %}
                         {% else %}
                         {% for field in form %}
-                            {% if field.errors %}
                             <div>
                                 {{ field }}
-                                <small>{{ field.errors }}</small>
+                                {% if field.errors %}
+                                    <small>
+                                        {% for error in field.errors %}
+                                            {{ error }}<br>
+                                        {% endfor %}
+                                    </small>
+                                {% endif %}
                             </div>
-                            {% else %}
-                            <div>
-                                {{ field }}
-                            </div>
-                            {% endif %}
                         {% endfor %}
                     <button type="submit">Sign up</button>
                 </form>
                 <div class="signup_otheracc">
-                    <p>or signin with</p>
+                    <p>or signup with</p>
                     <div class="signupacc_logo">
-                        <a href="#"><img src="{% static 'images/icon/facebook-blue.png' %}" alt="Facebook"></a>
-                        <a href="#"><img src="{% static 'images/icon/google-symbol.png' %}" alt="Facebook"></a>
+                        <a href="{% provider_login_url 'google' %}" class="google-signup-btn" title="Sign up with Google">
+                            <img src="{% static 'images/icon/google-symbol.png' %}" alt="Google">
+                        </a>
                     </div>
                 </div>
                 {% endif %}

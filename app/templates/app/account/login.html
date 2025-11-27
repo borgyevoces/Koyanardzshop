@@ -1,5 +1,6 @@
 {% extends 'app/navigation.html' %}
 {% load static %}
+{% load socialaccount %}
 
 {% block content %}
 
@@ -50,8 +51,9 @@
                 <div class="login_otheracc">
                     <p>or signin with</p>
                     <div class="loginacc_logo">
-                        <a href="#"><img src="{% static 'images/icon/facebook-blue.png' %}" alt="Facebook"></a>
-                        <a href="#"><img src="{% static 'images/icon/google-symbol.png' %}" alt="Facebook"></a>
+                        <a href="{% provider_login_url 'google' %}" class="google-login-btn" title="Sign in with Google">
+                            <img src="{% static 'images/icon/google-symbol.png' %}" alt="Google">
+                        </a>
                     </div>
                 </div>
             </div>
