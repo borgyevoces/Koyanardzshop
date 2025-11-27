@@ -5018,7 +5018,7 @@ footer .footer .footer_shop {
 /* LOGIN PAGE RESPONSIVE - TABLET (1024px) */
 @media (max-width: 1024px) {
     .loginpage {
-        margin-top: 2.5rem;
+        margin-top: 2rem;
     }
     
     .loginpage_body {
