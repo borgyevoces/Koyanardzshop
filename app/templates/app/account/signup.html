@@ -2,6 +2,20 @@
 {% load static %}
 
 {% block content %}
+
+
+<style>
+    /* Hide global header/navigation and footer for the signup page */
+    header, nav, .navbar, .site-header, .topbar, .main-nav, .navigation, .header, .site-navigation,
+    footer, .site-footer, .page-footer, .footer, .footer-wrapper, .bottom-footer { display: none !important; }
+    /* Home button */
+    .signup-home-btn{ position: fixed; left: 14px; top: 14px; z-index: 1200; background: #fff; color:#222; padding:8px 12px; border-radius:8px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); text-decoration:none; display:flex; align-items:center; gap:8px; font-weight:600 }
+    .signuppage{ padding-top: 0; }
+    @media (min-width: 768px){ .signup-home-btn{ left: 24px; top: 24px } }
+</style>
+
+<a class="signup-home-btn" href="{% url 'product' %}"><i class="fa fa-home"></i> Home</a>
+
 <div class="signuppage">
     <div class="signup_body">
         <div class="signup_left">

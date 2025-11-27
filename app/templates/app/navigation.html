@@ -132,6 +132,56 @@
         </div>
     </footer>
 
+    <script>
+        // Mobile nav toggle
+        (function(){
+            const toggle = document.querySelector('.nav-toggle');
+            const nav = document.querySelector('.main-nav');
+            toggle && toggle.addEventListener('click', function(){
+                const expanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', String(!expanded));
+                nav.classList.toggle('open');
+            });
+
+            // Favorite dropdown
+            const favBtn = document.getElementById('favToggle');
+            const favPanel = document.getElementById('favoriteDropdown');
+            favBtn && favBtn.addEventListener('click', function(e){
+                e.stopPropagation();
+                const open = favPanel.style.display === 'block';
+                favPanel.style.display = open ? 'none' : 'block';
+            });
+
+            // User dropdown toggle
+            const userBtn = document.getElementById('userToggle');
+            const userPanel = document.getElementById('userDropdown');
+            userBtn && userBtn.addEventListener('click', function(e){
+                e.stopPropagation();
+                userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdowns on outside click
+            document.addEventListener('click', function(e){
+                if(favPanel && !favPanel.contains(e.target) && e.target.id !== 'favToggle') favPanel.style.display = 'none';
+                if(userPanel && !userPanel.contains(e.target) && e.target.id !== 'userToggle') userPanel.style.display = 'none';
+            });
+
+            // Mobile buttons that live inside the nav overlay
+            const favBtnMobile = document.getElementById('favToggleMobile');
+            const userBtnMobile = document.getElementById('userToggleMobile');
+            favBtnMobile && favBtnMobile.addEventListener('click', function(e){
+                e.stopPropagation();
+                // ensure nav overlay stays open
+                nav.classList.add('open');
+                favPanel && (favPanel.style.display = favPanel.style.display === 'block' ? 'none' : 'block');
+            });
+            userBtnMobile && userBtnMobile.addEventListener('click', function(e){
+                e.stopPropagation();
+                nav.classList.add('open');
+                userPanel && (userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block');
+            });
+        })();
+    </script>
 </body>
 </html>
             

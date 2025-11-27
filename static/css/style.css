@@ -1185,7 +1185,7 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
-    top: 7rem;
+    top: 4rem;
     margin-bottom: 14rem;
 }
 .uppercart{
@@ -1496,7 +1496,6 @@ footer .footer .footer_shop {
 .appointmentpage{
     position: relative;
     display: block;
-    padding-bottom: 10rem;
 }
 .upperappointment{
     display: flex;
@@ -2906,6 +2905,8 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
+    margin-top: 5rem;
+    margin-bottom: 1rem;
 }
 .selling_body{
     display: flex;
@@ -3450,6 +3451,7 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
+    margin-top: 3rem;
 }
 .loginpage_body{
     display: flex;

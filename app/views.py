@@ -29,6 +29,7 @@ from django.db import models
 from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+import json
 import os, json
 import random
 import urllib.parse
@@ -206,7 +207,7 @@ def register(request):
                                 It expires in 5 minutes. Use the URL below to return to the website:
                                 http://127.0.0.1:8000/signup/{user.username}
                             """
-                sender = "koyanardzshop@gmail.com"
+                sender = settings.EMAIL_HOST_USER
                 receiver = [user.email]
 
                 send_mail(subject, message, sender, receiver, fail_silently=False)
@@ -230,13 +231,13 @@ def resend_otp(request):
 
             subject="Email Verification"
             message = f"""  
-                                Hi {instance.username}, here is your OTP {otp.otp_code}
+                                Hi {user.username}, here is your OTP {otp.otp_code}
                                 it expires in 5 minute, use the url below to redirect back to the website
-                                http://127.0.0.1:8000/verify-email/{instance.username}
+                                http://127.0.0.1:8000/verify-email/{user.username}
 
                                 """
-            sender = "koyanardzshop@gmail.com"
-            receiver = [instance.email, ]
+            sender = settings.EMAIL_HOST_USER
+            receiver = [user.email]
 
             send_mail(
                     subject,
@@ -300,7 +301,7 @@ def forgot_password(request):
                     send_mail(
                         "Password Reset Request",
                         message,
-                        'koyanardzshop@gmail.com',
+                        settings.EMAIL_HOST_USER,
                         [email],
                     )
                 messages.success(request, "Password reset link has been sent to your email.")
