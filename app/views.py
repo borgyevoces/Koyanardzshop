@@ -270,7 +270,7 @@ def login_view(request):
 
         if user:
             if user.check_password(password):
-                auth_login(request, user)
+                auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                 
                 if user.is_staff:
                     return redirect('admin_dashboard')
@@ -823,8 +823,7 @@ class ProductPage(TemplateView):
             products = products.filter(
                 Q(category_name__category_name__icontains=search_query) |
                 Q(brand__brand__icontains=search_query) |
-                Q(product_name__icontains=search_query) |
-                Q(description__icontains=search_query)
+                Q(product_name__icontains=search_query) 
             )
 
         # Convert category_filter to integer if it exists

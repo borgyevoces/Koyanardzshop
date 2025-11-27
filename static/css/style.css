@@ -3074,7 +3074,8 @@ footer .footer .footer_shop {
 }
 
 /* SELLING PAGE RESPONSIVE */
-.sellingpage{
+/* SELLING PAGE - DESKTOP */
+.sellingpage {
     position: relative;
     display: block;
     justify-items: center;
@@ -3082,31 +3083,37 @@ footer .footer .footer_shop {
     margin-bottom: 1rem;
     padding: 0 0.5rem;
 }
-.selling_body{
+
+.selling_body {
     display: flex;
     width: 95%;
-    max-width: 100%;
+    max-width: 1200px;
     height: auto;
     min-height: 35rem;
     border-radius: 1.5rem;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     color: black;
     margin: 0 auto;
+    background: white;
+    overflow: hidden;
 }
-.selling_left{
+
+.selling_left {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 30%;
-    padding: 1.5rem;
+    padding: 2rem 1.5rem;
     background: linear-gradient(135deg, #f8fafc 0%, #eef6fb 100%);
     border-radius: 1.5rem 0 0 1.5rem;
 }
-.selling_left .step-box{
+
+.selling_left .step-box {
     margin: 1.5rem;
     text-align: center;
 }
-.selling_right{
+
+.selling_right {
     display: block;
     width: 70%;
     padding: 2rem;
@@ -3115,100 +3122,136 @@ footer .footer .footer_shop {
     overflow-y: auto;
     max-height: 55rem;
 }
-.selling_right form{
+
+.selling_right form {
     display: block;
 }
-.step-box{
+
+.step-box {
     display: none;
 }
-.step-box.active{
+
+.step-box.active {
     display: block;
 }
-.sellingright_body{
+
+.sellingright_body {
     margin-bottom: 1.5rem;
 }
-.sellingright_body h4{
+
+.sellingright_body h4 {
     font-size: 1.5rem;
     color: #001A40;
     margin: 0 0 0.8rem 0;
+    font-weight: 600;
 }
-.sellingright_body p{
+
+.sellingright_body p {
     font-size: 1rem;
     color: #666;
     margin: 0;
+    line-height: 1.6;
 }
-.form-grid{
+
+.form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
-.form-group{
+
+.form-group {
     display: flex;
     flex-direction: column;
 }
-.form-group label{
+
+.form-group label {
     font-size: 0.95rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
     color: #333;
 }
+
 .form-group input,
 .form-group select,
-.form-group textarea{
+.form-group textarea {
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 0.5rem;
     font-size: 0.95rem;
     font-family: inherit;
+    transition: all 0.3s ease;
 }
-.form-group textarea{
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #0b84c6;
+    box-shadow: 0 0 8px rgba(11, 132, 198, 0.2);
+}
+
+.form-group textarea {
     min-height: 6rem;
     resize: vertical;
 }
-.stepthree{
+
+.stepthree {
     background: #f8fafc;
     padding: 1.5rem;
     border-radius: 0.8rem;
     margin-bottom: 1.5rem;
+    border-left: 4px solid #0b84c6;
 }
-.stepthree h3{
+
+.stepthree h3 {
     font-size: 1.2rem;
     margin: 0 0 0.8rem 0;
     color: #001A40;
+    font-weight: 600;
 }
-.stepthree p{
+
+.stepthree p {
     font-size: 0.95rem;
     line-height: 1.6;
     margin: 0;
     color: #555;
 }
-.stepthree_instructions{
+
+.stepthree_instructions {
     background: white;
     padding: 1.5rem;
     border-radius: 0.8rem;
     border-left: 4px solid #0b84c6;
     margin-bottom: 1.5rem;
 }
-.stepthree_instructions p{
+
+.stepthree_instructions p {
     font-size: 0.9rem;
     line-height: 1.7;
     margin: 0.5rem 0;
     color: #555;
 }
-.stepthree_instructions label{
+
+.stepthree_instructions label {
     display: block;
     margin-top: 1rem;
     font-size: 0.95rem;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
-.stepthree_instructions input[type="checkbox"]{
+
+.stepthree_instructions input[type="checkbox"] {
     margin-right: 0.5rem;
     cursor: pointer;
+    width: 18px;
+    height: 18px;
 }
+
 .selling_left .selling_left1,
 .selling_left .selling_left2,
-.selling_left .selling_left3{
+.selling_left .selling_left3 {
     padding: 1rem;
     margin: 0.5rem 0;
     border-radius: 0.8rem;
@@ -3216,29 +3259,39 @@ footer .footer .footer_shop {
     background: white;
     border: 2px solid transparent;
     transition: all 0.3s ease;
+    user-select: none;
 }
+
 .selling_left .selling_left1:hover,
 .selling_left .selling_left2:hover,
-.selling_left .selling_left3:hover{
+.selling_left .selling_left3:hover {
     background: #e8f4fb;
     border-color: #0b84c6;
+    transform: translateX(4px);
 }
+
 .selling_left .selling_left1.active,
 .selling_left .selling_left2.active,
-.selling_left .selling_left3.active{
+.selling_left .selling_left3.active {
     background: #0b84c6;
     border-color: #0b84c6;
     color: white;
+    box-shadow: 0 4px 12px rgba(11, 132, 198, 0.3);
 }
-.selling_left p{
+
+.selling_left p {
     font-size: 0.85rem;
     margin: 0.3rem 0;
+    font-weight: 500;
 }
-.selling_left h3{
+
+.selling_left h3 {
     font-size: 1.5rem;
     margin: 0.5rem 0 0 0;
+    font-weight: 600;
 }
-.button{
+
+.button {
     background-color: #0b84c6;
     color: white;
     padding: 0.8rem 2rem;
@@ -3248,142 +3301,329 @@ footer .footer .footer_shop {
     font-weight: 600;
     cursor: pointer;
     margin-top: 1rem;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    display: inline-block;
 }
-.button:hover{
+
+.button:hover {
     background-color: #0971a3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(9, 113, 163, 0.3);
 }
-.error-message{
+
+.button:active {
+    transform: translateY(0);
+}
+
+.error-message {
     color: #d32f2f;
     font-size: 0.85rem;
     margin-top: 0.3rem;
+    background-color: #fee;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.3rem;
+    border-left: 3px solid #d32f2f;
+}
+
+/* SELLING PAGE RESPONSIVE - TABLET (1024px and below) */
+@media (max-width: 1024px) {
+    .selling_body {
+        width: 96%;
+        min-height: 40rem;
+    }
+    
+    .selling_right {
+        max-height: 60rem;
+    }
+    
+    .sellingright_body h4 {
+        font-size: 1.3rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.7rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* SELLING PAGE RESPONSIVE - TABLET (768px) */
-@media (max-width: 768px){
-    .selling_body{
+@media (max-width: 768px) {
+    .sellingpage {
+        margin-top: 0.8rem;
+        margin-bottom: 0.8rem;
+        padding: 0.5rem;
+    }
+    
+    .selling_body {
         flex-direction: column;
         width: 98%;
         min-height: auto;
         border-radius: 1rem;
+        margin: 0 auto;
     }
-    .selling_left{
+    
+    .selling_left {
         width: 100%;
-        padding: 1rem;
+        padding: 1.2rem 1rem;
         border-radius: 1rem 1rem 0 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
     }
-    .selling_left .step-box{
-        margin: 0.8rem;
+    
+    .selling_left .step-box {
+        margin: 0;
     }
-    .selling_left p{
-        font-size: 0.8rem;
+    
+    .selling_left .sellingleft_bottom {
+        display: contents;
     }
-    .selling_left h3{
-        font-size: 1.2rem;
+    
+    .selling_left .selling_left1,
+    .selling_left .selling_left2,
+    .selling_left .selling_left3 {
+        padding: 0.8rem;
+        margin: 0;
+        border-radius: 0.6rem;
     }
-    .selling_right{
+    
+    .selling_left p {
+        font-size: 0.75rem;
+    }
+    
+    .selling_left h3 {
+        font-size: 1rem;
+    }
+    
+    .selling_right {
         width: 100%;
-        padding: 1.5rem;
+        padding: 1.2rem;
         border-radius: 0 0 1rem 1rem;
         max-height: none;
+        overflow: visible;
     }
-    .sellingright_body h4{
+    
+    .selling_right form {
+        width: 100%;
+    }
+    
+    .sellingright_body {
+        margin-bottom: 1rem;
+    }
+    
+    .sellingright_body h4 {
         font-size: 1.2rem;
     }
-    .form-grid{
+    
+    .sellingright_body p {
+        font-size: 0.9rem;
+    }
+    
+    .form-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
-    .stepthree{
-        padding: 1rem;
+    
+    .form-group label {
+        font-size: 0.9rem;
     }
-    .stepthree_instructions{
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.65rem;
+        font-size: 0.9rem;
+    }
+    
+    .form-group textarea {
+        min-height: 5rem;
+    }
+    
+    .stepthree {
         padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stepthree h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.6rem;
+    }
+    
+    .stepthree p {
+        font-size: 0.9rem;
+    }
+    
+    .stepthree_instructions {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stepthree_instructions p {
+        font-size: 0.85rem;
+        margin: 0.4rem 0;
+    }
+    
+    .stepthree_instructions label {
+        font-size: 0.9rem;
+        margin-top: 0.8rem;
+    }
+    
+    .button {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.95rem;
+        margin-top: 0.8rem;
     }
 }
 
 /* SELLING PAGE RESPONSIVE - MOBILE (520px) */
-@media (max-width: 520px){
-    .sellingpage{
-        margin-top: 0.5rem;
-        padding: 0;
+@media (max-width: 520px) {
+    .sellingpage {
+        margin-top: 0.3rem;
+        margin-bottom: 0.3rem;
+        padding: 0.3rem;
     }
-    .selling_body{
+    
+    .selling_body {
         width: 100%;
         border-radius: 0.8rem;
         margin: 0;
+        flex-direction: column;
+        min-height: auto;
     }
-    .selling_left{
+    
+    .selling_left {
+        width: 100%;
         padding: 0.8rem;
         border-radius: 0.8rem 0.8rem 0 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.6rem;
     }
-    .selling_left .step-box{
-        margin: 0.4rem;
+    
+    .selling_left .step-box {
+        margin: 0;
     }
+    
+    .selling_left .sellingleft_bottom {
+        display: contents;
+    }
+    
     .selling_left .selling_left1,
     .selling_left .selling_left2,
-    .selling_left .selling_left3{
-        padding: 0.6rem;
-        margin: 0.3rem 0;
+    .selling_left .selling_left3 {
+        padding: 0.5rem;
+        margin: 0;
+        border-radius: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
-    .selling_left p{
-        font-size: 0.7rem;
+    
+    .selling_left p {
+        font-size: 0.65rem;
+        margin: 0.2rem 0;
+        line-height: 1.2;
     }
-    .selling_left h3{
-        font-size: 1rem;
+    
+    .selling_left h3 {
+        font-size: 0.85rem;
+        margin: 0.3rem 0 0 0;
     }
-    .selling_right{
-        padding: 1rem;
+    
+    .selling_right {
+        width: 100%;
+        padding: 0.8rem;
         border-radius: 0 0 0.8rem 0.8rem;
+        max-height: none;
+        overflow: visible;
     }
-    .sellingright_body{
-        margin-bottom: 1rem;
+    
+    .sellingright_body {
+        margin-bottom: 0.8rem;
     }
-    .sellingright_body h4{
+    
+    .sellingright_body h4 {
         font-size: 1rem;
+        margin-bottom: 0.5rem;
     }
-    .sellingright_body p{
-        font-size: 0.9rem;
+    
+    .sellingright_body p {
+        font-size: 0.85rem;
+        line-height: 1.5;
     }
-    .form-grid{
+    
+    .form-grid {
+        grid-template-columns: 1fr;
         gap: 0.8rem;
         margin-bottom: 1rem;
     }
-    .form-group label{
-        font-size: 0.85rem;
+    
+    .form-group label {
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
     }
+    
     .form-group input,
     .form-group select,
-    .form-group textarea{
+    .form-group textarea {
         padding: 0.6rem;
-        font-size: 0.9rem;
-    }
-    .stepthree{
-        padding: 0.8rem;
-        margin-bottom: 1rem;
-    }
-    .stepthree h3{
-        font-size: 1rem;
-    }
-    .stepthree p{
         font-size: 0.85rem;
     }
-    .stepthree_instructions{
+    
+    .form-group textarea {
+        min-height: 5rem;
+    }
+    
+    .stepthree {
         padding: 0.8rem;
         margin-bottom: 1rem;
     }
-    .stepthree_instructions p{
+    
+    .stepthree h3 {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stepthree p {
         font-size: 0.8rem;
     }
-    .stepthree_instructions label{
-        font-size: 0.85rem;
+    
+    .stepthree_instructions {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
     }
-    .button{
-        padding: 0.6rem 1.5rem;
-        font-size: 0.9rem;
+    
+    .stepthree_instructions p {
+        font-size: 0.75rem;
+        line-height: 1.5;
+        margin: 0.3rem 0;
+    }
+    
+    .stepthree_instructions label {
+        font-size: 0.8rem;
+        margin-top: 0.6rem;
+    }
+    
+    .stepthree_instructions input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin-right: 0.4rem;
+    }
+    
+    .button {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
         width: 100%;
-        margin-top: 0.8rem;
+        margin-top: 0.6rem;
+    }
+    
+    .error-message {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.6rem;
     }
 }
 

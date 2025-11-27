@@ -37,12 +37,62 @@
                             <form id="edit_form" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <input type="hidden" id="edit_id" name="id">
-                                <label>Product Name</label>
-                                <input type="text" id="edit_name" name="product_name">
-                                <label>Stock</label>
-                                <input type="number" id="edit_stock" name="stock">
-                                <label>Price</label>
-                                <input type="number" step="0.01" id="edit_price" name="price">
+                                <p>
+                                    <label>Product Name</label>
+                                    <input type="text" id="edit_name" name="product_name" required>
+                                </p>
+                                <p>
+                                    <label>Category</label>
+                                    <select id="edit_category" name="category_name" required>
+                                        <option value="">Select Category</option>
+                                        {% for category in categories %}
+                                            <option value="{{ category.id }}">{{ category.category_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </p>
+                                <p>
+                                    <label>Brand</label>
+                                    <select id="edit_brand" name="brand" required>
+                                        <option value="">Select Brand</option>
+                                        {% for brand in brands %}
+                                            <option value="{{ brand.id }}">{{ brand.brand }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </p>
+                                <p>
+                                    <label>Component Type</label>
+                                    <select id="edit_component" name="component_type" required>
+                                        <option value="motherboard">Motherboard</option>
+                                        <option value="cpu">Processor</option>
+                                        <option value="ram">RAM</option>
+                                        <option value="gpu">Graphics Card</option>
+                                        <option value="psu">Power Supply</option>
+                                        <option value="case">PC Case</option>
+                                        <option value="cooling">Cooling</option>
+                                        <option value="monitor">Monitor</option>
+                                        <option value="storage">Storage</option>
+                                    </select>
+                                </p>
+                                <p>
+                                    <label>Description</label>
+                                    <textarea id="edit_description" name="description"></textarea>
+                                </p>
+                                <p>
+                                    <label>Price</label>
+                                    <input type="number" step="0.01" id="edit_price" name="price" required>
+                                </p>
+                                <p>
+                                    <label>Stock</label>
+                                    <input type="number" id="edit_stock" name="stock" required>
+                                </p>
+                                <p>
+                                    <label>Product Image</label>
+                                    <input type="file" id="edit_image" name="image" accept="image/*">
+                                </p>
+                                <p>
+                                    <label>Model File</label>
+                                    <input type="text" id="edit_model_file" name="model_file">
+                                </p>
                                 <button type="submit">Update</button>
                             </form>
                         </div>
@@ -174,25 +224,87 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-    const selectAll = document.getElementById('select_all');
-    const checkboxes = document.querySelectorAll('.row_checkbox');
+        const selectAll = document.getElementById('select_all');
+        const checkboxes = document.querySelectorAll('.row_checkbox');
 
-    selectAll.addEventListener('change', function () {
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
+        selectAll.addEventListener('change', function () {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
 
-    function getSelectedIds() {
-        return [...document.querySelectorAll('.row_checkbox:checked')]
-            .map(cb => cb.closest('tr').getAttribute('data-id'));
-    }
+        function getSelectedIds() {
+            return [...document.querySelectorAll('.row_checkbox:checked')]
+                .map(cb => cb.closest('tr').getAttribute('data-id'));
+        }
 
-    document.getElementById('edit_btn').addEventListener('click', function () {
-        const selected = getSelectedIds();
-        console.log('Selected for edit:', selected);
-    });
+        // POPUP FUNCTIONS
+        function openPopup(popupId) {
+            document.getElementById(popupId).classList.add('active');
+        }
 
-    document.getElementById('delete_btn').addEventListener('click', function () {
-        const selected = getSelectedIds();
+        function closePopup(popupId) {
+            document.getElementById(popupId).classList.remove('active');
+        }
+
+        window.openAddCategory = () => openPopup('add_category_popup');
+        window.closeAddCategory = () => closePopup('add_category_popup');
+        window.openAddBrand = () => openPopup('add_brand_popup');
+        window.closeAddBrand = () => closePopup('add_brand_popup');
+        window.openAddProduct = () => openPopup('add_product_popup');
+        window.closeAddProduct = () => closePopup('add_product_popup');
+        window.openAddVariant = () => {
+            const selected = getSelectedIds();
+            if (selected.length !== 1) {
+                alert("Please select one product to add a variant.");
+                return;
+            }
+            document.querySelector('#add_variant_popup input[name="product_id"]').value = selected[0];
+            openPopup('add_variant_popup');
+        };
+        window.closeAddVariant = () => closePopup('add_variant_popup');
+        window.closeEditProduct = () => closePopup('edit_product_popup');
+
+        // EDIT BUTTON
+        document.getElementById('edit_btn').addEventListener('click', function () {
+            const selected = getSelectedIds();
+            if (selected.length !== 1) {
+                alert('Please select only one product to edit.');
+                return;
+            }
+
+            const row = document.querySelector(`tr[data-id="${selected[0]}"]`);
+            const id = selected[0];
+            const name = row.querySelector('.prod_name').textContent;
+            const stock = row.querySelector('.prod_stock').textContent;
+            const price = row.querySelector('.prod_price').textContent.replace('₱', '').replace(/,/g, '');
+            const category = row.querySelector('td:nth-child(5)').textContent.trim();
+            const brand = row.querySelector('td:nth-child(6)').textContent.trim();
+
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_stock').value = stock;
+            document.getElementById('edit_price').value = price;
+            
+            // Set category and brand dropdowns
+            const categoryOptions = document.querySelectorAll('#edit_category option');
+            categoryOptions.forEach(opt => {
+                if (opt.textContent.trim() === category) {
+                    document.getElementById('edit_category').value = opt.value;
+                }
+            });
+            
+            const brandOptions = document.querySelectorAll('#edit_brand option');
+            brandOptions.forEach(opt => {
+                if (opt.textContent.trim() === brand) {
+                    document.getElementById('edit_brand').value = opt.value;
+                }
+            });
+
+            openPopup('edit_product_popup');
+        });
+
+        // DELETE BUTTON
+        document.getElementById('delete_btn').addEventListener('click', function () {
+            const selected = getSelectedIds();
             if (selected.length === 0) {
                 alert('No product selected.');
                 return;
@@ -217,79 +329,55 @@
                 });
             }    
         });
+
+        // EDIT FORM SUBMIT
+        document.getElementById('edit_form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            fetch('/update_product/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Product updated!');
+                    location.reload();
+                } else {
+                    alert('Failed to update.');
+                }
+            });
+        });
+
+        // Close popup when clicking outside
+        document.querySelectorAll('.popup').forEach(popup => {
+            popup.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
     });
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
-document.getElementById('edit_btn').addEventListener('click', function () {
-    const selected = getSelectedIds();
-    if (selected.length !== 1) {
-        alert('Please select only one product to edit.');
-        return;
-    }
-
-    const row = document.querySelector(`tr[data-id="${selected[0]}"]`);
-    const id = selected[0];
-    const name = row.querySelector('.prod_name').textContent;
-    const stock = row.querySelector('.prod_stock').textContent;
-    const price = row.querySelector('.prod_price').textContent;
-
-    document.getElementById('edit_id').value = id;
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_stock').value = stock;
-    document.getElementById('edit_price').value = price;
-
-    document.getElementById('edit_product_popup').style.display = 'block';
-});
-
-function closeEditProduct() {
-    document.getElementById('edit_product_popup').style.display = 'none';
-}
-document.getElementById('edit_form').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const form = e.target;
-    const formData = new FormData(form);
-
-    fetch('/update_product/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Product updated!');
-            location.reload();
-        } else {
-            alert('Failed to update.');
-        }
-    });
-});
-function openAddVariant() {
-    const selected = getSelectedIds();
-    if (selected.length !== 1) {
-        alert("Please select one product to add a variant.");
-        return;
-    }
-    document.querySelector('#add_variant_popup input[name="product_id"]').value = selected[0];
-    document.getElementById('add_variant_popup').style.display = 'block';
-}
-function closeAddVariant() {
-    document.getElementById('add_variant_popup').style.display = 'none';
-}
 </script>
 {% endblock content %}
