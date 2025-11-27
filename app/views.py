@@ -548,12 +548,10 @@ def toggle_favorite(request, product_id):
     if not request.user.is_authenticated:
         return JsonResponse({"status": "error", "message": "Login required"}, status=401)
     
-    user = request.user
     product = get_object_or_404(Product, id=product_id)
 
     favorite, created = Favorite.objects.get_or_create(
-        user=user,
-        product=product
+        favorite_product=product
     )
 
     if not created:
@@ -819,7 +817,6 @@ class ProductPage(TemplateView):
         price_order = self.request.GET.get('price_order', '').strip()
         component_filter = self.request.GET.get('component', '').strip()
 
-
         products = Product.objects.all()
 
         if search_query:
@@ -827,23 +824,31 @@ class ProductPage(TemplateView):
                 Q(category_name__category_name__icontains=search_query) |
                 Q(brand__brand__icontains=search_query) |
                 Q(product_name__icontains=search_query) |
-                Q(description__icontains=search_query) |
-                Q(price__icontains=search_query)
+                Q(description__icontains=search_query)
             )
 
+        # Convert category_filter to integer if it exists
         if category_filter:
-            products = products.filter(category_name__id=category_filter)
-            brands = Brand.objects.filter(product__category_name__id=category_filter).distinct()
+            try:
+                category_id = int(category_filter)
+                products = products.filter(category_name__id=category_id)
+                brands = Brand.objects.filter(product__category_name__id=category_id).distinct()
+            except (ValueError, TypeError):
+                brands = Brand.objects.annotate(product_count=Count('product')).order_by('-product_count')
         else:
-            brands = Brand.objects.annotate(product_count=Count('product')).order_by('-product_count')[:5]
+            brands = Brand.objects.annotate(product_count=Count('product')).order_by('-product_count')
         
+        # Convert brand_filter to integer if it exists
         if brand_filter:
-            products = products.filter(brand__id=brand_filter)
+            try:
+                brand_id = int(brand_filter)
+                products = products.filter(brand__id=brand_id)
+            except (ValueError, TypeError):
+                pass
 
         if component_filter:
             products = products.filter(component_type=component_filter)
 
-        
         if price_order == 'high':
             products = products.order_by('-price')
         elif price_order == 'low':

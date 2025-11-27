@@ -1185,8 +1185,8 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
-    top: 4rem;
-    margin-bottom: 14rem;
+    top: 2rem;
+    margin-bottom: 10rem;
 }
 .uppercart{
     position: relative;
@@ -1293,13 +1293,14 @@ footer .footer .footer_shop {
 .cartleft .cartleft_image{
     display: flex;
     gap: 1rem;
+    flex-direction: column;
 }
 .cartleft .cartleft_image img{
     width: 9rem;
     height: 9rem;
     min-width: 9rem;
     min-height: 9rem;
-    margin-top: -2rem;
+    margin-top: 0;
 }
 .cartleft .cartleft_image .cartleft_text{
     display: block;
@@ -1314,7 +1315,7 @@ footer .footer .footer_shop {
 }
 .text_quantity{
     display: flex;
-    margin: 1.7rem 0;
+    margin: 1rem 0;
 }
 .text_quantity button{
     width: 1.1rem;
@@ -1334,6 +1335,7 @@ footer .footer .footer_shop {
     display: flex;
     justify-content: right;
     right: 0;
+    margin-top: 0.5rem;
 }
 .cartleft_price p{
     font-weight: 100;
@@ -1496,6 +1498,7 @@ footer .footer .footer_shop {
 .appointmentpage{
     position: relative;
     display: block;
+    margin-top: 3rem;
 }
 .upperappointment{
     display: flex;
@@ -1657,7 +1660,7 @@ footer .footer .footer_shop {
 .checkoutpage{
     position: relative;
     display: block;
-    top: 7rem;
+    top: 3rem;
     margin-bottom: 5.7rem;
     background: -webkit-gradient(linear,left top, right top,from(rgba(138, 187, 223, 1)), color-stop(0%, rgba(138, 187, 223, 1)), color-stop(60%, rgba(255, 255, 255, 1)));
     background: -o-linear-gradient(left,rgba(138, 187, 223, 1) 0%, rgba(138, 187, 223, 1) 0%, rgba(255, 255, 255, 1) 60%);
@@ -2095,47 +2098,335 @@ footer .footer .footer_shop {
 .footer-bottom{background:rgba(0,0,0,0.06);padding:.6rem 0;margin-top:1rem;color:rgba(255,255,255,.85);font-size:.9rem}
 
 /* Responsive */
-@media (max-width: 900px){
+/* TABLET BREAKPOINT - 768px and below */
+@media (max-width: 1024px) and (min-width: 769px){
+    .cartbody{width:85%;margin:1.5rem}
+    .cartbody_body{width:100%}
+    .cartright{width:100%;margin-top:1rem;border-radius:0 0 2rem 2rem}
+    .product-container .product-card{width:calc(50% - 1rem);height:auto}
+    .product-container .product-card img{height:160px}
+    .productpage .box .containerbox{width:calc(50% - 1rem);height:auto}
+}
+
+/* TABLET BREAKPOINT - 768px */
+@media (max-width: 768px) {
+    /* Header/Nav tablet adjustments */
     .nav-toggle{display:block;background:transparent;border:none;color:inherit;cursor:pointer;padding:.4rem;margin-left:.5rem}
     .header-inner{align-items:center;gap:.6rem;padding:.45rem 0}
     .brand-link{display:flex;align-items:center;gap:.5rem}
     .header-inner .brand-text{display:none}
-
-    /* keep header actions visible at the right */
-    /* hide the header action icons on small screens and move them into the nav overlay */
     .header-actions{display:none}
-
-    /* Collapsible nav becomes a fixed overlay that sits under the header when opened */
+    
+    /* Collapsible nav for tablet */
     .main-nav{position:fixed;left:0;right:0;top:5rem;background:linear-gradient(180deg,#0b6fa6,#0582b8);display:none;padding:.4rem 0;border-top:1px solid rgba(255,255,255,.06);z-index:10000;width:100%;box-shadow:0 8px 24px rgba(0,0,0,0.12)}
     .main-nav.open{display:block}
-    /* keep nav links hidden until the menu is opened */
     .main-nav .nav-list{display:none;flex-direction:column;gap:0;padding:0;margin:0;align-items:stretch;max-height:calc(100vh - 5rem);overflow:auto}
     .main-nav.open .nav-list{display:flex}
     .nav-list li{width:100%;border-bottom:1px solid rgba(255,255,255,0.06)}
-    .nav-list a{display:flex;align-items:center;gap:.6rem;padding:.9rem 1rem;color:#fff;width:100%;text-decoration:none}
+    .nav-list a{display:flex;align-items:center;gap:.6rem;padding:.9rem 1rem;color:#fff;width:100%;text-decoration:none;font-size:0.95rem}
     .nav-list a i{margin-right:.5rem}
-
-    /* hide complex subnavs on small screens; user can navigate to parent page */
     .has-sub .subnav{display:none}
-
-    /* dropdowns (favorites/user) become stacked panels on mobile */
+    
+    /* Dropdown panels for tablet */
     .dropdown-panel{position:static;right:auto;top:auto;background:#fff;color:#222;margin:.6rem 0;padding:.6rem;border-radius:.5rem;box-shadow:none;width:100%;box-sizing:border-box}
-    .dropdown-panel a{padding:.75rem .8rem}
-    .fav-item img{width:44px;height:44px}
-    .fav-actions button, .fav-actions form button{width:36px;height:36px}
-
-    /* mobile-only nav actions styling (show on small screens) */
+    .dropdown-panel a{padding:.75rem .8rem;font-size:0.95rem}
+    .fav-item img{width:48px;height:48px}
+    .fav-actions button, .fav-actions form button{width:40px;height:40px}
+    
+    /* Mobile nav actions for tablet */
     .nav-actions-mobile{display:block}
     .action-btn-mobile{background:transparent;border:none;color:inherit;padding:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:.6rem}
     .action-btn-mobile i{font-size:1.05rem}
-    /* show the mobile action items inside the overlay */
     .main-nav.open .nav-list .nav-actions-mobile{display:block}
     .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{width:100%;text-align:left}
+    
+    /* Cart page tablet */
+    .cartbody{width:90%;flex-direction:column;gap:1.5rem;min-height:auto;margin:1rem auto}
+    .cartbody_body{width:100%;max-height:none;overflow:visible}
+    .cartright{width:100%;margin-top:1rem;padding:1rem;border-radius:0 0 2rem 2rem}
+    .cartleft .cartleft_image img{width:7.5rem;height:7.5rem;min-width:7.5rem;min-height:7.5rem}
+    .text_quantity{margin:0.8rem 0}
+    .cartleft_price{margin-top:0.5rem}
+    
+    /* Product grid tablet */
+    .product-container .product-card{width:calc(50% - 1.2rem);height:auto;margin:0.8rem}
+    .product-container .product-card img{height:160px;object-fit:contain}
+    .box .containerbox{width:calc(50% - 1.2rem);height:auto;margin:1rem 0.6rem}
+    
+    /* Product item page tablet */
+    .product_itembody{grid-template-columns:1fr;gap:1rem}
+    .product_itempage .product_itembody .product_itemleft{width:100%;height:auto}
+    .product_itempage .product_itembody .product_itemright{width:100%;margin:0}
+    .productleft_upper img#main_image{max-height:350px}
+    
+    /* Appointment page tablet */
+    .appointmentpage{flex-direction:column}
+    .appointment_left{width:100%}
+    .appointment_right{width:100%}
+}
 
-    /* Cart page responsive */
-    .cartbody{width:90%;flex-direction:column;gap:1.5rem;min-height:auto;margin:1rem}
-    .cartbody_body{width:100%;max-height:none}
-    .cartright{width:100%;margin-top:1rem}
+/* MOBILE BREAKPOINT - Below 768px */
+@media (max-width: 767px){
+    /* General spacing adjustments */
+    body{padding:0;margin:0}
+    
+    /* Header/Nav mobile */
+    .nav-toggle{display:block;background:transparent;border:none;color:inherit;cursor:pointer;padding:.3rem;margin-left:.3rem}
+    .header-inner{align-items:center;gap:.4rem;padding:.3rem 0}
+    .brand-link{display:flex;align-items:center;gap:.3rem}
+    .header-inner .brand-text{display:none}
+    .header-actions{display:none}
+    
+    .main-nav{position:fixed;left:0;right:0;top:5rem;background:linear-gradient(180deg,#0b6fa6,#0582b8);display:none;padding:.3rem 0;border-top:1px solid rgba(255,255,255,.06);z-index:10000;width:100%;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    .main-nav.open{display:block}
+    .main-nav .nav-list{display:none;flex-direction:column;gap:0;padding:0;margin:0;align-items:stretch;max-height:calc(100vh - 5rem);overflow:auto}
+    .main-nav.open .nav-list{display:flex}
+    .nav-list li{width:100%;border-bottom:1px solid rgba(255,255,255,0.06)}
+    .nav-list a{display:flex;align-items:center;gap:.4rem;padding:.75rem 0.8rem;color:#fff;width:100%;text-decoration:none;font-size:0.9rem}
+    .nav-list a i{margin-right:.4rem}
+    .has-sub .subnav{display:none}
+    
+    .dropdown-panel{position:static;right:auto;top:auto;background:#fff;color:#222;margin:.5rem 0;padding:.5rem;border-radius:.4rem;box-shadow:none;width:100%;box-sizing:border-box}
+    .dropdown-panel a{padding:.6rem 0.7rem;font-size:0.9rem}
+    .fav-item img{width:40px;height:40px}
+    .fav-actions button, .fav-actions form button{width:32px;height:32px;font-size:0.8rem}
+    
+    .nav-actions-mobile{display:block}
+    .action-btn-mobile{background:transparent;border:none;color:inherit;padding:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:0.9rem}
+    .action-btn-mobile i{font-size:1rem}
+    .main-nav.open .nav-list .nav-actions-mobile{display:block}
+    .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{width:100%;text-align:left}
+    
+    /* Cart page mobile */
+    .cartbody{width:95%;flex-direction:column;gap:1rem;min-height:auto;margin:0.5rem auto;padding:0.5rem}
+    .cartbody_body{width:100%;max-height:none;overflow:visible}
+    .cartbody p{margin:0.6rem 0.8rem;font-size:1.3rem}
+    .cartright{width:100%;margin-top:0.8rem;padding:0.8rem;border-radius:0 0 1.5rem 1.5rem}
+    .cartright h2{font-size:1.1rem;margin:0.3rem}
+    .cartright_button h3{font-size:1rem}
+    .cartright_buttonbutton button{width:90%;margin:0.1rem 1rem;height:3rem;font-size:0.95rem}
+    
+    .cartleft{height:auto;max-height:none;padding:0.2rem}
+    .cartleft .cartleft_image{gap:0.6rem}
+    .cartleft .cartleft_image img{width:5.5rem;height:5.5rem;min-width:5.5rem;min-height:5.5rem;margin-top:0}
+    .cartleft .cartleft_image .cartleft_text p{width:100%;font-size:0.9rem}
+    .text_quantity{margin:0.6rem 0;font-size:0.9rem}
+    .text_quantity button{width:1rem;font-size:0.8rem}
+    .text_quantity input{width:1.5rem;font-size:0.85rem}
+    .cartleft_price{margin-top:0.4rem}
+    .cartleft_price p{font-size:1.2rem}
+    
+    /* Product grid mobile */
+    .product-container{margin:0 0.5rem;gap:0.4rem}
+    .product-container .product-card{width:100%;height:auto;margin:0.4rem 0;padding:0.6rem}
+    .product-container .product-card img{height:140px;object-fit:contain}
+    .product-name h4{font-size:0.95rem}
+    .product-name p{font-size:0.85rem}
+    #homefavorites{right:0.3rem;top:0.3rem;width:24px;height:24px}
+    .productcard-button form button{width:100%;box-sizing:border-box;padding:0.4rem;font-size:0.85rem}
+    
+    /* Box container mobile */
+    .box .containerbox{width:100%;height:auto;margin:0.5rem 0;padding:0.5rem}
+    .box .containerbox .containerimage{height:140px}
+    .box .containerbox .containerimage img{height:100%;object-fit:contain}
+    .containercontent p{font-size:0.9rem;margin:0.2rem 0}
+    
+    /* Product item page mobile */
+    .product_itempage{padding:0.5rem}
+    .product_itempage .upperitem{padding:0.3rem 0.5rem;gap:0.5rem}
+    .product_itempage .upperitem a img{width:20px}
+    .product_itempage .upperitem button img{width:18px}
+    .product_itembody{grid-template-columns:1fr;gap:0.5rem;margin:0;max-width:100%}
+    .product_itempage .product_itembody .product_itemleft{width:100%;height:auto;margin:0;padding:0.5rem;border-radius:0.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+    .product_itempage .product_itembody .product_itemright{width:100%;margin:0.5rem 0;padding:0.5rem}
+    .productleft_upper img#main_image{max-height:300px;padding:0.5rem}
+    .productleft_bottom .leftbottom_image{margin:0.4rem;padding:0.4rem;gap:0.3rem}
+    .thumbnail{width:50px;height:50px;margin:0.15rem}
+    .product_itemright h3{font-size:1.2rem;margin:0.4rem 0}
+    .itemright_total{flex-direction:column;gap:0.6rem}
+    .itemright_button{flex-direction:column;width:100%;gap:0.4rem}
+    .itemright_button button{width:100%;padding:0.5rem;font-size:0.9rem}
+    
+    /* Appointment page mobile */
+    .appointmentpage{flex-direction:column;padding:0.5rem}
+    .appointment_left{width:100%;margin-bottom:1rem}
+    .appointment_right{width:100%}
+    .myappointmentpage{padding:0.5rem}
+    .myappointment_left{width:100%;margin-bottom:1rem}
+    .myappointment_right{width:100%}
+    
+    /* Empty cart mobile */
+    .cartpage_empty{margin:1rem 0}
+    .cartpage_emptybody{margin-left:0;text-align:center}
+    .cartpage_emptybody h3{width:100%;font-size:1.3rem;padding:0.5rem}
+    .cartpage_emptybutton button{width:100%;height:2rem;font-size:0.9rem}
+}
+
+/* SMALL MOBILE BREAKPOINT - 480px and below */
+@media (max-width:520px){
+    .brand-logo{width:35px;height:35px}
+    .action-btn img{width:20px}
+    .action-btn i{font-size:0.95rem}
+    .brand-title{font-size:0.85rem}
+    .header-inner{padding:.25rem 0}
+    .nav-list a{font-size:.85rem;padding:.6rem 0.7rem}
+    .nav-toggle{padding:.25rem;margin-left:.25rem}
+    
+    /* Cart small mobile */
+    .cartbody{width:98%;margin:0.3rem auto;padding:0.3rem}
+    .cartbody p{margin:0.5rem 0.5rem;font-size:1.1rem}
+    .cartbody_body{width:100%;overflow:visible}
+    .cartright{padding:0.5rem}
+    .cartright h2{font-size:1rem;margin:0.2rem}
+    .cartright_button h3{font-size:0.9rem}
+    .cartright_buttonbutton button{width:95%;margin:0.1rem auto;height:2.5rem;font-size:0.85rem}
+    
+    .cartleft .cartleft_image img{width:5rem;height:5rem;min-width:5rem;min-height:5rem;margin-top:0}
+    .cartleft .cartleft_image .cartleft_text p{width:100%;font-size:0.8rem}
+    .cartleft .cartleft_upper{gap:0.3rem}
+    .text_quantity{margin:0.5rem 0;gap:0.2rem}
+    .text_quantity button{width:0.9rem;font-size:0.75rem;padding:0.1rem}
+    .text_quantity input{width:1.2rem;font-size:0.75rem;height:0.9rem}
+    .cartleft_price p{font-size:1.1rem}
+    
+    /* Product grid small mobile */
+    .product-container{margin:0 0.2rem;gap:0.2rem}
+    .product-container .product-card{width:100%;margin:0.2rem 0;padding:0.4rem;border-radius:0.8rem}
+    .product-container .product-card img{height:120px}
+    .product-name h4{font-size:0.85rem;line-height:1.1}
+    .product-name p{font-size:0.75rem}
+    #homefavorites{right:0.2rem;top:0.2rem;width:20px;height:20px}
+    
+    /* Product item small mobile */
+    .product_itempage{padding:0.3rem}
+    .product_itempage .upperitem{padding:0.2rem 0.3rem;gap:0.3rem}
+    .product_itempage .upperitem a img{width:18px}
+    .product_itempage .upperitem button img{width:16px}
+    .productleft_upper img#main_image{max-height:250px;padding:0.3rem}
+    .thumbnail{width:45px;height:45px;margin:0.1rem}
+    .product_itemright h3{font-size:1.1rem}
+    
+    /* Appointment small mobile */
+    .myappointment_rightbody, .myappointment_left{width:100%}
+    .cartpage_emptybody h3{font-size:1.1rem;padding:0.3rem}
+    
+    /* Footer small mobile */
+    footer .footer{flex-direction:column;gap:1rem;padding:1rem}
+    .footer_logo{text-align:center;margin-bottom:0.5rem}
+    .footer_services, .footer_shop{width:100%;text-align:center}
+    .footer_nav{justify-content:center}
+    .footer_nav li{padding:0.2rem 0.5rem;font-size:0.8rem}
+}
+
+/* GENERAL RESPONSIVE IMPROVEMENTS */
+@media (max-width: 1200px){
+    body{font-size:15px}
+    h1{font-size:2rem}
+    h2{font-size:1.6rem}
+    h3{font-size:1.3rem}
+    h4{font-size:1.1rem}
+    
+    /* Homepage sections */
+    .hometext_upper .hometextupper_p{font-size:1.2rem}
+    .hometext p{font-size:1rem}
+    .hometext_bottom p{font-size:0.95rem}
+    
+    /* Product sections */
+    .box .containerbox{margin:0.8rem}
+    .box .containerbox .containerimage{height:180px}
+    
+    /* Footer responsive */
+    footer .footer{flex-wrap:wrap}
+    .footer_logo, .footer_services, .footer_shop{width:auto;flex:1 1 45%}
+}
+
+@media (max-width: 900px) and (min-width: 769px){
+    /* Tablet optimizations */
+    body{font-size:14.5px}
+    
+    /* Sections with better spacing */
+    .homesell_left, .homeabout_left{display:none}
+    .homesell_right, .homeabout_right{width:100%}
+    
+    /* Form improvements */
+    .form-grid{grid-template-columns:1fr}
+    
+    /* Header tighter */
+    header .header{padding:0.5rem 1rem}
+    .navbar_logotext a p{font-size:1.1rem}
+}
+
+@media (max-width: 768px){
+    body{font-size:14px;line-height:1.5}
+    h1{font-size:1.5rem}
+    h2{font-size:1.3rem}
+    h3{font-size:1.1rem}
+    h4{font-size:0.95rem}
+    
+    /* General spacing */
+    .homepage, .productpage, .cartpage{padding:0.5rem}
+    
+    /* Homepage hero adjustments */
+    .hometext_upper{margin:1rem 0}
+    .hometext_upper .hometextupper_p{font-size:1rem}
+    .hometext p{font-size:0.9rem}
+    .hometext_button{margin:1rem 0}
+    
+    /* Sections full width */
+    .homesell_left{display:none}
+    .homesell_right{width:100%}
+    .homeabout_left{display:none}
+    .homeabout_right{width:100%}
+    
+    /* Footer */
+    footer .footer{flex-direction:column;gap:1rem}
+    .footer_logo, .footer_services, .footer_shop{width:100%}
+    .footer_nav{justify-content:flex-start;flex-wrap:wrap}
+    .footer_nav li{padding:0.4rem 0.8rem;font-size:0.9rem}
+    
+    /* Tables */
+    table{font-size:0.9rem}
+    table th, table td{padding:0.6rem}
+}
+
+@media (max-width: 600px){
+    body{font-size:13px}
+    h1{font-size:1.3rem}
+    h2{font-size:1.1rem}
+    h3{font-size:0.95rem}
+    
+    /* Button sizing */
+    button, .button{padding:0.6rem 1.2rem;font-size:0.9rem}
+    
+    /* Input fields */
+    input, select, textarea{font-size:16px}
+    
+    /* Spacing utilities */
+    .container{padding:0.5rem}
+    margin-top, [class*="margin-top"]{margin-top:0.5rem !important}
+}
+
+@media (max-width: 480px){
+    body{font-size:12.5px}
+    
+    /* Text sizing */
+    h1{font-size:1.1rem}
+    h2{font-size:0.95rem}
+    h3{font-size:0.85rem}
+    
+    /* Extreme mobile optimizations */
+    .homepage{margin-top:0}
+    .hometext_upper{margin:0.5rem 0}
+    .hometext_upper .hometextupper_p{font-size:0.85rem}
+    
+    /* Modal/Dialog improvements */
+    .popup .pop_wrapper .pop_content{width:95vw;max-height:80vh}
+    
+    /* Touch target sizes */
+    button, a.button, input[type="button"], input[type="submit"]{min-height:44px;min-width:44px}
+    
+    /* Readable inputs on mobile */
+    input, select, textarea{font-size:16px;line-height:1.5}
 }
 
 /* small screens adjustments */
@@ -2354,7 +2645,7 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
-    top: 10rem;
+    top: 3rem;
     margin-bottom: 14rem;
 }
 .myappointmentbody{
@@ -2900,28 +3191,424 @@ footer .footer .footer_shop {
     background-color: #001A40;
 }
 
-/* SELLING */
+/* SELLING PAGE RESPONSIVE */
 .sellingpage{
     position: relative;
     display: block;
     justify-items: center;
-    margin-top: 5rem;
+    margin-top: 1rem;
     margin-bottom: 1rem;
+    padding: 0 0.5rem;
 }
 .selling_body{
     display: flex;
-    width: 80%;
-    height: 35rem;
-    border-radius: 2rem;
+    width: 95%;
+    max-width: 100%;
+    height: auto;
+    min-height: 35rem;
+    border-radius: 1.5rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
     color: black;
+    margin: 0 auto;
 }
 .selling_left{
     display: flex;
     justify-content: center;
     align-items: center;
     width: 30%;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef6fb 100%);
+    border-radius: 1.5rem 0 0 1.5rem;
+}
+.selling_left .step-box{
+    margin: 1.5rem;
+    text-align: center;
+}
+.selling_right{
+    display: block;
+    width: 70%;
+    padding: 2rem;
+    background: white;
+    border-radius: 0 1.5rem 1.5rem 0;
+    overflow-y: auto;
+    max-height: 55rem;
+}
+.selling_right form{
+    display: block;
+}
+.step-box{
+    display: none;
+}
+.step-box.active{
+    display: block;
+}
+.sellingright_body{
+    margin-bottom: 1.5rem;
+}
+.sellingright_body h4{
+    font-size: 1.5rem;
+    color: #001A40;
+    margin: 0 0 0.8rem 0;
+}
+.sellingright_body p{
+    font-size: 1rem;
+    color: #666;
+    margin: 0;
+}
+.form-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.form-group{
+    display: flex;
+    flex-direction: column;
+}
+.form-group label{
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+.form-group input,
+.form-group select,
+.form-group textarea{
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+.form-group textarea{
+    min-height: 6rem;
+    resize: vertical;
+}
+.stepthree{
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+.stepthree h3{
+    font-size: 1.2rem;
+    margin: 0 0 0.8rem 0;
+    color: #001A40;
+}
+.stepthree p{
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+    color: #555;
+}
+.stepthree_instructions{
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.8rem;
+    border-left: 4px solid #0b84c6;
+    margin-bottom: 1.5rem;
+}
+.stepthree_instructions p{
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin: 0.5rem 0;
+    color: #555;
+}
+.stepthree_instructions label{
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+.stepthree_instructions input[type="checkbox"]{
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+.selling_left .selling_left1,
+.selling_left .selling_left2,
+.selling_left .selling_left3{
     padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 0.8rem;
+    cursor: pointer;
+    background: white;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+.selling_left .selling_left1:hover,
+.selling_left .selling_left2:hover,
+.selling_left .selling_left3:hover{
+    background: #e8f4fb;
+    border-color: #0b84c6;
+}
+.selling_left .selling_left1.active,
+.selling_left .selling_left2.active,
+.selling_left .selling_left3.active{
+    background: #0b84c6;
+    border-color: #0b84c6;
+    color: white;
+}
+.selling_left p{
+    font-size: 0.85rem;
+    margin: 0.3rem 0;
+}
+.selling_left h3{
+    font-size: 1.5rem;
+    margin: 0.5rem 0 0 0;
+}
+.button{
+    background-color: #0b84c6;
+    color: white;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+}
+.button:hover{
+    background-color: #0971a3;
+}
+.error-message{
+    color: #d32f2f;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+}
+
+/* SELLING PAGE RESPONSIVE - TABLET (768px) */
+@media (max-width: 768px){
+    .selling_body{
+        flex-direction: column;
+        width: 98%;
+        min-height: auto;
+        border-radius: 1rem;
+    }
+    .selling_left{
+        width: 100%;
+        padding: 1rem;
+        border-radius: 1rem 1rem 0 0;
+    }
+    .selling_left .step-box{
+        margin: 0.8rem;
+    }
+    .selling_left p{
+        font-size: 0.8rem;
+    }
+    .selling_left h3{
+        font-size: 1.2rem;
+    }
+    .selling_right{
+        width: 100%;
+        padding: 1.5rem;
+        border-radius: 0 0 1rem 1rem;
+        max-height: none;
+    }
+    .sellingright_body h4{
+        font-size: 1.2rem;
+    }
+    .form-grid{
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .stepthree{
+        padding: 1rem;
+    }
+    .stepthree_instructions{
+        padding: 1rem;
+    }
+}
+
+/* SELLING PAGE RESPONSIVE - MOBILE (520px) */
+@media (max-width: 520px){
+    .sellingpage{
+        margin-top: 0.5rem;
+        padding: 0;
+    }
+    .selling_body{
+        width: 100%;
+        border-radius: 0.8rem;
+        margin: 0;
+    }
+    .selling_left{
+        padding: 0.8rem;
+        border-radius: 0.8rem 0.8rem 0 0;
+    }
+    .selling_left .step-box{
+        margin: 0.4rem;
+    }
+    .selling_left .selling_left1,
+    .selling_left .selling_left2,
+    .selling_left .selling_left3{
+        padding: 0.6rem;
+        margin: 0.3rem 0;
+    }
+    .selling_left p{
+        font-size: 0.7rem;
+    }
+    .selling_left h3{
+        font-size: 1rem;
+    }
+    .selling_right{
+        padding: 1rem;
+        border-radius: 0 0 0.8rem 0.8rem;
+    }
+    .sellingright_body{
+        margin-bottom: 1rem;
+    }
+    .sellingright_body h4{
+        font-size: 1rem;
+    }
+    .sellingright_body p{
+        font-size: 0.9rem;
+    }
+    .form-grid{
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    .form-group label{
+        font-size: 0.85rem;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea{
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+    .stepthree{
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    .stepthree h3{
+        font-size: 1rem;
+    }
+    .stepthree p{
+        font-size: 0.85rem;
+    }
+    .stepthree_instructions{
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    .stepthree_instructions p{
+        font-size: 0.8rem;
+    }
+    .stepthree_instructions label{
+        font-size: 0.85rem;
+    }
+    .button{
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-top: 0.8rem;
+    }
+}
+
+/* SELLING INFO SECTIONS RESPONSIVE */
+@media (max-width: 768px){
+    .sellinginfo1{
+        flex-direction: column;
+    }
+    .sellinginfo1_left{
+        width: 100%;
+    }
+    .sellingleft_body1{
+        width: 95%;
+        margin: 1rem auto;
+    }
+    .sellingleft_bold1 p{
+        font-size: 2rem;
+    }
+    .sellingleft_text1 p{
+        font-size: 1.2rem;
+    }
+    .sellinginfo1_right img{
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        border-radius: 0.5rem;
+        margin: 0;
+    }
+    
+    .sellinginfo2_body2{
+        width: 95%;
+        margin: 1rem auto;
+    }
+    .sellinginfo2_upper h4{
+        font-size: 2.5rem;
+    }
+    .sellingbody_bold2 p{
+        padding: 1.5rem;
+        font-size: 1.5rem;
+    }
+    .sellingbody_text2 p{
+        font-size: 1.2rem;
+        margin: 1rem;
+    }
+    .sellinginfo2_step{
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .sellinginfo3_body{
+        flex-direction: column;
+        width: 95%;
+        height: auto;
+        margin: 1rem auto;
+    }
+    .sellinginfo3_left img{
+        width: 100%;
+        height: auto;
+        max-height: 250px;
+        border-radius: 0.5rem;
+        margin: 0;
+    }
+    .sellinginfo3_right{
+        margin: 1rem;
+        text-align: left;
+    }
+    .sellingright_bold3 h4{
+        font-size: 2rem;
+    }
+    .sellingtext3_p p{
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 520px){
+    .sellinginfo2_upper h4{
+        font-size: 1.8rem;
+    }
+    .sellingbody_bold2 p{
+        font-size: 1.2rem;
+        padding: 1rem;
+    }
+    .sellingbody_text2 p{
+        font-size: 1rem;
+        margin: 0.8rem;
+    }
+    .sellinginfo2_step{
+        gap: 0.8rem;
+    }
+    .sellinginfo2_step button{
+        padding: 0.1rem 0.5rem;
+        font-size: 1.2rem;
+    }
+    .sellingright_bold3 h4{
+        font-size: 1.5rem;
+    }
+    .sellingtext3_p p{
+        font-size: 1rem;
+    }
+    .sellingtext3_p img{
+        width: 1.2rem;
+        height: 1.2rem;
+    }
+    .sellingright_bottom3 a{
+        padding: 0.4rem 1rem;
+        font-size: 1rem;
+    }
 }
 .selling_left .step-box{
     margin: 1.5rem;

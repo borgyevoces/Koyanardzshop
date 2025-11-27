@@ -36,14 +36,14 @@
     <div class="filter-panel" aria-hidden="true">
         <div class="filter-panel-inner">
             <button id="filterClose" class="btn-sm filter-close">Close</button>
-            <form action="" method="GET" class="filter-form">
+            <form action="" method="GET" class="filter-form" id="mainFilterForm">
                 <input type="hidden" name="search" value="{{ search_query }}">
                 <div class="filter-row">
                     <label>Category</label>
                     <select class="categoryitem" name="category" id="categorySelect">
                         <option value="">All Categories</option>
                         {% for category in categories %}
-                            <option value="{{ category.id }}" {% if category.id == request.GET.category %} selected {% endif %}>{{ category.category_name }}</option>
+                            <option value="{{ category.id }}" {% if category.id|stringformat:'s' == category_filter %} selected {% endif %}>{{ category.category_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -56,36 +56,32 @@
                         <select name="brand" id="brandDropdown">
                             <option value="">Select Brand</option>
                             {% for brand in brands %}
-                                <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:'s' %}selected{% endif %}>{{ brand.brand|escape }}</option>
+                                <option value="{{ brand.id }}" {% if brand_filter|stringformat:'s' == brand.id|stringformat:'s' %}selected{% endif %}>{{ brand.brand|escape }}</option>
                             {% endfor %}
                         </select>
                     </form>
 
                     <div class="brand-list">
-                        <form id="brandForm" action="" method="GET">
-                            <input type="hidden" name="brand" id="brand_filter_input" value="{{ brand_filter }}">
-                            <input type="hidden" name="category" value="{{ category_filter }}">
-                            <input type="hidden" name="price_order" value="{{ price_order }}">
-                            <ul id="brand_filter">
-                                {% for brand in brands %}
-                                    <li data-id="{{ brand.id }}" class="brand-item {% if brand_filter == brand.id|stringformat:'s' %}selected{% endif %}">{{ brand.brand|escape }}</li>
-                                {% endfor %}
-                            </ul>
-                        </form>
+                        <ul id="brand_filter">
+                            {% for brand in brands %}
+                                <li data-id="{{ brand.id }}" class="brand-item {% if brand_filter|stringformat:'s' == brand.id|stringformat:'s' %}selected{% endif %}">{{ brand.brand|escape }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
 
                 <div id="component_filter_list" class="component-list" style="display:none;">
                     <label>Components</label>
+                    <input type="hidden" name="component" id="componentInput" value="{{ component_filter }}">
                     <ul>
-                        <li data-id="cpu">CPU</li>
-                        <li data-id="gpu">GPU</li>
-                        <li data-id="ram">RAM / Memory</li>
-                        <li data-id="motherboard">Motherboard</li>
-                        <li data-id="storage">Storage</li>
-                        <li data-id="psu">Power Supply</li>
-                        <li data-id="case">PC Case</li>
-                        <li data-id="cooling">Cooling</li>
+                        <li data-id="cpu" class="component-item {% if component_filter == 'cpu' %}selected{% endif %}">CPU</li>
+                        <li data-id="gpu" class="component-item {% if component_filter == 'gpu' %}selected{% endif %}">GPU</li>
+                        <li data-id="ram" class="component-item {% if component_filter == 'ram' %}selected{% endif %}">RAM / Memory</li>
+                        <li data-id="motherboard" class="component-item {% if component_filter == 'motherboard' %}selected{% endif %}">Motherboard</li>
+                        <li data-id="storage" class="component-item {% if component_filter == 'storage' %}selected{% endif %}">Storage</li>
+                        <li data-id="psu" class="component-item {% if component_filter == 'psu' %}selected{% endif %}">Power Supply</li>
+                        <li data-id="case" class="component-item {% if component_filter == 'case' %}selected{% endif %}">PC Case</li>
+                        <li data-id="cooling" class="component-item {% if component_filter == 'cooling' %}selected{% endif %}">Cooling</li>
                     </ul>
                 </div>
 
@@ -241,9 +237,10 @@
         const priceSelect = document.getElementById("priceOrder");
         const brandList = document.getElementById("brand_filter");
         const componentList = document.getElementById("component_filter_list");
+        const mainFilterForm = document.getElementById("mainFilterForm");
         const brandItems = document.querySelectorAll("#brand_filter li");
-        const brandInput = document.getElementById("brand_filter_input");
-        const brandForm = document.getElementById("brandForm");
+        const componentItems = componentList ? componentList.querySelectorAll(".component-item") : [];
+        const componentInput = document.getElementById("componentInput");
         const COMPUTER_PARTS_CATEGORY_ID = "15";
 
         function updateSidebarFilter() {
@@ -257,27 +254,31 @@
             }
         }
         updateSidebarFilter();
-        if (categorySelect) categorySelect.addEventListener("change", function () { updateSidebarFilter(); this.form.submit(); });
+        if (categorySelect) categorySelect.addEventListener("change", function () { updateSidebarFilter(); mainFilterForm.submit(); });
         if (priceSelect) priceSelect.addEventListener("change", function () { this.form.submit(); });
 
         brandItems.forEach(item => {
             item.addEventListener("click", function () {
                 brandItems.forEach(i => i.classList.remove("selected"));
                 this.classList.add("selected");
-                if (brandInput) { brandInput.value = this.dataset.id; brandForm.submit(); }
+                const brandInput = document.createElement('input');
+                brandInput.type = 'hidden';
+                brandInput.name = 'brand';
+                brandInput.value = this.dataset.id;
+                mainFilterForm.appendChild(brandInput);
+                mainFilterForm.submit();
             });
         });
 
-        const componentItems = componentList ? componentList.querySelectorAll("li") : [];
         componentItems.forEach(item => {
             item.addEventListener("click", function () {
                 componentItems.forEach(i => i.classList.remove("selected"));
                 this.classList.add("selected");
-                const params = new URLSearchParams(window.location.search);
-                params.set("component", this.dataset.id);
-                window.location.search = params.toString();
+                if (componentInput) componentInput.value = this.dataset.id;
+                mainFilterForm.submit();
             });
         });
+
 
     });
 
