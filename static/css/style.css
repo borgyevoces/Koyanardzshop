@@ -1499,6 +1499,7 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     margin-top: 3rem;
+    margin-bottom: 3rem;
 }
 .upperappointment{
     display: flex;
@@ -1652,6 +1653,374 @@ footer .footer .footer_shop {
     cursor: pointer;
 }
 
+/* APPOINTMENT PAGE RESPONSIVE - TABLET (1024px) */
+@media (max-width: 1024px) {
+    .appointmentpage {
+        margin-top: 2.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .appointment_body h3 {
+        font-size: 2rem;
+        padding: 1.2rem;
+    }
+    
+    .appointment_bodybody {
+        flex-direction: row;
+        gap: 2rem;
+        padding: 0 1.5rem;
+    }
+    
+    .appointment_body .appointment_left {
+        width: 45%;
+        margin-left: 0;
+    }
+    
+    #appointment-calendar {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .appointment_body .appointment_right {
+        width: 55%;
+    }
+    
+    .appointment_body .appointment_right form p input {
+        width: 100%;
+        max-width: 14rem;
+        height: 2.3rem;
+        padding: 0.8rem;
+        font-size: 1rem;
+    }
+    
+    .apppointmentright_formbutton {
+        width: 100%;
+        max-width: 12rem;
+    }
+}
+
+/* APPOINTMENT PAGE RESPONSIVE - TABLET (768px) */
+@media (max-width: 768px) {
+    .appointmentpage {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .upperappointment {
+        flex-direction: column;
+        gap: 1rem;
+        margin: 0 1rem;
+    }
+    
+    .upperappointment a {
+        font-size: 1rem;
+    }
+    
+    .upperappointment ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .upperappointment ul li {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.9rem;
+    }
+    
+    .appointment_body h3 {
+        font-size: 1.5rem;
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .appointment_bodybody {
+        flex-direction: column;
+        width: 100%;
+        padding: 0 1rem;
+        gap: 1.5rem;
+    }
+    
+    .appointment_body .appointment_left {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .appointment_body .appointment_left p {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    #appointment-calendar {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .appointment_body .appointment_right {
+        width: 100%;
+    }
+    
+    .appointment_body .appointment_right p {
+        font-size: 1.3rem;
+        padding: 0.5rem 0;
+    }
+    
+    .apppointment_rightform {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .appointment_body .appointment_right img {
+        width: 2rem;
+        margin-left: 0;
+        padding: 0.8rem 0;
+    }
+    
+    .appointment_body .appointment_right form p input {
+        width: 100%;
+        height: 2.2rem;
+        padding: 0.7rem;
+        margin: 0.5rem 0;
+        font-size: 1rem;
+    }
+    
+    .time-dropdown {
+        width: 100%;
+        margin: 0.5rem 0;
+        padding: 0.8rem;
+    }
+    
+    #time-toggle {
+        width: auto;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .options .time-btn {
+        width: auto;
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+    
+    .apppointmentright_formbutton {
+        width: 100%;
+        max-width: none;
+        margin: 1rem 0;
+        padding: 0.8rem;
+    }
+}
+
+/* APPOINTMENT PAGE RESPONSIVE - MOBILE (520px) */
+@media (max-width: 520px) {
+    .appointmentpage {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .upperappointment {
+        flex-direction: column;
+        gap: 0.8rem;
+        margin: 0 0.8rem;
+        padding: 0;
+    }
+    
+    .upperappointment a {
+        font-size: 0.9rem;
+    }
+    
+    .upperappointment a img {
+        width: 1.2rem;
+    }
+    
+    .upperappointment ul {
+        flex-wrap: wrap;
+        gap: 0.2rem;
+    }
+    
+    .upperappointment ul li {
+        padding: 0.2rem 0.3rem;
+        font-size: 0.8rem;
+    }
+    
+    .appointment_body h3 {
+        font-size: 1.3rem;
+        padding: 0.8rem;
+    }
+    
+    .appointment_bodybody {
+        flex-direction: column;
+        width: 100%;
+        padding: 0 0.8rem;
+        gap: 1rem;
+    }
+    
+    .appointment_body .appointment_left {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    .appointment_body .appointment_left p {
+        font-size: 1rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    #appointment-calendar {
+        width: 100%;
+        margin-left: 0;
+        font-size: 0.9rem;
+    }
+    
+    .appointment_body .appointment_right {
+        width: 100%;
+    }
+    
+    .appointment_body .appointment_right p {
+        font-size: 1.1rem;
+        padding: 0.4rem 0;
+    }
+    
+    .apppointment_rightform {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .appointment_body .appointment_right img {
+        width: 1.8rem;
+        margin-left: 0;
+        padding: 0.6rem 0;
+    }
+    
+    .appointment_body .appointment_right form p input {
+        width: 100%;
+        height: 2.1rem;
+        padding: 0.6rem;
+        margin: 0.4rem 0;
+        font-size: 0.95rem;
+    }
+    
+    .time-dropdown {
+        width: 100%;
+        margin: 0.4rem 0;
+        padding: 0.6rem;
+        font-size: 1rem;
+    }
+    
+    #time-toggle {
+        width: auto;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .options {
+        padding: 0.6rem;
+        font-size: 1rem;
+    }
+    
+    .options .time-btn {
+        width: auto;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    .apppointmentright_formbutton {
+        width: 100%;
+        margin: 0.8rem 0;
+        padding: 0.7rem;
+        font-size: 1rem;
+    }
+}
+
+/* APPOINTMENT PAGE RESPONSIVE - SMALL MOBILE (380px) */
+@media (max-width: 380px) {
+    .appointmentpage {
+        margin-top: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .upperappointment {
+        flex-direction: column;
+        gap: 0.6rem;
+        margin: 0 0.5rem;
+        padding: 0;
+    }
+    
+    .upperappointment a {
+        font-size: 0.8rem;
+    }
+    
+    .upperappointment a img {
+        width: 1rem;
+    }
+    
+    .upperappointment ul {
+        gap: 0.1rem;
+    }
+    
+    .upperappointment ul li {
+        padding: 0.15rem 0.25rem;
+        font-size: 0.7rem;
+    }
+    
+    .appointment_body h3 {
+        font-size: 1.1rem;
+        padding: 0.6rem;
+    }
+    
+    .appointment_bodybody {
+        padding: 0 0.5rem;
+        gap: 0.8rem;
+    }
+    
+    .appointment_body .appointment_left p {
+        font-size: 0.95rem;
+    }
+    
+    #appointment-calendar {
+        font-size: 0.8rem;
+    }
+    
+    .appointment_body .appointment_right p {
+        font-size: 1rem;
+    }
+    
+    .appointment_body .appointment_right img {
+        width: 1.6rem;
+        padding: 0.5rem 0;
+    }
+    
+    .appointment_body .appointment_right form p input {
+        height: 2rem;
+        padding: 0.5rem;
+        margin: 0.3rem 0;
+        font-size: 0.9rem;
+    }
+    
+    .time-dropdown {
+        margin: 0.3rem 0;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    #time-toggle {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.8rem;
+    }
+    
+    .options {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .options .time-btn {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+    
+    .apppointmentright_formbutton {
+        margin: 0.6rem 0;
+        padding: 0.6rem;
+        font-size: 0.95rem;
+    }
+}
+
 
 
 /* CHECKOUT */
@@ -1660,8 +2029,9 @@ footer .footer .footer_shop {
 .checkoutpage{
     position: relative;
     display: block;
-    top: 3rem;
-    margin-bottom: 5.7rem;
+    min-height: calc(100vh - 5rem);
+    padding-top: 1rem;
+    padding-bottom: 2rem;
     background: -webkit-gradient(linear,left top, right top,from(rgba(138, 187, 223, 1)), color-stop(0%, rgba(138, 187, 223, 1)), color-stop(60%, rgba(255, 255, 255, 1)));
     background: -o-linear-gradient(left,rgba(138, 187, 223, 1) 0%, rgba(138, 187, 223, 1) 0%, rgba(255, 255, 255, 1) 60%);
     background: linear-gradient(90deg,rgba(138, 187, 223, 1) 0%, rgba(138, 187, 223, 1) 0%, rgba(255, 255, 255, 1) 60%);
@@ -1711,13 +2081,19 @@ footer .footer .footer_shop {
     -webkit-box-pack: justify;
         -ms-flex-pack: justify;
             justify-content: space-between;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
+    -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+            align-items: stretch;
+    gap: 2rem;
+    padding: 0 2rem;
+    height: 100%;
 }
 .checkout_left_wrapper{
     position: relative;
-    width: 100%;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
 }
 .checkout_slider{
@@ -1780,8 +2156,13 @@ footer .footer .footer_shop {
 }
 .checkout_right{
     position: relative;
-    display: block;
-    width: 47%;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    justify-content: flex-start;
+    padding-top: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 12rem);
 }
 .checkoutright_uppertitle{
     text-align: center;
@@ -1921,6 +2302,234 @@ footer .footer .footer_shop {
     text-align: left;
     border: none;
     font-size: 1.5rem;
+}
+
+/* CHECKOUT RESPONSIVE - TABLET (1024px) */
+@media (max-width: 1024px) {
+    .checkout_left_wrapper {
+        width: 45%;
+    }
+    
+    .checkout_right {
+        width: 55%;
+    }
+    
+    .checkout_slide img {
+        width: 20rem;
+        height: 20rem;
+    }
+    
+    .checkoutright_uppertitle p {
+        font-size: 1.6rem;
+    }
+    
+    .checkoutright_bodyupper p {
+        font-size: 1.2rem;
+        margin-right: 1.5rem;
+    }
+}
+
+/* CHECKOUT RESPONSIVE - TABLET (768px) */
+@media (max-width: 768px) {
+    .checkout_body {
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+    
+    .checkout_left_wrapper {
+        width: 100%;
+        order: -1;
+    }
+    
+    .checkout_right {
+        width: 100%;
+        max-height: none;
+        padding-top: 1rem;
+    }
+    
+    .checkout_slide img {
+        width: 18rem;
+        height: 18rem;
+    }
+    
+    .checkoutright_uppertitle p {
+        font-size: 1.4rem;
+    }
+    
+    .checkoutright_bodyupper {
+        padding: 0.5rem 0;
+    }
+    
+    .checkoutright_bodyupper p {
+        font-size: 1rem;
+        margin-right: 1rem;
+    }
+}
+
+/* CHECKOUT RESPONSIVE - MOBILE (520px) */
+@media (max-width: 520px) {
+    .checkoutpage {
+        min-height: auto;
+        padding-top: 0.5rem;
+        padding-bottom: 1rem;
+    }
+    
+    .uppercheckout {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 0 1rem;
+    }
+    
+    .uppercheckout ul {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .checkout_body {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 0 0.8rem;
+    }
+    
+    .checkout_left_wrapper {
+        width: 100%;
+    }
+    
+    .checkout_slide img {
+        width: 15rem;
+        height: 15rem;
+    }
+    
+    .checkoutleft_bottom p {
+        font-size: 1rem;
+    }
+    
+    .checkout_right {
+        width: 100%;
+        max-height: none;
+        padding-top: 0.8rem;
+    }
+    
+    .checkoutright_uppertitle p {
+        font-size: 1.2rem;
+    }
+    
+    .checkoutright_upperbody {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .checkoutupper_bodyleft,
+    .checkoutupper_bodyright {
+        width: 100%;
+        margin: 0.3rem 0;
+    }
+    
+    .checkoutupper_bodyleft p,
+    .checkoutupper_bodyright p {
+        font-size: 0.95rem;
+    }
+    
+    .checkoutright_bottom {
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .checkoutright_bodyupper {
+        padding: 0.3rem 0;
+    }
+    
+    .checkoutright_bodyupper p {
+        font-size: 0.9rem;
+        margin-right: 0.8rem;
+    }
+    
+    .checkoutright_bodybody {
+        padding: 0.3rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .checkoutright_bodybody p {
+        font-size: 0.95rem;
+        margin-right: 0.5rem;
+    }
+    
+    .checkoutright_body form button {
+        width: 100%;
+        height: 2.2rem;
+        font-size: 1rem;
+        margin-top: 0.8rem;
+    }
+}
+
+/* CHECKOUT RESPONSIVE - SMALL MOBILE (380px) */
+@media (max-width: 380px) {
+    .checkoutpage {
+        min-height: auto;
+        padding-top: 0.3rem;
+        padding-bottom: 0.8rem;
+    }
+    
+    .uppercheckout {
+        margin: 0 0.5rem;
+    }
+    
+    .checkout_body {
+        gap: 0.8rem;
+        padding: 0 0.5rem;
+    }
+    
+    .checkout_slide img {
+        width: 12rem;
+        height: 12rem;
+    }
+    
+    .checkoutleft_bottom p {
+        font-size: 0.9rem;
+    }
+    
+    .checkout_nav_buttons button {
+        font-size: 1.2rem;
+    }
+    
+    .checkoutright_uppertitle p {
+        font-size: 1rem;
+    }
+    
+    .checkoutright_upperbody {
+        padding: 0.2rem 0.3rem;
+    }
+    
+    .checkoutupper_bodyleft,
+    .checkoutupper_bodyright {
+        margin: 0.2rem 0;
+    }
+    
+    .checkoutupper_bodyleft p,
+    .checkoutupper_bodyright p {
+        font-size: 0.85rem;
+    }
+    
+    .checkoutright_bottom p {
+        font-size: 1rem;
+    }
+    
+    .checkoutright_bodyupper p {
+        font-size: 0.8rem;
+        margin-right: 0.5rem;
+    }
+    
+    .checkoutright_bodybody p {
+        font-size: 0.85rem;
+        margin-right: 0.3rem;
+    }
+    
+    .checkoutright_body form button {
+        width: 100%;
+        height: 2rem;
+        font-size: 0.9rem;
+    }
 }
 
 /* APPOINTMENT COMPLETE */
@@ -3504,36 +4113,35 @@ footer .footer .footer_shop {
 /* SELLING PAGE - DESKTOP */
 .sellingpage {
     position: relative;
-    display: block;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    padding: 0 1rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #f0f6fb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-height: 100vh;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #eef6fb 100%);
 }
 
 .selling_body {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1300px;
     height: auto;
-    min-height: 40rem;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(11, 132, 198, 0.15);
-    color: #222;
-    margin: 0 auto;
+    min-height: 50rem;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(11, 132, 198, 0.12);
     background: white;
     overflow: hidden;
 }
 
 .selling_left {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 28%;
-    padding: 2.5rem 2rem;
+    padding: 3rem 2rem;
     background: linear-gradient(135deg, #0b84c6 0%, #0971a3 100%);
-    border-radius: 20px 0 0 20px;
+    border-radius: 16px 0 0 16px;
 }
 
 .selling_left .step-box {
@@ -3544,12 +4152,11 @@ footer .footer .footer_shop {
 
 .selling_right {
     display: block;
-    width: 72%;
     padding: 3rem;
     background: white;
-    border-radius: 0 20px 20px 0;
+    border-radius: 0 16px 16px 0;
     overflow-y: auto;
-    max-height: 70rem;
+    max-height: 60rem;
 }
 
 .selling_right form {
@@ -3789,25 +4396,34 @@ footer .footer .footer_shop {
 
 /* SELLING PAGE RESPONSIVE - TABLET (1024px and below) */
 @media (max-width: 1024px) {
+    .sellingpage {
+        padding: 1.5rem 0.8rem;
+    }
+    
     .selling_body {
-        width: 94%;
-        min-height: 45rem;
-        max-width: 950px;
+        grid-template-columns: 1fr 2fr;
+        max-width: 1100px;
+        min-height: 48rem;
+        border-radius: 14px;
     }
     
     .selling_left {
-        width: 26%;
-        padding: 2rem 1.5rem;
+        padding: 2.5rem 1.5rem;
+        border-radius: 14px 0 0 14px;
     }
     
     .selling_right {
-        width: 74%;
         padding: 2.5rem;
-        max-height: 65rem;
+        border-radius: 0 14px 14px 0;
+        max-height: 55rem;
     }
     
     .sellingright_body h4 {
         font-size: 1.5rem;
+    }
+    
+    .form-grid {
+        gap: 1.5rem;
     }
     
     .form-group input,
@@ -3826,34 +4442,33 @@ footer .footer .footer_shop {
 /* SELLING PAGE RESPONSIVE - TABLET (768px) */
 @media (max-width: 768px) {
     .sellingpage {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        padding: 0.5rem;
+        padding: 1rem 0.5rem;
+        min-height: auto;
     }
     
     .selling_body {
-        flex-direction: column;
-        width: 96%;
+        grid-template-columns: 1fr;
+        max-width: 100%;
+        width: 95%;
         min-height: auto;
         border-radius: 12px;
         margin: 0 auto;
-        max-width: 100%;
     }
     
     .selling_left {
-        width: 100%;
         padding: 1.5rem 1rem;
         border-radius: 12px 12px 0 0;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 0.8rem;
+        flex-direction: row;
     }
     
     .selling_left .step-box {
         margin: 0;
         position: static;
         display: flex !important;
-        width: auto;
+        width: 100%;
         height: auto;
     }
     
@@ -3867,16 +4482,10 @@ footer .footer .footer_shop {
         padding: 0.8rem;
         margin: 0;
         border-radius: 8px;
-        background: rgba(255, 255, 255, 0.85);
-        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid rgba(255, 255, 255, 0.4);
         transition: all 0.3s ease;
-    }
-    
-    .selling_left .selling_left1:hover,
-    .selling_left .selling_left2:hover,
-    .selling_left .selling_left3:hover {
-        background: rgba(255, 255, 255, 1);
-        transform: translateY(-2px);
+        cursor: pointer;
     }
     
     .selling_left .selling_left1.active,
@@ -3884,15 +4493,30 @@ footer .footer .footer_shop {
     .selling_left .selling_left3.active {
         background: white;
         border-color: white;
+        color: #0b84c6;
     }
     
     .selling_left p {
         font-size: 0.7rem;
         margin: 0.2rem 0;
+        color: rgba(255, 255, 255, 0.95);
+    }
+    
+    .selling_left .selling_left1.active p,
+    .selling_left .selling_left2.active p,
+    .selling_left .selling_left3.active p {
+        color: #0b84c6;
     }
     
     .selling_left h3 {
-        font-size: 0.95rem;
+        font-size: 1rem;
+        color: white;
+    }
+    
+    .selling_left .selling_left1.active h3,
+    .selling_left .selling_left2.active h3,
+    .selling_left .selling_left3.active h3 {
+        color: #0b84c6;
     }
     
     .selling_right {
@@ -3903,12 +4527,8 @@ footer .footer .footer_shop {
         overflow: visible;
     }
     
-    .selling_right form {
-        width: 100%;
-    }
-    
     .sellingright_body {
-        margin-bottom: 1.2rem;
+        margin-bottom: 1rem;
     }
     
     .sellingright_body h4 {
@@ -3922,11 +4542,7 @@ footer .footer .footer_shop {
     .form-grid {
         grid-template-columns: 1fr;
         gap: 1rem;
-        margin-bottom: 1.2rem;
-    }
-    
-    .form-group label {
-        font-size: 0.9rem;
+        margin-bottom: 1rem;
     }
     
     .form-group input,
@@ -3947,66 +4563,47 @@ footer .footer .footer_shop {
     
     .stepthree h3 {
         font-size: 1.1rem;
-        margin-bottom: 0.6rem;
-    }
-    
-    .stepthree p {
-        font-size: 0.9rem;
     }
     
     .stepthree_instructions {
         padding: 1rem;
         margin-bottom: 1rem;
-        border-radius: 8px;
-    }
-    
-    .stepthree_instructions p {
-        font-size: 0.85rem;
-        margin: 0.4rem 0;
-    }
-    
-    .stepthree_instructions label {
-        font-size: 0.9rem;
-        margin-top: 0.8rem;
     }
     
     .button {
         padding: 0.8rem 1.8rem;
         font-size: 0.95rem;
-        margin-top: 0.8rem;
+        margin-top: 1rem;
     }
 }
 
 /* SELLING PAGE RESPONSIVE - MOBILE (520px) */
 @media (max-width: 520px) {
     .sellingpage {
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        padding: 0.3rem;
+        padding: 0.8rem 0.3rem;
     }
     
     .selling_body {
-        width: 98%;
+        grid-template-columns: 1fr;
+        width: 97%;
         border-radius: 10px;
         margin: 0 auto;
-        flex-direction: column;
-        min-height: auto;
     }
     
     .selling_left {
-        width: 100%;
         padding: 1rem 0.8rem;
         border-radius: 10px 10px 0 0;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 0.5rem;
+        flex-direction: row;
     }
     
     .selling_left .step-box {
         margin: 0;
         position: static;
         display: flex !important;
-        width: auto;
+        width: 100%;
         height: auto;
     }
     
@@ -4018,10 +4615,9 @@ footer .footer .footer_shop {
     .selling_left .selling_left2,
     .selling_left .selling_left3 {
         padding: 0.6rem;
-        margin: 0;
         border-radius: 6px;
-        background: rgba(255, 255, 255, 0.8);
-        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.85);
+        border: 2px solid rgba(255, 255, 255, 0.3);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -4048,15 +4644,10 @@ footer .footer .footer_shop {
     }
     
     .selling_right {
-        width: 100%;
         padding: 1rem;
         border-radius: 0 0 10px 10px;
         max-height: none;
         overflow: visible;
-    }
-    
-    .sellingright_body {
-        margin-bottom: 1rem;
     }
     
     .sellingright_body h4 {
@@ -4066,7 +4657,6 @@ footer .footer .footer_shop {
     
     .sellingright_body p {
         font-size: 0.8rem;
-        line-height: 1.4;
     }
     
     .form-grid {
@@ -4077,7 +4667,6 @@ footer .footer .footer_shop {
     
     .form-group label {
         font-size: 0.75rem;
-        margin-bottom: 0.3rem;
     }
     
     .form-group input,
@@ -4098,34 +4687,11 @@ footer .footer .footer_shop {
     
     .stepthree h3 {
         font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stepthree p {
-        font-size: 0.75rem;
     }
     
     .stepthree_instructions {
         padding: 0.8rem;
         margin-bottom: 1rem;
-        border-radius: 6px;
-    }
-    
-    .stepthree_instructions p {
-        font-size: 0.7rem;
-        line-height: 1.4;
-        margin: 0.3rem 0;
-    }
-    
-    .stepthree_instructions label {
-        font-size: 0.75rem;
-        margin-top: 0.5rem;
-    }
-    
-    .stepthree_instructions input[type="checkbox"] {
-        width: 14px;
-        height: 14px;
-        margin-right: 0.4rem;
     }
     
     .button {
@@ -4134,30 +4700,23 @@ footer .footer .footer_shop {
         width: 100%;
         margin-top: 0.8rem;
     }
-    
-    .error-message {
-        font-size: 0.75rem;
-        padding: 0.5rem;
-    }
 }
 
 /* SELLING PAGE RESPONSIVE - SMALL MOBILE (380px) */
 @media (max-width: 380px) {
     .sellingpage {
-        margin-top: 0.3rem;
-        margin-bottom: 0.3rem;
-        padding: 0.2rem;
+        padding: 0.6rem 0.2rem;
     }
     
     .selling_body {
-        width: 100%;
+        width: 99%;
         border-radius: 8px;
-        margin: 0;
     }
     
     .selling_left {
         padding: 0.8rem 0.6rem;
         gap: 0.4rem;
+        border-radius: 8px 8px 0 0;
     }
     
     .selling_left .selling_left1,
@@ -4182,7 +4741,6 @@ footer .footer .footer_shop {
     
     .sellingright_body h4 {
         font-size: 1rem;
-        margin-bottom: 0.3rem;
     }
     
     .sellingright_body p {
@@ -4192,10 +4750,6 @@ footer .footer .footer_shop {
     .form-grid {
         gap: 0.6rem;
         margin-bottom: 0.8rem;
-    }
-    
-    .form-group label {
-        font-size: 0.7rem;
     }
     
     .form-group input,
@@ -4216,23 +4770,6 @@ footer .footer .footer_shop {
     
     .stepthree h3 {
         font-size: 0.85rem;
-    }
-    
-    .stepthree p {
-        font-size: 0.7rem;
-    }
-    
-    .stepthree_instructions {
-        padding: 0.6rem;
-        margin-bottom: 0.8rem;
-    }
-    
-    .stepthree_instructions p {
-        font-size: 0.65rem;
-    }
-    
-    .stepthree_instructions label {
-        font-size: 0.7rem;
     }
     
     .button {
@@ -4762,12 +5299,16 @@ footer .footer .footer_shop {
 /* USER */
 .signuppage{
     position: relative;
-    display: block;
-    justify-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin-top: 0;
+    padding: 1rem;
 }
 .signup_body{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     width: 55%;
     height: 28rem;
@@ -4776,9 +5317,12 @@ footer .footer .footer_shop {
 }
 .signup_left{
     display: flex;
-    width: 55%;
+    align-items: center;
+    width: 45%;
     height: 100%;
     font-family: Quicksand;
+    background-color: whitesmoke;
+    border-radius: 2rem 10rem 10rem 2rem;
 }
 .signup_leftbody{
     display: block;
@@ -4786,8 +5330,12 @@ footer .footer .footer_shop {
     width: 100%;
 }
 .signup_leftbody h2{
-    padding: .5rem;
+    padding: 1rem;
     font-size: 2.5rem;
+}
+.signup_left form{
+    display: block;
+    text-align: center;
 }
 .signup_leftbody form div{
     display: flex;
@@ -4796,8 +5344,8 @@ footer .footer .footer_shop {
 .signup_leftbody form input{
     display: block;
     width: 18rem;
-    height: 2.7rem;
-    margin: .5rem 0;
+    height: 3rem;
+    margin: .8rem 0;
     padding: 1rem 1.2rem;
     font-size: 1.2rem;
     border: 1px solid black;
@@ -4805,9 +5353,9 @@ footer .footer .footer_shop {
     background-color: whitesmoke;
 }
 .signup_leftbody form button{
-    width: 10rem;
-    height: 2.7rem;
-    margin: .3rem;
+    width: 12rem;
+    height: 3rem;
+    margin: .5rem;
     padding: 0 1rem;
     border: 1px solid whitesmoke;
     border-radius: 2rem;
@@ -4821,11 +5369,22 @@ footer .footer .footer_shop {
 }
 .signup_otheracc{
     color: rgb(99, 99, 99);
+    margin-top: 1rem;
 }
 .signup_otheracc p{
-    margin: .2rem 0;
+    margin: .5rem 0;
+    font-size: 0.9rem;
+}
+.signupacc_logo{
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
 }
 .signupacc_logo a{
+    padding: 0.3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .signupacc_logo a img{
     width: 2.8rem;
@@ -4844,6 +5403,7 @@ footer .footer .footer_shop {
 .signup_rightbody{
     display: block;
     text-align: center;
+    width: 100%;
 }
 .signup_rightbody h4{
     padding: 1rem;
@@ -4871,6 +5431,367 @@ footer .footer .footer_shop {
     border-radius: 2rem;
     color: whitesmoke;
 }
+
+/* SIGNUP PAGE RESPONSIVE - TABLET (1024px) */
+@media (max-width: 1024px) {
+    .signuppage {
+        min-height: 100vh;
+        padding: 0.5rem;
+    }
+    
+    .signup_body {
+        width: 70%;
+        height: 26rem;
+        border-radius: 1.5rem;
+    }
+    
+    .signup_left {
+        width: 45%;
+        border-radius: 1.5rem 0 0 1.5rem;
+    }
+    
+    .signup_leftbody h2 {
+        font-size: 1.8rem;
+        padding: 0.8rem;
+    }
+    
+    .signup_leftbody form input {
+        width: 14rem;
+        height: 2.4rem;
+        font-size: 1rem;
+        padding: 0.8rem 1rem;
+        margin: 0.6rem 0;
+    }
+    
+    .signup_leftbody form button {
+        width: 10rem;
+        height: 2.4rem;
+        font-size: 1.1rem;
+    }
+    
+    .signup_right {
+        width: 55%;
+        border-radius: 0 1.5rem 1.5rem 0;
+    }
+    
+    .signup_rightbody h4 {
+        font-size: 1.8rem;
+        padding: 0.8rem;
+    }
+    
+    .signupright_bodyp {
+        padding-bottom: 1rem;
+    }
+    
+    .signupright_bodyp p {
+        font-size: 0.95rem;
+        width: 70%;
+    }
+    
+    .signup_rightbody a {
+        padding: 0.8rem 2.5rem;
+        font-size: 1rem;
+    }
+    
+    .signupacc_logo a img {
+        width: 2.4rem;
+    }
+}
+
+/* SIGNUP PAGE RESPONSIVE - TABLET (768px) */
+@media (max-width: 768px) {
+    .signuppage {
+        min-height: 100vh;
+        padding: 0.5rem;
+    }
+    
+    .signup_body {
+        flex-direction: column;
+        width: 90%;
+        height: auto;
+        min-height: auto;
+        margin: 0 auto;
+        border-radius: 1.2rem;
+    }
+    
+    .signup_left {
+        width: 100%;
+        height: auto;
+        padding: 2rem 1.5rem;
+        border-radius: 1.2rem 1.2rem 0 0;
+        background-color: whitesmoke;
+    }
+    
+    .signup_leftbody {
+        width: 100%;
+    }
+    
+    .signup_leftbody h2 {
+        font-size: 1.5rem;
+        padding: 0.5rem 0;
+        margin: 0.5rem 0;
+    }
+    
+    .signup_leftbody form div {
+        display: flex;
+        justify-content: center;
+    }
+    
+    .signup_leftbody form input {
+        width: 100%;
+        max-width: 16rem;
+        height: 2.4rem;
+        font-size: 1rem;
+        padding: 0.7rem 1rem;
+        margin: 0.6rem 0;
+        border-radius: 0.6rem;
+    }
+    
+    .signup_leftbody form button {
+        width: 100%;
+        max-width: 14rem;
+        height: 2.4rem;
+        font-size: 1.2rem;
+        margin: 0.8rem auto;
+        display: block;
+    }
+    
+    .signup_otheracc {
+        margin-top: 1rem;
+    }
+    
+    .signup_otheracc p {
+        font-size: 0.9rem;
+        margin: 0.4rem 0;
+    }
+    
+    .signupacc_logo {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .signupacc_logo a {
+        padding: 0.3rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .signup_right {
+        width: 100%;
+        height: auto;
+        padding: 1.5rem;
+        border-radius: 0 0 1.2rem 1.2rem;
+        background-color: #001A40;
+    }
+    
+    .signup_rightbody {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .signup_rightbody h4 {
+        font-size: 1.5rem;
+        padding: 0.5rem 0;
+        margin: 0.5rem 0;
+    }
+    
+    .signupright_bodyp {
+        padding-bottom: 1rem;
+    }
+    
+    .signupright_bodyp p {
+        font-size: 0.9rem;
+        width: 100%;
+    }
+    
+    .signup_rightbody a {
+        padding: 0.7rem 2rem;
+        font-size: 0.95rem;
+        display: inline-block;
+    }
+    
+    .signupacc_logo a img {
+        width: 2.2rem;
+    }
+}
+
+/* SIGNUP PAGE RESPONSIVE - MOBILE (520px) */
+@media (max-width: 520px) {
+    .signuppage {
+        min-height: 100vh;
+        padding: 0.3rem;
+    }
+    
+    .signup_body {
+        width: 95%;
+        border-radius: 0.8rem;
+        flex-direction: column;
+    }
+    
+    .signup_left {
+        width: 100%;
+        height: auto;
+        padding: 1.5rem 1rem;
+        border-radius: 0.8rem 0.8rem 0 0;
+        background-color: whitesmoke;
+    }
+    
+    .signup_leftbody h2 {
+        font-size: 1.2rem;
+        margin: 0.4rem 0;
+        padding: 0.4rem 0;
+    }
+    
+    .signup_leftbody form input {
+        width: 100%;
+        height: 2.2rem;
+        font-size: 0.95rem;
+        padding: 0.6rem;
+        margin: 0.5rem 0;
+        border-radius: 0.6rem;
+    }
+    
+    .signup_leftbody form button {
+        width: 100%;
+        height: 2.2rem;
+        font-size: 1.1rem;
+        margin: 0.6rem 0;
+    }
+    
+    .signup_otheracc {
+        margin-top: 0.8rem;
+    }
+    
+    .signup_otheracc p {
+        font-size: 0.8rem;
+        margin: 0.3rem 0;
+    }
+    
+    .signupacc_logo {
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+    
+    .signupacc_logo a {
+        padding: 0.2rem;
+    }
+    
+    .signup_right {
+        width: 100%;
+        height: auto;
+        padding: 1.2rem;
+        border-radius: 0 0 0.8rem 0.8rem;
+        background-color: #001A40;
+    }
+    
+    .signup_rightbody h4 {
+        font-size: 1.2rem;
+        padding: 0.4rem 0;
+        margin: 0.3rem 0;
+    }
+    
+    .signupright_bodyp {
+        padding-bottom: 0.8rem;
+    }
+    
+    .signupright_bodyp p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        width: 100%;
+    }
+    
+    .signup_rightbody a {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .signupacc_logo a img {
+        width: 2rem;
+    }
+}
+
+/* SIGNUP PAGE RESPONSIVE - SMALL MOBILE (380px) */
+@media (max-width: 380px) {
+    .signuppage {
+        min-height: 100vh;
+        padding: 0.2rem;
+    }
+    
+    .signup_body {
+        width: 97%;
+        border-radius: 0.6rem;
+        flex-direction: column;
+    }
+    
+    .signup_left {
+        width: 100%;
+        padding: 1.2rem 0.8rem;
+        border-radius: 0.6rem 0.6rem 0 0;
+        background-color: whitesmoke;
+    }
+    
+    .signup_leftbody h2 {
+        font-size: 1rem;
+        padding: 0.3rem 0;
+        margin: 0.2rem 0;
+    }
+    
+    .signup_leftbody form input {
+        height: 2rem;
+        font-size: 0.9rem;
+        padding: 0.5rem;
+        margin: 0.4rem 0;
+    }
+    
+    .signup_leftbody form button {
+        height: 2rem;
+        font-size: 1rem;
+        width: 90%;
+    }
+    
+    .signup_otheracc {
+        margin-top: 0.6rem;
+    }
+    
+    .signup_otheracc p {
+        font-size: 0.75rem;
+    }
+    
+    .signupacc_logo a img {
+        width: 1.8rem;
+    }
+    
+    .signup_right {
+        width: 100%;
+        padding: 1rem 0.8rem;
+        border-radius: 0 0 0.6rem 0.6rem;
+        background-color: #001A40;
+    }
+    
+    .signup_rightbody h4 {
+        font-size: 1rem;
+        padding: 0.3rem 0;
+        margin: 0.2rem 0;
+    }
+    
+    .signupright_bodyp {
+        padding-bottom: 0.6rem;
+    }
+    
+    .signupright_bodyp p {
+        font-size: 0.75rem;
+        width: 100%;
+    }
+    
+    .signup_rightbody a {
+        padding: 0.5rem 1.2rem;
+        font-size: 0.85rem;
+    }
+}
+
 .loginpage{
     position: relative;
     display: block;
