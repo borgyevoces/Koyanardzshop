@@ -7,18 +7,12 @@
 <section class="hp-hero">
     <div class="container hp-hero-inner">
         <div class="hero-copy">
-            <h1>Reliable PCs &amp; Laptops — Curated for Performance</h1>
+            <h1><span class="hero-highlight">POWERED</span> by <span class="hero-break">Passion</span> <span class="hero-highlight">DRIVEN</span> by <span class="hero-break">Performance</span></h1>
             <p class="lead">Discover affordable and high-performance computers, laptops, and custom PC builds--handpicked to meet your needs.</p>
             <div class="hero-ctas">
                 <a class="btn btn-primary" href="{% url 'product' %}">Shop Products</a>
                 <a class="btn btn-outline" href="{% url 'selling' %}">Sell Your Device</a>
             </div>
-            <ul class="hero-features">
-                <li><i class="fa-solid fa-truck-fast"></i><span>Fast local pickup</span></li>
-                <li><i class="fa-solid fa-shield-halved"></i><span>Inspected &amp; tested</span></li>
-                <li><i class="fa-solid fa-headset"></i><span>Support &amp; warranty</span></li>
-                <li><i class="fa-solid fa-tools"></i><span>Upgrade & repair services</span></li>
-            </ul>
         </div>
         <div class="hero-media">
             <img src="{% static 'images/system1drop.png' %}" alt="Featured build">
@@ -31,63 +25,75 @@
         <h2>Featured &amp; New Arrivals</h2>
         <a class="see-more" href="{% url 'product' %}">See all</a>
     </div>
-    <div class="product-grid">
-        {% if products %}
-            {% for produkto in products %}
-                <article class="card product-card">
-                    <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
-                        <i class="fa-regular fa-heart"></i>
-                    </button>
-                    <a class="product-thumb" href="{% url 'product_item' produkto.id %}">
-                        {% if produkto.image %}
-                            <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}">
-                        {% else %}
-                            <img src="{% static 'images/products/placeholder.png' %}" alt="placeholder">
-                        {% endif %}
-                    </a>
-                    <div class="card-body">
-                        <h3 class="card-title">{{ produkto.product_name }}</h3>
-                        <p class="price">₱{{ produkto.price|intcomma }}</p>
-                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button class="btn btn-sm">Add to cart</button></form>
-                    </div>
-                </article>
-            {% endfor %}
-        {% else %}
-            <p>No products available right now.</p>
-        {% endif %}
+    <div class="product-carousel">
+        <div class="carousel-wrapper">
+            <div class="carousel-track">
+                {% if products %}
+                    {% for produkto in products %}
+                        <article class="carousel-slide product-card">
+                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                            <a class="product-thumb" href="{% url 'product_item' produkto.id %}">
+                                {% if produkto.image %}
+                                    <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}">
+                                {% else %}
+                                    <img src="{% static 'images/products/placeholder.png' %}" alt="placeholder">
+                                {% endif %}
+                            </a>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ produkto.product_name }}</h3>
+                                <p class="price">₱{{ produkto.price|intcomma }}</p>
+                                <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button class="btn btn-sm">Add to cart</button></form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                    <p>No products available right now.</p>
+                {% endif %}
+            </div>
+        </div>
+        <button class="carousel-btn prev" id="prevBtn">❮</button>
+        <button class="carousel-btn next" id="nextBtn">❯</button>
     </div>
 </section>
 
-<section class="hp-about container">
-        <div class="about-grid">
-        <div>
-            <h3>About Koya Nardz</h3>
-            <p>Koya nardz Computer Trading is a trusted tech shop in Bacoor, Cavite, offering brand-new and secondhand laptops, desktops, and PC parts. Since 2015, we've provided reliable and budget-friendly products, helping customers find the setup that fits their needs.</p>
-        </div>
+<section class="hp-about">
+    <div class="about-grid">
         <div class="about-media">
-            <img src="{% static 'images/KNCT.png' %}" alt="Koya Nardz">
+            <img src="{% static 'images/computer.png' %}" alt="Sell your device">
+        </div>
+        <div class="about-left">
+            <h2>Got a laptop or PC to Sell?</h2>
+            <p>Turn your old laptop or PC into instant cash or upgrade credit.</p>
+            <a class="btn btn-primary sell-btn" href="{% url 'selling' %}">SELL NOW →</a>
         </div>
     </div>
+</section>
 
-    <section id="store-map" class="hp-map">
-        <div class="map-grid container">
-            <div class="map-container">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.8979824317407!2d120.9755040750075!3d14.433042386033703!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d374c991d945%3A0xd6ebfddd6f74cb60!2sKOYA%20NARDZ%20COMPUTER%20TRADING!5e0!3m2!1sen!2sph!4v1764142154625!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-            </div>
-            <div class="store-details">
-                <h4>Visit our store</h4>
-                <p><strong>Address:</strong> Bacoor, Cavite</p>
-                <p><strong>Hours:</strong> Mon–Sat 9:00 — 18:00</p>
-                <p><strong>Email:</strong> <a href="mailto:support@koyanardzshop.com">support@koyanardzshop.com</a></p>
-                <p>Tap <em>Get directions</em> to open Google Maps with navigation to our area.</p>
-                <a class="btn btn-primary" href="https://www.google.com/maps/dir/?api=1&destination=Bacoor%20Cavite" target="_blank">Get directions</a>
-            </div>
+<section id="store-map" class="hp-map">
+    <div class="map-grid container">
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.8979824317407!2d120.9755040750075!3d14.433042386033703!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d374c991d945%3A0xd6ebfddd6f74cb60!2sKOYA%20NARDZ%20COMPUTER%20TRADING!5e0!3m2!1sen!2sph!4v1764142154625!5m2!1sen!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
-    </section>
+        <div class="store-details">
+            <div>
+                <h3>About Koya Nardz</h3>
+                <p>Koya nardz Computer Trading is a trusted tech shop in Bacoor, Cavite, offering brand-new and secondhand laptops, desktops, and PC parts. Since 2015, we've provided reliable and budget-friendly products, helping customers find the setup that fits their needs.</p>
+            </div>
+            <h4>Visit our store</h4>
+            <p><strong>Address:</strong> Bacoor, Cavite</p>
+            <p><strong>Hours:</strong> Mon–Sat 9:00 — 18:00</p>
+            <p><strong>Email:</strong> <a href="mailto:support@koyanardzshop.com">support@koyanardzshop.com</a></p>
+            <p>Tap <em>Get directions</em> to open Google Maps with navigation to our area.</p>
+            <a class="btn btn-primary" href="https://www.google.com/maps/dir/?api=1&destination=Bacoor%20Cavite" target="_blank">Get directions</a>
+        </div>
+    </div>
 </section>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Favorite button functionality
     document.querySelectorAll('.favorite_btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const productId = this.getAttribute('data-product-id');
@@ -99,6 +105,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).catch(() => {});
         });
     });
+
+    // Carousel functionality
+    const track = document.querySelector('.carousel-track');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    let currentPosition = 0;
+
+    if (track) {
+        const slideWidth = 16 * 16 + 2 * 16; // 16rem slide + 2rem gap in pixels
+        const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
+
+        nextBtn.addEventListener('click', function () {
+            currentPosition = Math.min(currentPosition + slideWidth, maxScroll);
+            track.style.transform = `translateX(-${currentPosition}px)`;
+        });
+
+        prevBtn.addEventListener('click', function () {
+            currentPosition = Math.max(currentPosition - slideWidth, 0);
+            track.style.transform = `translateX(-${currentPosition}px)`;
+        });
+    }
 });
 </script>
 

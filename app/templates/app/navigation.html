@@ -6,14 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Koya Nardz{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Afacad:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
     <script src="{% static 'js/base.js' %}"></script>
-    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
@@ -38,15 +36,15 @@
 
             <nav class="main-nav" aria-label="Primary navigation">
                 <ul class="nav-list">
-                    <li><a href="{% url 'product' %}"><i class="fa-solid fa-box-open" aria-hidden="true"></i><span>Products</span></a></li>
+                    <li><a href="{% url 'product' %}"><span>Products</span></a></li>
                     <li class="has-sub">
-                        <a href="{% url 'selling' %}"><i class="fa-solid fa-hand-holding-dollar" aria-hidden="true"></i><span>Sell</span></a>
+                        <a href="{% url 'selling' %}"><span>Sell</span></a>
                         <ul class="subnav">
                             <li><a href="{% url 'selling_information' %}">How to Sell?</a></li>
                             <li><a href="{% url 'selling' %}">Sell</a></li>
                         </ul>
                     </li>
-                    <li><a href="{% url 'my_appointment' %}"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i><span>Appointment</span></a></li>
+                    <li><a href="{% url 'my_appointment' %}"><span>Appointment</span></a></li>
                         <!-- Mobile-only action links: cart, favorites, account/sign-in -->
                         <li class="nav-actions-mobile"><a href="{% url 'cart' %}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Cart</span></a></li>
                         <li class="nav-actions-mobile"><button id="favToggleMobile" class="action-btn-mobile"><i class="fa-regular fa-heart" aria-hidden="true"></i><span>Favorites</span></button></li>
