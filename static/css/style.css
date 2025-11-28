@@ -287,7 +287,8 @@ footer .footer .footer_shop {
 /* Hero Section */
 .hp-hero {
     padding: 4rem 1rem;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 1) 40%, rgba(255, 209, 220, 1) 100%);
+    background: #CF7EDD;
+    background: linear-gradient(240deg, rgba(207, 126, 221, 1) 0%, rgba(226, 177, 234, 1) 50%, rgba(255, 255, 255, 1) 100%);
     min-height: 600px;
     display: flex;
     align-items: center;
