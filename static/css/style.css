@@ -870,7 +870,6 @@ footer .footer .footer_shop {
 /* About Section - Sell Template */
 .hp-about {
     padding: 0;
-    background: linear-gradient(90deg, rgba(240, 240, 240, 1) 0%, rgba(240, 240, 240, 1) 60%, rgba(255, 255, 255, 1) 100%);
     min-height: 600px;
     display: flex;
     align-items: center;
