@@ -6,62 +6,37 @@
     <div class="sellingpage">
         <div class="selling_body">
             <div class="selling_left">
-                <div id="stepleft1" class="step-box active">
-                    <div class="sellingleft_bottom">
-                        <div class="selling_left1" onclick="goToStep(1)">
-                            <p>Terms & Agreement</p>
-                            <h3>1</h3>
+                <div class="selling_steps">
+                    <div class="step-item" onclick="goToStep(1)">
+                        <div class="step-circle" id="circle1">
+                            <span class="step-check">✓</span>
+                            <span class="step-number">1</span>
                         </div>
-                        <div class="selling_left2" onclick="goToStep(2)">
-                            <p>Personal Information</p>
-                            <h3>2</h3>
-                        </div>
-                        <div class="selling_left3" onclick="goToStep(3)">
-                            <p>Product Information</p>
-                            <h3>3</h3>
-                        </div>
+                        <p class="step-label">PERSONAL<br>INFORMATION</p>
                     </div>
-                </div>
-                <div id="stepleft2" class="step-box">
-                    <div class="sellingleft_bottom">
-                        <div class="selling_left1" onclick="goToStep(1)">
-                            <p>Terms & Aggreement</p>
-                            <h3>1</h3>
+                    <div class="step-line"></div>
+                    <div class="step-item" onclick="goToStep(2)">
+                        <div class="step-circle" id="circle2">
+                            <span class="step-number">2</span>
                         </div>
-                        <div class="selling_left2" onclick="goToStep(2)">
-                            <p>Personal Information</p>
-                            <h3>2</h3>
-                        </div>
-                        <div class="selling_left3" onclick="goToStep(3)">
-                            <p>Product Information</p>
-                            <h3>3</h3>
-                        </div>
+                        <p class="step-label">PRODUCT<br>INFORMATION</p>
                     </div>
-                </div>
-                <div id="stepleft3" class="step-box">
-                    <div class="sellingleft_bottom">
-                        <div class="selling_left1" onclick="goToStep(1)">
-                            <p>Terms & Aggreement</p>
-                            <h3>1</h3>
+                    <div class="step-line"></div>
+                    <div class="step-item" onclick="goToStep(3)">
+                        <div class="step-circle" id="circle3">
+                            <span class="step-number">3</span>
                         </div>
-                        <div class="selling_left2" onclick="goToStep(2)">
-                            <p>Personal Information</p>
-                            <h3>2</h3>
-                        </div>
-                        <div class="selling_left3" onclick="goToStep(3)">
-                            <p>Product Information</p>
-                            <h3>3</h3>
-                        </div>
+                        <p class="step-label">CONFIRMATION</p>
                     </div>
                 </div>
             </div>
             <div class="selling_right">
                 <form id="sellForm" method="POST" enctype="multipart/form-data" action="">
                     {% csrf_token %}
-                    <div id="step1" class="step-box" style="display: block;">
-                        <div class="sellingright_body">
-                            <h4>Terms & Aggreement</h4>
-                            <p>Please read and accept our trade-in terms before submitting your request. This ensures transparency and sets expectations for the in-person evaluation.</p>
+                    <div id="step1" class="step-box step-active" style="display: block;">
+                        <div class="sellingright_header">
+                            <h2>Personal Information</h2>
+                            <p>Enter your personal information to help us contact you and verify your identity. This will also be used to confirm your appointment schedule.</p>
                         </div>
                         <div class="stepthree">
                             <h3>Instructions:</h3>
@@ -84,10 +59,10 @@
                         </div>
                         <button type="button" class="button" onclick="nextStep(1)">Next</button>
                     </div>
-                    <div id="step2" class="step-box active" style="display: none;">
-                         <div class="sellingright_body">
-                            <h4>Personal Information</h4>
-                            <p>Enter your personal information to help us contact you and verify your identity. This will also be used to confirm your appointment schedule.</p>
+                    <div id="step2" class="step-box" style="display: none;">
+                        <div class="sellingright_header">
+                            <h2>Product Information</h2>
+                            <p>Provide the details of the device you wish to sell or trade in. Accurate specifications and clear images will help us assess your item faster.</p>
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
@@ -115,9 +90,9 @@
                         <button type="button" class="button" onclick="nextStep(2)">Next</button>
                     </div>
                     <div id="step3" class="step-box" style="display: none;">
-                        <div class="sellingright_body">
-                            <h4>Product Information</h4>
-                            <p>Provide the details of the device you wish to sell or trade in. Accurate specifications and clear images will help us assess your item faster.</p>
+                        <div class="sellingright_header">
+                            <h2>Confirmation</h2>
+                            <p>Please review and confirm all the information you've provided before submitting your request.</p>
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
@@ -147,81 +122,66 @@
     let highestStepReached = 1;
 
     function nextStep(current) {
-    const form = document.getElementById("sellForm");
-    const currentStepRight = document.getElementById(`step${current}`);
-    const errorMessages = currentStepRight.querySelectorAll(".error-message");
-    errorMessages.forEach(msg => msg.remove());
+        const currentStepRight = document.getElementById(`step${current}`);
+        const errorMessages = currentStepRight.querySelectorAll(".error-message");
+        errorMessages.forEach(msg => msg.remove());
 
-    let isValid = true;
-    const fields = currentStepRight.querySelectorAll("[required]");
+        let isValid = true;
+        const fields = currentStepRight.querySelectorAll("[required]");
 
-    fields.forEach(field => {
-        if (!field.value.trim()) {  
-            isValid = false;
-            const errorMessage = document.createElement("div");
-            errorMessage.classList.add("error-message");
-            errorMessage.style.position = "absolute";
-            errorMessage.style.marginTop = "-1.2rem";
-            errorMessage.style.color = "red";
-            errorMessage.textContent = `${field.placeholder || "This field"} is required`;
+        fields.forEach(field => {
+            if (!field.value.trim()) {  
+                isValid = false;
+                const errorMessage = document.createElement("div");
+                errorMessage.classList.add("error-message");
+                errorMessage.style.color = "red";
+                errorMessage.textContent = `${field.placeholder || "This field"} is required`;
+                field.parentElement.appendChild(errorMessage);
+            }
+        });
 
-            field.parentElement.insertBefore(errorMessage, field);
-        }
-    });
+        if (!isValid) return;
 
-    if (current === 1) {
-        const agreeCheckbox = document.querySelector('input[name="agree"]');
-        const existingError = document.getElementById("agree-error");
-
-        if (existingError) existingError.remove();
-
-        if (!agreeCheckbox.checked) {
-            isValid = false;
-
-            const errorMessage = document.createElement("div");
-            errorMessage.id = "agree-error";
-            errorMessage.style.color = "red";
-            errorMessage.style.marginTop = "0.5rem";
-            errorMessage.textContent = "You must agree to the terms before continuing.";
-
-            agreeCheckbox.parentElement.appendChild(errorMessage);
-        }
+        highestStepReached = Math.max(highestStepReached, current + 1);
+        goToStep(current + 1);
+        updateStepIndicators();
     }
-
-    if (!isValid) return;
-
-    highestStepReached = Math.max(highestStepReached, current + 1);
-
-    currentStepRight.style.display = 'none';
-    currentStepRight.classList.remove('active');
-
-    const nextStepRight = document.getElementById(`step${current + 1}`);
-    nextStepRight.style.display = 'block';
-    nextStepRight.classList.add('active');
-
-    document.querySelector(`#stepleft${current}`).classList.remove('active');
-    document.querySelector(`#stepleft${current + 1}`).classList.add('active');
-}
-
 
     function goToStep(stepNumber) {
-    if (stepNumber > highestStepReached) {
-        return; 
+        if (stepNumber > highestStepReached) {
+            return; 
+        }
+
+        document.querySelectorAll(".selling_right .step-box").forEach(step => {
+            step.style.display = "none";
+            step.classList.remove("step-active");
+        });
+
+        document.querySelector(`#step${stepNumber}`).style.display = "block";
+        document.querySelector(`#step${stepNumber}`).classList.add("step-active");
+        
+        updateStepIndicators();
     }
 
-    document.querySelectorAll(".selling_right .step-box").forEach(step => {
-        step.style.display = "none";
-        step.classList.remove("active");
+    function updateStepIndicators() {
+        const stepItems = document.querySelectorAll('.step-item');
+        const currentStep = document.querySelector('.selling_right .step-active');
+        
+        stepItems.forEach((item, index) => {
+            const stepNum = index + 1;
+            item.classList.remove('active', 'completed');
+            
+            if (stepNum < highestStepReached) {
+                item.classList.add('completed');
+            } else if (stepNum === highestStepReached) {
+                item.classList.add('active');
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStepIndicators();
     });
-
-    document.querySelector(`#step${stepNumber}`).style.display = "block";
-    document.querySelector(`#step${stepNumber}`).classList.add("active");
-    document.querySelectorAll(".selling_left1, .selling_left2, .selling_left3")
-        .forEach(btn => btn.classList.remove("active"));
-
-    document.querySelector(`.selling_left${stepNumber}`).classList.add("active");
-}
-
 </script>
 
 {% endblock content %}
