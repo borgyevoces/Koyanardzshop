@@ -7135,7 +7135,8 @@ fieldset{
     .hero-copy .lead{font-size:1rem}
 }
 @media (max-width:480px){
-    .hp-hero{margin-top: -5rem;}
+    .hp-hero{margin-top: -5rem;background: #CF7EDD;
+background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 1) 100%);}
     .product-grid{grid-template-columns:1fr}
     .hero-copy h1{font-size:1.45rem}
     .hero-copy .lead{font-size:.98rem}
