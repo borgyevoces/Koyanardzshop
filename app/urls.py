@@ -46,7 +46,6 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<int:uid>/<str:token>/', views.reset_password, name='reset_password'),
     path('profile/', views.user_profile, name='profile'),
-    path('complete-oauth-profile/', views.complete_oauth_profile, name='complete_oauth_profile'),
     path('logout/', views.logout_view, name='logout'),
     path('resend_otp/', views.resend_otp, name="resend-otp"),
     path('api/products/', views.product_list, name='product_list'),

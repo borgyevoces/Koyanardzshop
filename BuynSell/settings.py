@@ -45,7 +45,6 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'app.middleware.OAuthProfileCompletionMiddleware',
 ]
 
 # CORS (frontend origins)

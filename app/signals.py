@@ -18,12 +18,11 @@ def create_token(sender, instance, created, **kwargs):
             is_google_oauth = not instance.has_usable_password()
             
             if is_google_oauth:
-                # For Google OAuth: require account completion before login
-                # Keep account inactive until they complete setup
-                instance.is_active = False
-                instance.is_oauth_pending = True
+                # Auto-activate Google OAuth accounts - no profile completion needed
+                instance.is_active = True
+                instance.is_oauth_pending = False
                 instance.save()
-                logger.info(f"Google OAuth account created for {instance.username} - set to inactive pending profile completion")
+                logger.info(f"Google OAuth account created and activated for {instance.username}")
             else:
                 # Require email verification for normal signups
                 otp = OtpToken.objects.create(user=instance, otp_expires_at=timezone.now() + timezone.timedelta(minutes=5))

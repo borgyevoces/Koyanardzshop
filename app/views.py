@@ -330,35 +330,6 @@ def reset_password(request, uid, token):
     return render(request, 'app/account/password_reset.html', {'form': form})
 
 @login_required
-@login_required
-def complete_oauth_profile(request):
-    """View for completing Google OAuth account profile"""
-    user = request.user
-    
-    # Check if user has a pending OAuth profile
-    if not user.is_oauth_pending:
-        return redirect('profile')
-    
-    profile_form = ProfileForm(instance=user)
-    
-    if request.method == 'POST':
-        profile_form = ProfileForm(request.POST, request.FILES, instance=user)
-        if profile_form.is_valid():
-            profile_form.save()
-            # Mark profile as complete
-            user.is_oauth_pending = False
-            user.is_active = True
-            user.save()
-            messages.success(request, 'Profile completed successfully! You can now access all features.')
-            return redirect('home')
-        else:
-            messages.error(request, 'Please fix the errors below.')
-    
-    return render(request, 'app/account/complete_oauth_profile.html', {
-        'profile_form': profile_form,
-        'user': user,
-    })
-
 def user_profile(request):
     profile_form = ProfileForm(instance=request.user)
     password_form = PasswordChangeForm(request.user)
