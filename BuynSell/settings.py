@@ -155,6 +155,9 @@ EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() in ('1', 'true', 'ye
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'app.CustomUser'
+
+# Dynamic SITE_ID based on environment - will be determined at runtime
+# SITE_ID is only used as a fallback; allauth prefers getting site from request
 SITE_ID = 1
 
 # Django-allauth settings
@@ -184,6 +187,10 @@ SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # Google signup: no email verification
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'   # Normal signup: email verification required
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+
+# Allauth adapter settings - use custom adapter to handle multi-site deployments
+SOCIALACCOUNT_ADAPTER = 'app.socialadapter.CustomSocialAccountAdapter'
+SOCIALACCOUNT_STORE_TOKENS = True
 
 # Production security
 if not DEBUG:
