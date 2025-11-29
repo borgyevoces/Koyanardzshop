@@ -9,6 +9,7 @@ class CustomUser(AbstractUser):
     contact = models.CharField(max_length=15, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, default='avatars/user_default.png')
+    is_oauth_pending = models.BooleanField(default=False, help_text="True if account created via OAuth but profile not completed")
 
     USERNAME_FIELD = ("email")
     REQUIRED_FIELDS = ["username"]

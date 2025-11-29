@@ -199,21 +199,13 @@ def register(request):
             form = RegisterForm(request.POST)
             if form.is_valid():
                 user = form.save()
-                otp = OtpToken.objects.create(user=user, otp_expires_at=timezone.now() + timezone.timedelta(minutes=5))
-
-                subject = "Email Verification"
-                message = f"""  
-                                Hi {user.username}, here is your OTP: {otp.otp_code}
-                                It expires in 5 minutes. Use the URL below to return to the website:
-                                http://127.0.0.1:8000/signup/{user.username}
-                            """
-                sender = settings.EMAIL_HOST_USER
-                receiver = [user.email]
-
-                send_mail(subject, message, sender, receiver, fail_silently=False)
+                # OTP creation and email sending is handled by the post_save signal
+                # Get the OTP that was created by the signal
+                otp = OtpToken.objects.filter(user=user).last()
+                if otp:
+                    otp_code = otp.otp_code
 
                 messages.success(request, "Account created successfully! Please check your email for the OTP.")
-                otp_code = otp.otp_code 
 
     context = {
         "form": form,
@@ -338,6 +330,35 @@ def reset_password(request, uid, token):
     return render(request, 'app/account/password_reset.html', {'form': form})
 
 @login_required
+@login_required
+def complete_oauth_profile(request):
+    """View for completing Google OAuth account profile"""
+    user = request.user
+    
+    # Check if user has a pending OAuth profile
+    if not user.is_oauth_pending:
+        return redirect('profile')
+    
+    profile_form = ProfileForm(instance=user)
+    
+    if request.method == 'POST':
+        profile_form = ProfileForm(request.POST, request.FILES, instance=user)
+        if profile_form.is_valid():
+            profile_form.save()
+            # Mark profile as complete
+            user.is_oauth_pending = False
+            user.is_active = True
+            user.save()
+            messages.success(request, 'Profile completed successfully! You can now access all features.')
+            return redirect('home')
+        else:
+            messages.error(request, 'Please fix the errors below.')
+    
+    return render(request, 'app/account/complete_oauth_profile.html', {
+        'profile_form': profile_form,
+        'user': user,
+    })
+
 def user_profile(request):
     profile_form = ProfileForm(instance=request.user)
     password_form = PasswordChangeForm(request.user)
