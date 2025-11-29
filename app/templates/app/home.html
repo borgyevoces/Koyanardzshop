@@ -7,7 +7,7 @@
 <section class="hp-hero">
     <div class="container hp-hero-inner">
         <div class="hero-copy">
-            <h1><span class="hero-highlight">POWERED</span> by <span class="hero-break">Passion</span> <span class="hero-highlight">DRIVEN</span> by <span class="hero-break">Performance</span></h1>
+            <h1><span class="hero-highlight">POWERED</span> by <span class="hero-break">Passion</span> <span class="hero-highlights">DRIVEN</span> by <span class="hero-breaks">Performance</span></h1>
             <p class="lead">Discover affordable and high-performance computers, laptops, and custom PC builds--handpicked to meet your needs.</p>
             <div class="hero-ctas">
                 <a class="btn btn-primary" href="{% url 'product' %}">Shop Products</a>
@@ -43,8 +43,10 @@
                             </a>
                             <div class="card-body">
                                 <h3 class="card-title">{{ produkto.product_name }}</h3>
-                                <p class="price">₱{{ produkto.price|intcomma }}</p>
-                                <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button class="btn btn-sm">Add to cart</button></form>
+                                <div class="cardbody_bottom">
+                                    <p class="price">₱{{ produkto.price|intcomma }}</p>
+                                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button class="btn btn-sm">Add to cart</button></form>
+                                </div>
                             </div>
                         </article>
                     {% endfor %}
@@ -84,7 +86,7 @@
             <h4>Visit our store</h4>
             <p><strong>Address:</strong> Bacoor, Cavite</p>
             <p><strong>Hours:</strong> Mon–Sat 9:00 — 7:00</p>
-            <p><strong>Email:</strong> <a href="mailto:support@koyanardzshop.com">support@koyanardzshop.com</a></p>
+            <p><strong>Email:</strong> <a href="mailto:koyanardzshop@gmail.com">koyanardzshop@gmail.com</a></p>
             <p>Tap <em>Get directions</em> to open Google Maps with navigation to our area.</p>
             <a class="btn btn-primary" href="https://www.google.com/maps/dir/?api=1&destination=Bacoor%20Cavite" target="_blank">Get directions</a>
         </div>

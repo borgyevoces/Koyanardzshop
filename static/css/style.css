@@ -286,6 +286,7 @@ footer .footer .footer_shop {
 /* Home */
 /* Hero Section */
 .hp-hero {
+    margin-top: -3rem;
     padding: 4rem 1rem;
     background: #CF7EDD;
     background: linear-gradient(240deg, rgba(207, 126, 221, 1) 0%, rgba(226, 177, 234, 1) 50%, rgba(255, 255, 255, 1) 100%);
@@ -310,11 +311,12 @@ footer .footer .footer_shop {
 
 .hero-copy h1 {
     font-family: Montserrat, sans-serif;
-    font-size: 3.5rem;
-    font-weight: 700;
+    font-size: 3.3rem;
+    font-weight: 400;
     color: #001A40;
     line-height: 1.2;
     margin-bottom: 1.5rem;
+    margin-left: -1rem;
     letter-spacing: -0.5px;
 }
 
@@ -324,21 +326,34 @@ footer .footer .footer_shop {
     text-transform: uppercase;
     letter-spacing: 2px;
 }
+.hero-highlights {
+    font-size: 4rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.1rem;
+}
 
 .hero-break {
     display: block;
     font-size: 2.2rem;
     font-weight: 500;
     margin: 0.5rem 0;
-    letter-spacing: 0;
+    letter-spacing: 3rem;
+}
+.hero-breaks{
+    display: block;
+    font-size: 2.2rem;
+    font-weight: 500;
+    margin: 0.5rem 0;
+    letter-spacing: 1.2rem;
 }
 
 .hero-copy .lead {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     color: #555;
     line-height: 1.6;
-    margin-bottom: 2rem;
-    max-width: 550px;
+    margin: 2rem 0;
+    max-width: 500px;
 }
 
 .hero-cta {
@@ -353,7 +368,7 @@ footer .footer .footer_shop {
     border-radius: 50px;
     text-decoration: none;
     font-weight: 700;
-    font-size: 1.05rem;
+    font-size: 1.25rem;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -654,15 +669,17 @@ footer .footer .footer_shop {
 .carousel-slide {
     flex: 0 0 16rem;
     min-width: 16rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.5);
 }
 
 .carousel-btn {
     position: absolute;
     top: 50%;
+    margin: 0 -1rem;
     transform: translateY(-50%);
     color: black;
     border: none;
-    padding: .8rem 1rem;
+    padding: .6rem .8rem;
     font-size: 1.2rem;
     cursor: pointer;
     border-radius: 50%;
@@ -698,7 +715,7 @@ footer .footer .footer_shop {
     height: 22rem;
     border: 1px solid #007BFF;
     border-radius: 1.2rem;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.1);
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.5);
 }
 #homefavorites{
     position: absolute;
@@ -874,8 +891,9 @@ footer .footer .footer_shop {
     min-height: 600px;
     display: flex;
     align-items: center;
-    margin-top: 2rem;
-    width: 100%;
+    margin-top: 1rem;
+    width: 95%;
+    
 }
 
 .about-grid {
@@ -918,9 +936,9 @@ footer .footer .footer_shop {
 }
 
 .about-left p {
-    font-size: 1.15rem;
-    color: #999;
-    line-height: 1.7;
+    font-size: 1.25rem;
+    color: #757474;
+    line-height: 1.2;
     margin-bottom: 2.5rem;
 }
 
@@ -3031,7 +3049,7 @@ footer .footer .footer_shop {
 .site-header{position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#0b6fa6 0,#0b84c6 100%);color:#fff;z-index:999;box-shadow:0 4px 18px rgba(2,24,40,0.12)}
 .header-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.6rem 0}
 .brand-link{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:inherit}
-.brand-logo{width:48px;height:auto;border-radius:6px}
+.brand-logo{width:60px;height:auto;border-radius:6px}
 .brand-title{font-family:Montserrat;font-weight:700;font-size:1.05rem;display:block}
 .brand-sub{display:block;font-size:.7rem;color:rgba(255,255,255,.9)}
 
@@ -7069,15 +7087,16 @@ fieldset{
 .hero-media img{max-width:100%;height:auto;}
 
 .hp-products{padding:2.5rem 0}
-.hp-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.hp-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem; padding: 0 .5rem;}
+.see-more:hover{text-decoration: underline;}
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 .card.product-card{position:relative;padding:0;border-radius:10px;overflow:hidden;border:1px solid #eef6fb;background:#fff}
 .product-card .favorite_btn{position:absolute;right:10px;top:10px;background:linear-gradient(180deg,rgba(255,255,255,0.95),#fff);border-radius:10px;padding:.45rem;border:0;box-shadow:0 6px 18px rgba(4,59,91,0.06);cursor:pointer}
 .product-thumb img{width:100%;height:220px;object-fit:cover;display:block;transition:transform .35s ease}
 .product-card:hover .product-thumb img{transform:scale(1.03)}
-.card-body{padding:1rem}
-.card-title{font-size:1.02rem;margin:0 0 .4rem;color:#0b3b50;line-height:1.2}
-.price{font-weight:800;color:#0b84c6;margin-bottom:.6rem}
+.card-body{padding:1rem; }
+.card-title{font-size:1.02rem;margin:0 0 .4rem;color:#0b3b50;line-height:1.2; height: 2rem; }
+.price{font-weight:800;color:#0b84c6;margin-bottom:.3rem}
 .add-cart-form{margin:0}
 .btn-sm{padding:.55rem .8rem;border-radius:.5rem;background:#0b84c6;color:#fff;border:0;font-weight:700}
 
@@ -7112,11 +7131,14 @@ fieldset{
     .box .containerbox{flex:1 1 100%;max-width:100%}
     .product-thumb img, .containerimage{height:160px}
     .product-grid{grid-template-columns:1fr}
-}
 
-.hp-about{padding:2rem 0}
+.hp-about{width: 100%;}
 .about-grid{display:grid;grid-template-columns:1.25fr 420px;gap:2rem;align-items:center}
-.about-media img{max-width:100%;border-radius:10px}
+.about-media img{max-width:100%;border-radius:10px; padding-top:0}
+.about-left{margin: 0 1rem; padding: 0; margin-bottom: 1.5rem;}
+.about-left h2{font-size:2rem;margin-bottom:.6rem;color:#033f63}
+.about-left p{font-size: 1.2rem;}
+}
 
 @media (max-width: 1200px){
     .hero-copy h1{font-size:2.25rem}
@@ -7139,12 +7161,21 @@ fieldset{
     .hp-hero{margin-top: -5rem;background: #CF7EDD;
 background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 1) 100%);}
     .product-grid{grid-template-columns:1fr}
+    .hero-copy{margin: 1rem .5rem;}
+    .hero-copy .hero-highlight{font-size: 2.4rem;}
+    .hero-copy .hero-highlights{font-size: 2.4rem; letter-spacing: .75rem;}
     .hero-copy h1{font-size:1.45rem}
-    .hero-copy .lead{font-size:.98rem}
+    .hero-copy .hero-break{letter-spacing: 1.75rem; font-size: 1.5rem;}
+    .hero-copy .hero-breaks{letter-spacing: .65rem; font-size: 1.5rem;}
+    .hero-copy .lead{font-size:.98rem; width: 100%;}
     .hero-media{width:100%}
     .hero-features{flex-direction:column;gap:.6rem}
     .hero-copy{padding-right:0}
+    .carousel-track article{padding-top:2rem;}
+    .card-body h3{margin-bottom:.2rem; height:1.6rem; max-height: 1.6rem; overflow: hidden;}
+    .cardbody_bottom p{font-size: 1rem;}
 }
+
 
 /* Map & About extras */
 .about-cta-row{display:flex;gap:.6rem;margin-top:1rem}
@@ -7157,7 +7188,12 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
 .map-container{width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,0.06)}
 .map-container iframe{width:100%;height:100%;border:0}
 .store-details{padding:.8rem;font-size:1rem; border-radius:8px;background:#fff;border:1px solid #eef6fb}
-.store-details h4{margin-top:0; font-size: 1.2rem;}
+.store-details h3{font-size: 1.5rem; margin: .5rem 0;}
+.store-details p{margin-left: .5rem; font-size: 1.2rem;}
+.store-details p:nth-child(6){margin-top: .5rem; font-size: 1rem;}
+.store-details h4{margin-top:1rem; margin-bottom: .3rem; font-size: 1.2rem;}
+.store-details a{text-decoration: none; color: #0b84c6; background-color: transparent;}
+.store-details .btn{margin-left: .5rem;}
 
 @media (max-width:768px){
     .map-grid{grid-template-columns:1fr;}
