@@ -96,8 +96,8 @@ DATABASES = {
 }
 
 # Override if DATABASE_URL is provided (Postgres on Render)
-DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
+DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
+if DATABASE_URL and DATABASE_URL.startswith('postgresql://'):
     # Parse the DATABASE_URL environment variable (e.g. provided by Render)
     # and ensure SSL is required in production (when DEBUG is False).
     db_config = dj_database_url.parse(DATABASE_URL, conn_max_age=600)

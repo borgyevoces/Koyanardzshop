@@ -4538,27 +4538,22 @@ footer .footer .footer_shop {
 /* SELLING PAGE - DESKTOP */
 /* SELLING PAGE */
 .sellingpage {
+    
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #eef6fb 100%);
-    top: 5rem;
+    display: block;
+    justify-items: center;
+    top: 10rem;
+    margin-bottom: 14rem;
+
 }
 
 .selling_body {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    width: 100%;
-    max-width: 1200px;
-    height: auto;
-    min-height: 50rem;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(11, 132, 198, 0.12);
-    background: white;
-    overflow: hidden;
+    display: flex;
+    width: 80%;
+    height: 35rem;
+    border-radius: 2rem;
+    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
+    color: black;
 }
 
 .selling_left {
@@ -4567,6 +4562,7 @@ footer .footer .footer_shop {
     justify-content: center;
     align-items: center;
     padding: 3rem 2rem;
+    width: 30%;
     background: linear-gradient(135deg, #0b84c6 0%, #0971a3 100%);
     border-radius: 16px 0 0 16px;
 }
@@ -4662,12 +4658,11 @@ footer .footer .footer_shop {
 }
 
 .selling_right {
-    display: block;
-    padding: 2.5rem;
-    background: white;
-    border-radius: 0 16px 16px 0;
-    overflow-y: auto;
-    max-height: 55rem;
+    width: 70%;
+    height: 100%;
+    background-color: whitesmoke;
+    padding: 2rem;
+    border-radius: 0 2rem 2rem 0;
 }
 
 .selling_right form {
