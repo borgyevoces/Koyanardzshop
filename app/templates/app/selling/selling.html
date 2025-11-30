@@ -35,8 +35,8 @@
                     {% csrf_token %}
                     <div id="step1" class="step-box step-active" style="display: block;">
                         <div class="sellingright_header">
-                            <h2>Personal Information</h2>
-                            <p>Enter your personal information to help us contact you and verify your identity. This will also be used to confirm your appointment schedule.</p>
+                            <h2>Terms and Agreement</h2>
+                            <p>Please read and accept our trade-in terms before submitting your request. This ensures transparency and sets expectations for the in-person evaluation.</p>
                         </div>
                         <div class="stepthree">
                             <h3>Instructions:</h3>
@@ -61,57 +61,69 @@
                     </div>
                     <div id="step2" class="step-box" style="display: none;">
                         <div class="sellingright_header">
+                            <h2>Personal Information</h2>
+                            <p>Enter your personal information to help us contact you and verify your identity. This will also be used to confirm your appointment schedule.</p>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>First Name:</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name:</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="form-group">
+                                <label>Contact:</label>
+                                {{ form.contact }}
+                            </div>
+                            <div class="form-group">
+                                <label>Email:</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="form-group">
+                                <label>Address:</label>
+                                {{ form.address }}
+                            </div>
+                            <div class="form-group">
+                                <label>Appointment Date:</label>
+                                {{ form.selling_date }}
+                            </div>
+                            <div class="form-group">
+                                <label>Appointment Time:</label>
+                                {{ form.selling_time }}
+                            </div>
+                        </div>
+                        <button type="button" class="button" id="buttton" onclick="nextStep(2)">Next</button>
+                    </div>
+                    <div id="step3" class="step-box" style="display: none;">
+                        <div class="sellingright_header">
                             <h2>Product Information</h2>
                             <p>Provide the details of the device you wish to sell or trade in. Accurate specifications and clear images will help us assess your item faster.</p>
                         </div>
                         <div class="form-grid">
                             <div class="form-group">
-                                {{ form.first_name }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.last_name }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.contact }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.email }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.address }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.selling_date }}
-                            </div>
-                            <div class="form-group">
-                                {{ form.selling_time }}
-                            </div>
-                        </div>
-                        <button type="button" class="button" onclick="nextStep(2)">Next</button>
-                    </div>
-                    <div id="step3" class="step-box" style="display: none;">
-                        <div class="sellingright_header">
-                            <h2>Confirmation</h2>
-                            <p>Please review and confirm all the information you've provided before submitting your request.</p>
-                        </div>
-                        <div class="form-grid">
-                            <div class="form-group">
+                                <label>Product Name:</label>
                                 {{ form.product_name }}
                             </div>
                             <div class="form-group">
                                 {{ form.category.label_tag }} {{ form.category }}
                             </div>
                             <div class="form-group">
-                                {{ form.price|intcomma }}
+                                <label>Selling Price:</label>
+                                {{ form.price }}
                             </div>
                             <div class="form-group">
+                                <label>Product Image:</label>
                                 {{ form.image }}
                             </div>
                         </div>
                         <div class="form-group" style="margin-top: 1rem;">
+                            <label>Product Description:</label>
                              {{ form.description }}
                         </div>
-                        <button type="submit" class="button">Submit</button>
+                        <div id="submit-error" style="color: red; margin-top: 10px; display: none;"></div>
+                        <button type="button" class="button" onclick="submitForm()">Submit</button>
                     </div>
                 </form>
             </div>
@@ -121,6 +133,79 @@
 <script>
     let highestStepReached = 1;
 
+    function submitForm() {
+        console.log("submitForm called");
+        
+        // Validate all steps before submitting
+        let allValid = true;
+
+        // Check Step 1: Checkbox must be checked
+        const step1 = document.getElementById('step1');
+        const agreeCheckbox = step1.querySelector('input[type="checkbox"]');
+        console.log("Agree checkbox:", agreeCheckbox, "Checked:", agreeCheckbox ? agreeCheckbox.checked : false);
+        
+        if (!agreeCheckbox || !agreeCheckbox.checked) {
+            allValid = false;
+            alert("Please accept the terms and conditions in Step 1");
+            goToStep(1);
+            return;
+        }
+
+        // Check Step 2: All personal info fields
+        const step2 = document.getElementById('step2');
+        const step2Fields = step2.querySelectorAll("[required]");
+        console.log("Step2 required fields count:", step2Fields.length);
+        
+        step2Fields.forEach(field => {
+            console.log("Checking field:", field.name, "Value:", field.value);
+            if (!field.value.trim()) {
+                allValid = false;
+            }
+        });
+
+        if (!allValid) {
+            alert("Please fill in all required fields in Step 2");
+            goToStep(2);
+            return;
+        }
+
+        // Check Step 3: All product info fields
+        const step3 = document.getElementById('step3');
+        const errorDiv = document.getElementById('submit-error');
+        const existingErrors = step3.querySelectorAll(".error-message");
+        existingErrors.forEach(msg => msg.remove());
+
+        let step3Valid = true;
+        const fields = step3.querySelectorAll("[required]");
+        console.log("Step3 required fields count:", fields.length);
+
+        fields.forEach(field => {
+            console.log("Checking field:", field.name, "Value:", field.value.trim());
+            if (!field.value.trim()) {  
+                step3Valid = false;
+                const errorMessage = document.createElement("div");
+                errorMessage.classList.add("error-message");
+                errorMessage.style.color = "red";
+                errorMessage.style.marginTop = "5px";
+                errorMessage.textContent = `${field.placeholder || field.name || "This field"} is required`;
+                field.parentElement.appendChild(errorMessage);
+            }
+        });
+
+        if (!step3Valid) {
+            console.log("Step 3 validation failed");
+            errorDiv.textContent = "Please fill in all required fields";
+            errorDiv.style.display = "block";
+            return;
+        }
+
+        // If all validations pass, submit the form
+        console.log("All validations passed, submitting form now");
+        const form = document.getElementById('sellForm');
+        console.log("Form element:", form);
+        form.submit();
+    }
+
     function nextStep(current) {
         const currentStepRight = document.getElementById(`step${current}`);
         const errorMessages = currentStepRight.querySelectorAll(".error-message");
@@ -128,6 +213,20 @@
 
         let isValid = true;
         const fields = currentStepRight.querySelectorAll("[required]");
+
+        // Step 1: Check if checkbox is checked
+        if (current === 1) {
+            const agreeCheckbox = currentStepRight.querySelector('input[type="checkbox"]');
+            if (!agreeCheckbox || !agreeCheckbox.checked) {
+                isValid = false;
+                const errorMessage = document.createElement("div");
+                errorMessage.classList.add("error-message");
+                errorMessage.style.color = "red";
+                errorMessage.style.marginTop = "10px";
+                errorMessage.textContent = "You must agree to the terms and conditions to continue";
+                currentStepRight.appendChild(errorMessage);
+            }
+        }
 
         fields.forEach(field => {
             if (!field.value.trim()) {  
