@@ -121,11 +121,23 @@ document.addEventListener('click', function (e) {
             } else if (data.status === 'removed') {
                 favBtn.classList.remove('favorited');
 
-                // remove from dropdown if present
+                // Remove from favorites dropdown if present
                 const dropdown = document.getElementById('favoriteDropdown');
                 if (dropdown) {
                     const card = dropdown.querySelector(`.fav-item[data-product-id="${productId}"]`);
                     if (card) card.remove();
+                }
+
+                // If this favorite button lives on the dedicated favorites page, remove its card
+                const favCard = favBtn.closest('.favorites');
+                if (favCard) {
+                    favCard.remove();
+                }
+
+                // Also handle product-card layout
+                const productCard = favBtn.closest('.product-card');
+                if (productCard) {
+                    productCard.remove();
                 }
             }
         })
