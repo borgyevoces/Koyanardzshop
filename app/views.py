@@ -561,7 +561,7 @@ def toggle_favorite(request, product_id):
         # Render partial HTML for the new favorite item so frontend can insert it
         html = ''
         try:
-            html = render_to_string('app/partials/fav_item.html', {'product': product, 'request': request})
+            html = render_to_string('app/favorites.html', {'product': product, 'request': request})
         except Exception:
             html = ''
 

@@ -61,40 +61,51 @@
     let currentIndex = 0;
 
     function updateSlider() {
+        if (!slider) return;
         slider.style.transform = `translateX(-${currentIndex * 100}%)`;
     }
 
-    nextBtn.addEventListener('click', () => {
-        if (currentIndex < slides.length - 1) {
-            currentIndex++;
-            updateSlider();
-        }
-    });
+    if (nextBtn && slides && slides.length) {
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < slides.length - 1) {
+                currentIndex++;
+                updateSlider();
+            }
+        });
+    }
 
-    prevBtn.addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            updateSlider();
-        }
-    });
+    if (prevBtn && slides && slides.length) {
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSlider();
+            }
+        });
+    }
 
-    updateSlider();
+    if (slider) updateSlider();
 
 /* Favorites */
 /* Favorites: event delegation handles clicks on favorite buttons and dropdown remove buttons */
 document.addEventListener('click', function (e) {
     // Favorite button on product cards
     const favBtn = e.target.closest && e.target.closest('.favorite_btn');
-    if (favBtn) {
+        if (favBtn) {
         e.preventDefault();
         const productId = favBtn.getAttribute('data-product-id');
+        console.log('Favorite button clicked for productId=', productId);
 
         fetch(`/toggle_favorite/${productId}/`, {
             method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
         })
-        .then(res => res.json())
+        .then(res => {
+            console.log('toggle_favorite response status', res.status);
+            return res.json();
+        })
         .then(data => {
+            console.log('toggle_favorite response data', data);
             if (data.status === 'added') {
                 favBtn.classList.add('favorited');
 
@@ -149,13 +160,19 @@ document.addEventListener('click', function (e) {
     if (removeBtn) {
         e.preventDefault();
         const productId = removeBtn.getAttribute('data-product-id');
+        console.log('Fav remove button clicked for productId=', productId);
 
         fetch(`/toggle_favorite/${productId}/`, {
             method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
         })
-        .then(res => res.json())
+        .then(res => {
+            console.log('toggle_favorite (remove) status', res.status);
+            return res.json();
+        })
         .then(data => {
+            console.log('toggle_favorite (remove) data', data);
             if (data.status === 'removed') {
                 // remove the dropdown item
                 const item = removeBtn.closest('.fav-item');

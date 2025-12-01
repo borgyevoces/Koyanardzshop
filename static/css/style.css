@@ -349,11 +349,11 @@ footer .footer .footer_shop {
 }
 
 .hero-copy .lead {
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     color: #555;
     line-height: 1.6;
     margin: 2rem 0;
-    max-width: 500px;
+    max-width: 440px;
 }
 
 .hero-cta {
@@ -381,6 +381,7 @@ footer .footer .footer_shop {
 }
 
 .hero-media {
+    margin-top: -2rem;
     flex: 1;
     display: flex;
     align-items: center;
@@ -388,9 +389,8 @@ footer .footer .footer_shop {
 }
 
 .hero-media img {
-    max-width: 100%;
     height: auto;
-    max-height: 500px;
+    max-height: 8700px;
     object-fit: contain;
 }
 
@@ -722,7 +722,6 @@ footer .footer .footer_shop {
     display: flex;
     justify-content: right;
     right: 0;
-    margin-right: .7rem;
     border: none;
     background-color: transparent;
     cursor: pointer;
@@ -7285,12 +7284,13 @@ fieldset{
 }
 
 /* ===== Home page modern layout ===== */
-.hp-hero{padding:6.5rem 0 3rem;background:linear-gradient(180deg,#eaf6fb 0,#fff 60%)}
+.hp-hero{margin: 2rem 0; padding:6.5rem 0 3rem;background:linear-gradient(180deg,#eaf6fb 0,#fff 60%)}
 .hp-hero-inner{display:flex;align-items:center;gap:2.5rem;justify-content:space-between}
 .hero-copy{flex:1;max-width:760px}
 .hero-copy h1{font-family:Montserrat;font-size:2.6rem;line-height:1.05;color:#033f63;margin-bottom:.6rem}
-.hero-copy .lead{color:#334e5f;margin-bottom:1rem;font-size:1.05rem}
+.hero-copy .lead{color:#334e5f;margin-bottom:1rem; margin-left: -1rem; font-size:1.25rem}
 .hero-sublead{color:#4b636d;margin-bottom:1rem;font-size:1rem}
+.hero-ctas{margin: 3rem 0;}
 .hero-ctas .btn{padding:.75rem 1.1rem;border-radius:.7rem;text-decoration:none;font-weight:600}
 .btn-primary{background:#0b84c6;color:#fff}
 .btn-outline{background:transparent;border:1px solid #0b84c6;color:#0b84c6}
@@ -7298,7 +7298,7 @@ fieldset{
 .hero-features li{display:flex;align-items:center;gap:.8rem;color:#0b4d66;padding:.4rem 0}
 .hero-features i{background:#fff;padding:.6rem;border-radius:10px;color:#0b84c6;font-size:1.15rem}
 .hero-media{flex:0 0 460px;text-align:right}
-.hero-media img{max-width:100%;height:auto;}
+.hero-media img{height:auto;}
 
 .hp-products{padding:2.5rem 0}
 .hp-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem; padding: 0 .5rem;}

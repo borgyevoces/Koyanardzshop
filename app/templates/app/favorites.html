@@ -14,7 +14,7 @@
                 <div class="favorites">
                     <div class="favoritesbody">
                         <div class="favorites_upper">
-                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Remove from favorites">
+                            <button type="button" class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Remove from favorites">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -42,10 +42,6 @@
                 <div class="favoritespage_empty">
                     <div class="favoritespage_emptybody">
                         <h3>No favorite products yet</h3>
-                        <div class="favoritespage_emptybutton">
-                            <button><a href="{% url 'product' %}">Login/ Signup</a></button>
-                            <button><a href="{% url 'product' %}">Shop Now</a></button>
-                        </div>
                     </div>
                 </div>
             {% endif %}

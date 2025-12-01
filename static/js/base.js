@@ -91,7 +91,8 @@ document.addEventListener('click', function (e) {
 
         fetch(`/toggle_favorite/${productId}/`, {
             method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
         })
         .then(res => res.json())
         .then(data => {
@@ -155,7 +156,8 @@ document.addEventListener('click', function (e) {
 
         fetch(`/toggle_favorite/${productId}/`, {
             method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
         })
         .then(res => res.json())
         .then(data => {

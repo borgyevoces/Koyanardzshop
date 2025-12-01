@@ -3,7 +3,7 @@
     <a href="{% url 'product_item' product.id %}"><img src="{{ product.image.url }}" width="40" height="40" alt="{{ product.product_name }}"></a>
     <div class="fav-meta">{{ product.product_name }}</div>
     <div class="fav-actions">
-        <button class="fav-remove-btn" data-product-id="{{ product.id }}">✕</button>
+        <button type="button" class="fav-remove-btn" data-product-id="{{ product.id }}" aria-label="Remove from favorites"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
         <form action="{% url 'add_to_cart' product.id %}" method="POST">{% csrf_token %}<button>🛒</button></form>
     </div>
 </div>

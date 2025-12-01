@@ -41,8 +41,8 @@
         <div class="product-container">
         {% if products %}
             {% for produkto in products %}
-            <div class="product-card">
-                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+                <div class="product-card">
+                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites" aria-label="Toggle favorite"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
                 {% if produkto.image %}
                 <a href="{% url 'product_item' produkto.id %}">
                     <img src="{{ produkto.image.url }}" alt="Product Image">
