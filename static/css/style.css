@@ -7368,7 +7368,7 @@ fieldset{
 }
 @media (max-width: 768px){
     .hp-hero-inner{flex-direction:column-reverse;align-items:flex-start;gap:1.25rem}
-    .hero-media{text-align:center; justify-items: center;}
+    .hero-media{text-align:center; width: 100%;}
     .product-grid{grid-template-columns:repeat(2,1fr)}
     .about-grid{grid-template-columns:1fr}
     .hero-copy h1{font-size:1.8rem}
