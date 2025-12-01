@@ -48,7 +48,7 @@
                         <!-- Mobile-only action links: cart, favorites, account/sign-in -->
                         <li class="nav-actions-mobile"><a href="{% url 'cart' %}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Cart</span></a></li>
                         <li class="nav-actions-mobile"><button id="favToggleMobile" class="action-btn-mobile"><i class="fa-regular fa-heart" aria-hidden="true"></i><span>Favorites</span></button></li>
-                        <li class="nav-actions-mobile">{% if user.is_authenticated %}<button id="userToggleMobile" class="action-btn-mobile"><i class="fa-solid fa-user" aria-hidden="true"></i><span>Account</span></button>{% else %}<a href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Sign in</span></a>{% endif %}</li>
+                        <li class="nav-actions-mobile">{% if user.is_authenticated %}<a href="{% url 'logout' %}" class="action-btn-mobile"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span></a>{% else %}<a href="{% url 'login' %}" class="action-btn-mobile"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Sign in</span></a>{% endif %}</li>
                 </ul>
             </nav>
 
@@ -60,7 +60,7 @@
                     <div id="favoriteDropdown" class="dropdown-panel">
                         {% if products_favorite %}
                             {% for produkto in products_favorite %}
-                            <div class="fav-item">
+                            <div class="fav-item" data-product-id="{{ produkto.id }}">
                                 <a href="{% url 'product_item' produkto.id %}"><img src="{{ produkto.image.url }}" width="40" height="40" alt="{{ produkto.product_name }}"></a>
                                 <div class="fav-meta">{{ produkto.product_name }}</div>
                                 <div class="fav-actions">
@@ -141,10 +141,16 @@
                 nav.classList.toggle('open');
             });
 
-            // Favorite dropdown
+            // Favorite dropdown / mobile redirect
             const favBtn = document.getElementById('favToggle');
             const favPanel = document.getElementById('favoriteDropdown');
             favBtn && favBtn.addEventListener('click', function(e){
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+                if (isMobile) {
+                    // On mobile, go to the favorites page instead of showing dropdown
+                    window.location.href = "{% url 'favorite' %}";
+                    return;
+                }
                 e.stopPropagation();
                 const open = favPanel.style.display === 'block';
                 favPanel.style.display = open ? 'none' : 'block';
@@ -169,9 +175,8 @@
             const userBtnMobile = document.getElementById('userToggleMobile');
             favBtnMobile && favBtnMobile.addEventListener('click', function(e){
                 e.stopPropagation();
-                // ensure nav overlay stays open
-                nav.classList.add('open');
-                favPanel && (favPanel.style.display = favPanel.style.display === 'block' ? 'none' : 'block');
+                // On mobile, redirect to the favorites page
+                window.location.href = "{% url 'favorite' %}";
             });
             userBtnMobile && userBtnMobile.addEventListener('click', function(e){
                 e.stopPropagation();

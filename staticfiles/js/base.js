@@ -81,30 +81,81 @@
     updateSlider();
 
 /* Favorites */
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.favorite_btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const productId = this.getAttribute('data-product-id');
-            const heartIcon = this.querySelector('.heart_favorite')
+/* Favorites: event delegation handles clicks on favorite buttons and dropdown remove buttons */
+document.addEventListener('click', function (e) {
+    // Favorite button on product cards
+    const favBtn = e.target.closest && e.target.closest('.favorite_btn');
+    if (favBtn) {
+        e.preventDefault();
+        const productId = favBtn.getAttribute('data-product-id');
 
-            fetch(`/toggle_favorite/${productId}/`, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'added') {
-                    heartIcon.src = "{% static 'images/icon/heart-blue.png' %}";
-                } else if (data.status === 'removed') {
-                    heartIcon.src = "{% static 'images/icon/heart-black.png' %}";
+        fetch(`/toggle_favorite/${productId}/`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'added') {
+                favBtn.classList.add('favorited');
 
-                    const card = this.closest('.favorites');
-                    if (card) card.remove(); 
+                const dropdown = document.getElementById('favoriteDropdown');
+                if (data.html && dropdown) {
+                    if (!dropdown.querySelector(`.fav-item[data-product-id="${data.product.id}"]`)) {
+                        dropdown.insertAdjacentHTML('afterbegin', data.html);
+                    }
+                } else if (data.product) {
+                    if (dropdown) {
+                        if (!dropdown.querySelector(`.fav-item[data-product-id="${data.product.id}"]`)) {
+                            const item = document.createElement('div');
+                            item.className = 'fav-item';
+                            item.setAttribute('data-product-id', data.product.id);
+                            item.innerHTML = `
+                                <img src="${data.product.img || ''}" alt="${data.product.name}">
+                                <div class="fav-details">${data.product.name}</div>
+                                <button class="fav-remove-btn" data-product-id="${data.product.id}">Remove</button>
+                            `;
+                            dropdown.prepend(item);
+                        }
+                    }
                 }
-            })
-            .catch(err => console.error('Error toggling favorite:', err));
-        });
-    });
+            } else if (data.status === 'removed') {
+                favBtn.classList.remove('favorited');
+
+                // remove from dropdown if present
+                const dropdown = document.getElementById('favoriteDropdown');
+                if (dropdown) {
+                    const card = dropdown.querySelector(`.fav-item[data-product-id="${productId}"]`);
+                    if (card) card.remove();
+                }
+            }
+        })
+        .catch(err => console.error('Error toggling favorite:', err));
+    }
+
+    // Remove button inside favorites dropdown
+    const removeBtn = e.target.closest && e.target.closest('.fav-remove-btn');
+    if (removeBtn) {
+        e.preventDefault();
+        const productId = removeBtn.getAttribute('data-product-id');
+
+        fetch(`/toggle_favorite/${productId}/`, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'removed') {
+                // remove the dropdown item
+                const item = removeBtn.closest('.fav-item');
+                if (item) item.remove();
+
+                // also update any open product cards on the page
+                const prodBtn = document.querySelector(`.favorite_btn[data-product-id="${productId}"]`);
+                if (prodBtn) prodBtn.classList.remove('favorited');
+            }
+        })
+        .catch(err => console.error('Error removing favorite from dropdown:', err));
+    }
 });
 
 

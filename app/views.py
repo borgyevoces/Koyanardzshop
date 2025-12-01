@@ -541,22 +541,38 @@ def toggle_favorite(request, product_id):
         return JsonResponse({"status": "error", "message": "Login required"}, status=401)
     
     product = get_object_or_404(Product, id=product_id)
+    # Keep a session-based list of favorites so the UI can persist per-user session
+    favs = request.session.get('favorites', [])
+    prod_id_str = str(product.id)
 
-    favorite, created = Favorite.objects.get_or_create(
-        favorite_product=product
-    )
-
-    if not created:
-        favorite.delete()
-        return JsonResponse({"status": "removed"})
+    if prod_id_str in favs:
+        # remove favorite
+        favs.remove(prod_id_str)
+        request.session['favorites'] = favs
+        # Also remove any global Favorite record if exists
+        Favorite.objects.filter(favorite_product=product).delete()
+        return JsonResponse({"status": "removed", "product": {"id": product.id}})
     else:
+        # add favorite
+        favs.append(prod_id_str)
+        request.session['favorites'] = favs
+        # create or ensure global Favorite exists for admin views (optional)
+        Favorite.objects.get_or_create(favorite_product=product)
+        # Render partial HTML for the new favorite item so frontend can insert it
+        html = ''
+        try:
+            html = render_to_string('app/partials/fav_item.html', {'product': product, 'request': request})
+        except Exception:
+            html = ''
+
         return JsonResponse({
             "status": "added",
             "product": {
                 "id": product.id,
                 "name": product.product_name,
                 "img": product.image.url if product.image else ""
-            }
+            },
+            "html": html
         })
 
 

@@ -3277,6 +3277,7 @@ footer .footer .footer_shop {
     .nav-list li{width:100%;border-bottom:1px solid rgba(255,255,255,0.06)}
     
     .nav-list a{display:flex;align-items:center;gap:.4rem;padding:.75rem 0.8rem;color:whitesmoke;width:100%;text-decoration:none;font-size:0.9rem}
+    .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{display:flex;align-items:center;gap:.4rem;padding:.75rem 0.8rem;color:whitesmoke;width:100%;text-decoration:none;font-size:0.9rem}
     .nav-list a:hover{
         background: whitesmoke; color:black;
     }
@@ -7711,6 +7712,7 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
     .product-title {
         width: 100%;
         margin-bottom: 0.3rem;
+        font-size: 2rem;
     }
     
     .product-title h1 {
@@ -8692,4 +8694,45 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
         font-size: 0.75rem !important;
         padding: 0.4rem !important;
     }
+}
+
+/* Favorites page responsive styles (appended) */
+.favoritespage {max-width: 900px; margin: 0 auto 3rem; }
+.favorite_bodybody { display: block; }
+.favorites { display: flex; gap: 1rem; align-items: center; padding: 1rem; background:#fff; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); margin-bottom:1rem; position:relative }
+.favorites_image { flex: 0 0 84px; display:flex; align-items:center; justify-content:center }
+.favorites_image img { width:84px; height:84px; object-fit:cover; border-radius:8px }
+.favorites_text { flex:1; display:flex; flex-direction:column; gap:.45rem }
+.favorites_text p { margin:0; font-weight:600; color:#0b4060 }
+.favorites_price p { margin:0; color:#0b84c6; font-weight:700 }
+.favorites_upper { position:absolute; right:12px; top:12px }
+.favorite_btn { background:#fff; border:0; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(11,64,96,0.06); cursor:pointer }
+.favorite_btn img { width:18px; height:18px }
+.favorites_actions { margin-top:6px }
+.add-to-cart-form { display:inline-block }
+.add-to-cart-text { background:#0b84c6; color:#fff; border:0; padding:.45rem .8rem; border-radius:6px; font-weight:600; cursor:pointer }
+
+/* Product card section (if present) - show Add to Cart as text instead of icon */
+.product-card .productcard-button form button, .product-card .productcard-button button { background:#0b84c6; color:#fff; border:0; padding:.5rem .8rem; border-radius:6px; font-weight:600 }
+
+/* Tablet: tighten spacing and make two-column list if desired */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .favoritespage{margin-top: 1.5rem; padding: 1rem;}
+    .favorite_bodybody h3{font-size: 2.5rem; margin: 1rem; text-align: center;}
+    .favorites { padding: 1rem; }
+    .favorites_image { flex: 0 0 96px }
+    .favorites_image img { width:96px; height:96px }
+}
+
+/* Mobile: stack image above details, keep trash on top-right */
+@media (max-width: 768px) {
+    .favorite_bodybody h3{font-size: 2rem; text-align: center; margin: 1rem;}
+    .favoritesbody{width: 100% !;}
+    .favorites { flex-direction:column; align-items:flex-start; padding: .8rem; }
+    .favorites_image { width:100%; justify-content:flex-start }
+    .favorites_image img { width:70%; height:auto; max-height:220px; border-radius:8px }
+    .favorites_upper { right:10px; top:8px }
+    .favorites_text { width:100% }
+    .favorite_btn { width:36px; height:36px }
+    .add-to-cart-text { width:100%; text-align:center }
 }
