@@ -3,69 +3,96 @@
 
 {% block content %}
     <div class="sellinginformationpage">
+        <style>
+            .sellinginformationpage section { padding: 60px 0; }
+            .sellinginfo_body { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+            .sellinginfo_left, .sellinginfo_right { width: 48%; }
+            .sellinginfo_left .icons { display: flex; flex-direction: column; gap: 20px; }
+            .sellinginfo_left .icon-row { display:flex; align-items:center; gap:18px; }
+            .sellinginfo_left .icon-row img { width:64px; height:64px; object-fit:contain; }
+            .sellinginfo_right img, .sellinginfo_left img.bg { max-width:100%; height:auto; display:block; border-radius:8px; }
+            .selling-cta { margin-top:24px; }
+            .selling-cta a { display:inline-block; padding:14px 28px; background:#072147; color:#fff; border-radius:40px; text-decoration:none; }
+
+            /* Tablet and Mobile responsive rules */
+            @media (max-width: 1024px) {
+                .sellinginfo_body { flex-direction: column; }
+                .sellinginfo_left, .sellinginfo_right { width:100%; }
+                .sellinginfo_left .icon-row img { width:56px; height:56px; }
+            }
+            @media (max-width: 600px) {
+                .sellinginfo_left .icon-row img { width:48px; height:48px; }
+                .sellinginformationpage section { padding: 28px 12px; }
+                .selling-cta a { width:100%; text-align:center; }
+            }
+        </style>
+
+        <!-- Section 1: Sell or Trade Your Device -->
         <section class="sellinginfo1">
-            <div class="sellinginfo1_body">
-                <div class="sellinginfo1_left">
-                    <div class="sellingleft_body1">
-                        <div class="sellingleft_bold1">
-                            <p>Got a device you no longer need? </br> Trade it in with ease. </p>
-                        </div>
-                        <div class="sellingleft_text1">
-                            <p>We make it simple and transparent for you to trade it in your laptops, desktops, or PC parts. Whether you’re upgrading or just clearing space, our in-person evaluation process ensures you get a fair deal.</p>
-                        </div>
+            <div class="sellinginfo_body">
+                <div class="sellinginfo_left">
+                    <h1>Sell or Trade Your Device</h1>
+                    <p>Turn your laptop, PC, or parts into cash or store credit. Send the details below and we'll give you a quick evaluation.</p>
+                    <div class="selling-cta">
+                        <a href="{% url 'selling' %}">Start Appointment</a>
                     </div>
                 </div>
-                <div class="sellinginfo1_right">
-                    <img src="{% static 'images/computer1.jpg' %}" alt="">
+                <div class="sellinginfo_right">
+                    <img src="{% static 'images/selling1-background.png' %}" alt="Sell or trade background" class="bg">
                 </div>
             </div>
         </section>
+
+        <!-- Section 2: We Accept -->
         <section class="sellinginfo2">
-            <div class="sellinginfo2_body">
-                <div class="sellinginfo2_upper">
-                    <h4>How It Works?</h4>
+            <div class="sellinginfo_body">
+                <div class="sellinginfo_left">
+                    <h2>We Accept:</h2>
+                    <div class="icons">
+                        <div class="icon-row">
+                            <img src="{% static 'images/icon/laptop-color.png' %}" alt="Laptop icon">
+                            <div> <strong>Laptops</strong></div>
+                        </div>
+                        <div class="icon-row">
+                            <img src="{% static 'images/icon/gaming.png' %}" alt="Desktop icon">
+                            <div> <strong>Desktops</strong></div>
+                        </div>
+                        <div class="icon-row">
+                            <img src="{% static 'images/icon/motherboard.png' %}" alt="Parts icon">
+                            <div> <strong>PC Parts (GPU, CPU, RAM, Storage)</strong></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="sellinginfo2_body2">
-                    <div class="sellingbody_bold2">
-                        <p>Fill Out The Trade-In Form</p>
-                    </div>
-                    <div class="sellingbody_text2">
-                        <p>Tell us about your device — brand, model, specs, and condition. Upload clear images and choose your preferred appointment time.</p>
-                        <p>Step 1: Tell Us About Your Device </br> Fill out a quick form with your device’s specs, condition, and photos.</p>
-                    </div>
-                </div>
-                <div class="sellinginfo2_bottom">
-                    <h4>Step</h4>
-                    <div class="sellinginfo2_step">
-                        <button>1</button>
-                        <button>2</button>
-                        <button>3</button>
-                    </div>
+                <div class="sellinginfo_right">
+                    <img src="{% static 'images/selling2-background.png' %}" alt="We accept background" class="bg">
                 </div>
             </div>
         </section>
+
+        <!-- Section 3: Please Prepare -->
         <section class="sellinginfo3">
-            <div class="sellinginfo3_body">
-                <div class="sellinginfo3_left">
-                    <img src="{% static 'images/computer2.jpg' %}" alt="">
+            <div class="sellinginfo_body">
+                <div class="sellinginfo_left">
+                    <img src="{% static 'images/selling3-background.png' %}" alt="Please prepare background" class="bg">
                 </div>
-                <div class="sellinginfo3_right">
-                    <div class="sellingright_bold3">
-                        <h4>What You Need?</h4>
+                <div class="sellinginfo_right">
+                    <h2>Please Prepare:</h2>
+                    <div class="icons">
+                        <div class="icon-row">
+                            <img src="{% static 'images/icon/picture.png' %}" alt="Clear photos icon">
+                            <div> <strong>Clear photos of the device</strong></div>
+                        </div>
+                        <div class="icon-row">
+                            <img src="{% static 'images/icon/product.png' %}" alt="Model/specs icon">
+                            <div> <strong>Model and specs</strong></div>
+                        </div>
+                        <div class="icon-row">
+                            <img src="{% static 'images/icon/computer-repair.png' %}" alt="Condition icon">
+                            <div> <strong>Condition (working / for repair)</strong></div>
+                        </div>
                     </div>
-                    <div class="sellingright_text3">
-                        <div class="sellingtext3_p">
-                            <img src="{% static 'images/icon/check-blue.png' %}" alt=""><p>Your device and/or accessories</p>
-                        </div>
-                        <div class="sellingtext3_p">
-                            <img src="{% static 'images/icon/check-blue.png' %}" alt=""><p>A valid ID</p>
-                        </div>
-                        <div class="sellingtext3_p">
-                            <img src="{% static 'images/icon/check-blue.png' %}" alt=""><p>A confirmed appointment</p>
-                        </div>
-                    </div>
-                    <div class="sellingright_bottom3">
-                        <a href="{% url 'selling' %}">Sell Now</a>
+                    <div class="selling-cta">
+                        <a href="{% url 'selling' %}">Book an Appointment</a>
                     </div>
                 </div>
             </div>
