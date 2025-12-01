@@ -404,6 +404,9 @@ footer .footer .footer_shop {
     .hp-hero-inner {
         gap: 2rem;
     }
+    .hero-media img{
+        width: 100%;
+    }
     
     .hero-copy h1 {
         font-size: 2.8rem;
@@ -3204,7 +3207,7 @@ footer .footer .footer_shop {
 @media (max-width: 768px) {
     /* Header/Nav tablet adjustments */
     .nav-toggle{display:block;background:transparent;border:none;color:inherit;cursor:pointer;padding:.4rem;margin-left:.5rem}
-    .header-inner{align-items:center;gap:.6rem;padding:.45rem 0}
+    .header-inner{align-items:center;gap:.6rem;padding:.45rem 1rem}
     .brand-link{display:flex;align-items:center;gap:.5rem}
     .header-inner .brand-text{display:none}
     .header-actions{display:none}
@@ -7301,7 +7304,7 @@ fieldset{
 .hero-media img{height:auto;}
 
 .hp-products{padding:2.5rem 0}
-.hp-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem; padding: 0 .5rem;}
+.hp-section-head{display:flex;align-items:center;justify-content:space-between; margin: 0 1rem 1.25rem 1rem;}
 .see-more:hover{text-decoration: underline;}
 .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 .card.product-card{position:relative;padding:0;border-radius:10px;overflow:hidden;border:1px solid #eef6fb;background:#fff}
@@ -7312,7 +7315,7 @@ fieldset{
 .card-title{font-size:1.02rem;margin:0 0 .4rem;color:#0b3b50;line-height:1.2; height: 2rem; }
 .price{font-weight:800;color:#0b84c6;margin-bottom:.3rem}
 .add-cart-form{margin:0}
-.btn-sm{width: 10rem; padding:.55rem .8rem;border-radius:.5rem;background:#0b84c6;color:#fff;border:0;font-weight:700; cursor: pointer;}
+.btn-sm{width: 100%; padding:.55rem .8rem;border-radius:.5rem;background:#0b84c6;color:#fff;border:0;font-weight:700; cursor: pointer;}
 
 /* Product list (legacy product page) container cards */
 .box{display:flex;flex-wrap:wrap;gap:1rem;padding:0}
@@ -7365,7 +7368,7 @@ fieldset{
 }
 @media (max-width: 768px){
     .hp-hero-inner{flex-direction:column-reverse;align-items:flex-start;gap:1.25rem}
-    .hero-media{text-align:left}
+    .hero-media{text-align:center; justify-items: center;}
     .product-grid{grid-template-columns:repeat(2,1fr)}
     .about-grid{grid-template-columns:1fr}
     .hero-copy h1{font-size:1.8rem}
@@ -7382,7 +7385,7 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
     .hero-copy .hero-break{letter-spacing: 1.75rem; font-size: 1.5rem;}
     .hero-copy .hero-breaks{letter-spacing: .65rem; font-size: 1.5rem;}
     .hero-copy .lead{font-size:.98rem; width: 100%;}
-    .hero-media{width:100%}
+    .hero-media{width:90%}
     .hero-features{flex-direction:column;gap:.6rem}
     .hero-copy{padding-right:0}
     .carousel-track article{padding-top:2rem;}
@@ -7468,7 +7471,7 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
 /* TABLET BREAKPOINT - 1024px and below */
 @media (max-width: 1024px) {
     .productpage {
-        padding: 1.5rem 0.8rem 5rem;
+        padding: 2.5rem 0.8rem 5rem;
     }
     
     .product-header {
