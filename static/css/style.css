@@ -3553,9 +3553,26 @@ footer .footer .footer_shop {
 }
 /* Responsive product-card adjustments */
 @media (max-width: 900px) {
-    .product-container{
-        justify-content: center;
-        gap: 1rem;
+                /* Mobile adjustments for selling page: put images above text where needed */
+                .selling-cta a { width:100%; text-align:center; }
+
+                /* For sections where the image is on the right (section1 & section2),
+                   reverse the column order so the image appears above the text on mobile. */
+                .sellinginfo1 .sellinginfo_body,
+                .sellinginfo2 .sellinginfo_body {
+                    flex-direction: column-reverse;
+                    align-items: center;
+                }
+
+                /* For section3 the markup already has image first, keep normal column order */
+                .sellinginfo3 .sellinginfo_body {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .sellinginfo_left, .sellinginfo_right { width:100%; }
+                .sellinginfo_left h3, .sellinginfo_left h2 { text-align:center; }
+                .sellinginfo_right img { margin: 1rem 0; max-width: 420px; }
     }
     .product-container .product-card{
         width: calc(50% - 1.2rem);
@@ -4589,204 +4606,35 @@ footer .footer .footer_shop {
 .sellinginformationpage{
     position: relative;
     display: block;
-    margin-bottom: 5.5rem;
-    background: linear-gradient(180deg,rgba(245, 245, 245, 1) 40%, rgba(32, 97, 130, 0.5) 100%);
+    padding: 2rem 1rem 6rem;
 }
-.sellinginfo1{
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.sellinginformationpage section { padding: 60px 0; }
+.sellinginfo_body { display: flex; align-items: center; justify-content: space-between; font-family: Montserrat; gap: 32px; 
+    /* container alignment: center content and match header horizontal padding */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
 }
-.sellinginfo1_body{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 80%;
-    height: 90%;
-    margin: 1rem 4rem;
-    margin-top: 2rem;
-    border-radius: .5rem;
-    background-color: white;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
-}
-.sellinginfo1_left{
-    display: block;
-}
-.sellingleft_body1{
-    width: 85%;
-    margin: 1rem 3rem;
-}
-.sellingleft_bold1{
-    margin-top: -2rem;
-    font-family: Montserrat;
-    color: #001A40;
-}
-.sellingleft_bold1 p{
-    font-size: 3.5rem;
-    font-weight: 500;
-}
-.sellingleft_text1{
-    margin-top: 2rem;
-    font-family: Afacad;
-}
-.sellingleft_text1 p{
-    font-size: 1.7rem;
-}
-.sellinginfo1_right{
-    
-}
-.sellinginfo1_right img{
-    width: 27rem;
-    height: 35rem;
-    opacity: .9;
-    margin-bottom: -.4rem;
-    border-radius:  0 .5rem .5rem 0;
-}
-.sellinginfo2{
-    display: block;
-    justify-items: center;
-    align-items: center;
-}
-.sellinginfo2_body{
-    justify-items: center;
-}
-.sellinginfo2_upper{
-    margin-top: 2rem;
-    text-align: center;
-    font-family: Montserrat;
-}
-.sellinginfo2_upper h4{
-    font-size: 4rem;
-    color: #001A40;
-}
-.sellinginfo2_body2{
-    display: block;
-    justify-content: space;
-    align-items: center;
-    width: 55%;
-    margin: 1rem 6rem;
-    border-radius: .5rem;
-    background-color: transparent;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
-}
-.sellingbody_bold2{
-    text-align: center;
-    font-family: Montserrat;
-    color: #1B1A1A;
-}
-.sellingbody_bold2 p{
-    padding: 2rem;
-    font-size: 2rem;
-}
-.sellingbody_text2{
-    margin: 1.5rem 2.5rem;
-    font-family: Afacad;
-}
-.sellingbody_text2 p{
-    padding-bottom: 2rem;
-    font-size: 1.75rem;
-}
-.sellingbody_text2 p:nth-child(2){
-    margin-top: 1rem;
-}
-.sellinginfo2_bottom{
-    text-align: center;
-}
-.sellinginfo2_bottom h4{
-    text-transform: uppercase;
-    font-family: Montserrat;
-    font-size: 2.5rem;
-    color: #333333;
-}
-.sellinginfo2_step{
-    display: flex;
-    margin-top: .3rem;
-    gap: 1.5rem;
-}
-.sellinginfo2_step button{
-    padding: .1rem .7rem;
-    font-family: Afacad;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 100%;
-    color: #333333;
-    background-color: #dfdfdf;
-    cursor: pointer;
-}
-.sellinginfo3{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem 0;
-}
-.sellinginfo3_body{
-    display: flex;
-    justify-content: space;
-    align-items: center;
-    width: 80%;
-    height: 90%;
-    margin: 1rem 4rem;
-    margin-top: 2rem;
-    border-radius: .5rem;
-    background-color: white;
-    box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
-}
-.sellinginfo3_left{
+.sellinginfo_left, .sellinginfo_right { width: 48%; }
+.sellinginfo_left .icons { display: flex; flex-direction: column; gap: 20px; }
+.sellinginfo_left .icon-row { display:flex; align-items:center; gap:18px; }
+.sellinginfo_left .icon-row img { width:64px; height:64px; object-fit:contain; }
+.sellinginfo_right img, .sellinginfo_left img.bg { max-width:100%; height:auto; display:block; border-radius:8px; }
+.selling-cta { margin-top:24px; }
+.selling-cta a { display:inline-block; padding:14px 28px; background:#072147; color:#fff; border-radius:40px; text-decoration:none; }
+.sellinginfo1 .sellinginfo_left h3{font-size: 2.5rem; color: #001A46;}
 
-}
-.sellinginfo3_left img{
-    width: 27rem;
-    height: 35rem;
-    opacity: .9;
-    margin-bottom: -.4rem;
-    border-radius: .5rem 0 0 .5rem;
-}
-.sellinginfo3_right{
-    margin:  1rem 6rem;
-    text-align: center;
-}
-.sellingright_bold3{
-    font-family: Montserrat;
-}
-.sellingright_bold3 h4{
-    font-size: 4rem;
-    color: #001A40;
-}
-.sellingright_text3{
-    margin-top: 2rem;
-    font-family: Afacad;
-}
-.sellingtext3_p{
-    display: flex;
-    padding: 1rem;
-}
-.sellingtext3_p img{
-    width: 1.5rem;
-    height: 1.5rem;
-}
-.sellingtext3_p p{
-    margin-top: -.5rem;
-    margin-left: .8rem;
-    padding-bottom: .5rem;
-    font-size: 2rem;
-}
-.sellingright_bottom3{
-    margin-top: 1rem;
-    text-align: right;
-}
-.sellingright_bottom3 a{
-    padding: .5rem 1.7rem;
-    text-decoration: none;
-    font-size: 1.8rem;
-    border-radius: 2rem;
-    color: white;
-    background-color: #001A40;
-}
-
-/* SELLING PAGE RESPONSIVE */
-/* SELLING PAGE - DESKTOP */
-/* SELLING PAGE */
+            /* Tablet and Mobile responsive rules */
+            @media (max-width: 1024px) {
+                .sellinginfo_body { flex-direction: column; }
+                .sellinginfo_left, .sellinginfo_right { width:100%; }
+                .sellinginfo_left .icon-row img { width:56px; height:56px; }
+            }
+            @media (max-width: 600px) {
+                .sellinginfo_left .icon-row img { width:48px; height:48px; }
+                .sellinginformationpage section { padding: 28px 12px; }
+                .selling-cta a { width:100%; text-align:center; }
+            }/* SELLING PAGE */
 .sellingpage {
     position: relative;
     display: block;
