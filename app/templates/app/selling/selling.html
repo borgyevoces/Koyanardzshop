@@ -33,33 +33,9 @@
             <div class="selling_right">
                 <form id="sellForm" method="POST" enctype="multipart/form-data" action="">
                     {% csrf_token %}
+
+                    <!-- STEP 1 (was previous step2): Personal Information -->
                     <div id="step1" class="step-box step-active" style="display: block;">
-                        <div class="sellingright_header">
-                            <h2>Terms and Agreement</h2>
-                            <p>Please read and accept our trade-in terms before submitting your request. This ensures transparency and sets expectations for the in-person evaluation.</p>
-                        </div>
-                        <div class="stepthree">
-                            <h3>Instructions:</h3>
-                            <p>Please read the following terms carefully. By checking the box below, you agree to comply with our trade-in guidelines.</p>
-                        </div>
-                        <div class="stepthree_instructions">
-                            <p>Terms & Conditions: </p>
-                            <p> 1. All items submitted for trade-in or selling must undergo in-person evaluation at our physical store.</br>
-                                2. You must present a valid government-issued ID during your appointment for verification.</br>
-                                3. Koya Nardz Computer Trading does not accept stolen, fake, or tampered devices. Legal action may be taken for fraudulent submissions.</br>
-                                4. Final pricing will be determined after inspection by our technician. Submitted specs and condition must be accurate.</br>
-                                5. Devices must be complete (e.g., charger, battery, if applicable), unless declared missing during submission.</br>
-                                6. Cosmetic damage or undisclosed issues may affect the final offer or result in rejection of the trade-in.</br>
-                                7. Appointments may be rescheduled or declined depending on store availability.</br>
-                            </p>
-                            {{ form.agree.errors }}
-                            <label>
-                                {{ form.agree }} I confirm that the information I provided is true and accurate, and I agree to the terms and conditions stated above.
-                            </label>
-                        </div>
-                        <button type="button" class="button" onclick="nextStep(1)">Next</button>
-                    </div>
-                    <div id="step2" class="step-box" style="display: none;">
                         <div class="sellingright_header">
                             <h2>Personal Information</h2>
                             <p>Enter your personal information to help us contact you and verify your identity. This will also be used to confirm your appointment schedule.</p>
@@ -94,9 +70,11 @@
                                 {{ form.selling_time }}
                             </div>
                         </div>
-                        <button type="button" class="button" id="buttton" onclick="nextStep(2)">Next</button>
+                        <button type="button" class="button" id="buttton" onclick="nextStep(1)">Next</button>
                     </div>
-                    <div id="step3" class="step-box" style="display: none;">
+
+                    <!-- STEP 2 (was previous step3): Product Information -->
+                    <div id="step2" class="step-box" style="display: none;">
                         <div class="sellingright_header">
                             <h2>Product Information</h2>
                             <p>Provide the details of the device you wish to sell or trade in. Accurate specifications and clear images will help us assess your item faster.</p>
@@ -122,6 +100,32 @@
                             <label>Product Description:</label>
                              {{ form.description }}
                         </div>
+                        <button type="button" class="button" onclick="nextStep(2)">Next</button>
+                    </div>
+
+                    <!-- STEP 3: Summary + Terms (was previous step1) -->
+                    <div id="step3" class="step-box" style="display: none;">
+                        <div class="sellingright_header">
+                            <h2>Summary & Terms</h2>
+                            <p>Review your submission below. Confirm the details and accept the terms to submit.</p>
+                        </div>
+
+                        <div id="summary_personal" class="step-summary">
+                            <h3>Personal Information</h3>
+                            <div id="summary_personal_content"></div>
+                        </div>
+
+                        <div id="summary_product" class="step-summary">
+                            <h3>Product Information</h3>
+                            <div id="summary_product_content"></div>
+                        </div>
+
+                        <!-- Summary only: show values from Step 1 & 2 -->
+                        <div id="summary_image" style="margin:1rem 0">
+                            <h4>Product Image Preview</h4>
+                            <div id="summary_image_container"></div>
+                        </div>
+
                         <div id="submit-error" style="color: red; margin-top: 10px; display: none;"></div>
                         <button type="button" class="button" onclick="submitForm()">Submit</button>
                     </div>
@@ -135,101 +139,42 @@
 
     function submitForm() {
         console.log("submitForm called");
-        
-        // Validate all steps before submitting
-        let allValid = true;
 
-        // Check Step 1: Checkbox must be checked
+        // Validate personal info (step1)
         const step1 = document.getElementById('step1');
-        const agreeCheckbox = step1.querySelector('input[type="checkbox"]');
-        console.log("Agree checkbox:", agreeCheckbox, "Checked:", agreeCheckbox ? agreeCheckbox.checked : false);
-        
-        if (!agreeCheckbox || !agreeCheckbox.checked) {
-            allValid = false;
-            alert("Please accept the terms and conditions in Step 1");
-            goToStep(1);
-            return;
+        const step1Fields = step1.querySelectorAll("[required]");
+        for (const field of step1Fields) {
+            if (!field.value.trim()) {
+                alert("Please fill in all required fields in Personal Information");
+                goToStep(1);
+                return;
+            }
         }
 
-        // Check Step 2: All personal info fields
+        // Validate product info (step2)
         const step2 = document.getElementById('step2');
         const step2Fields = step2.querySelectorAll("[required]");
-        console.log("Step2 required fields count:", step2Fields.length);
-        
-        step2Fields.forEach(field => {
-            console.log("Checking field:", field.name, "Value:", field.value);
+        for (const field of step2Fields) {
             if (!field.value.trim()) {
-                allValid = false;
+                alert("Please fill in all required fields in Product Information");
+                goToStep(2);
+                return;
             }
-        });
-
-        if (!allValid) {
-            alert("Please fill in all required fields in Step 2");
-            goToStep(2);
-            return;
         }
 
-        // Check Step 3: All product info fields
-        const step3 = document.getElementById('step3');
-        const errorDiv = document.getElementById('submit-error');
-        const existingErrors = step3.querySelectorAll(".error-message");
-        existingErrors.forEach(msg => msg.remove());
-
-        let step3Valid = true;
-        const fields = step3.querySelectorAll("[required]");
-        console.log("Step3 required fields count:", fields.length);
-
-        fields.forEach(field => {
-            console.log("Checking field:", field.name, "Value:", field.value.trim());
-            if (!field.value.trim()) {  
-                step3Valid = false;
-                const errorMessage = document.createElement("div");
-                errorMessage.classList.add("error-message");
-                errorMessage.style.color = "red";
-                errorMessage.style.marginTop = "5px";
-                errorMessage.textContent = `${field.placeholder || field.name || "This field"} is required`;
-                field.parentElement.appendChild(errorMessage);
-            }
-        });
-
-        if (!step3Valid) {
-            console.log("Step 3 validation failed");
-            errorDiv.textContent = "Please fill in all required fields";
-            errorDiv.style.display = "block";
-            return;
-        }
-
-        // If all validations pass, submit the form
-        console.log("All validations passed, submitting form now");
-        const form = document.getElementById('sellForm');
-        console.log("Form element:", form);
-        form.submit();
+        // All checks passed — submit the form
+        document.getElementById('sellForm').submit();
     }
 
     function nextStep(current) {
         const currentStepRight = document.getElementById(`step${current}`);
         const errorMessages = currentStepRight.querySelectorAll(".error-message");
         errorMessages.forEach(msg => msg.remove());
-
         let isValid = true;
         const fields = currentStepRight.querySelectorAll("[required]");
 
-        // Step 1: Check if checkbox is checked
-        if (current === 1) {
-            const agreeCheckbox = currentStepRight.querySelector('input[type="checkbox"]');
-            if (!agreeCheckbox || !agreeCheckbox.checked) {
-                isValid = false;
-                const errorMessage = document.createElement("div");
-                errorMessage.classList.add("error-message");
-                errorMessage.style.color = "red";
-                errorMessage.style.marginTop = "10px";
-                errorMessage.textContent = "You must agree to the terms and conditions to continue";
-                currentStepRight.appendChild(errorMessage);
-            }
-        }
-
         fields.forEach(field => {
-            if (!field.value.trim()) {  
+            if (!field.value.trim()) {
                 isValid = false;
                 const errorMessage = document.createElement("div");
                 errorMessage.classList.add("error-message");
@@ -260,6 +205,10 @@
         document.querySelector(`#step${stepNumber}`).classList.add("step-active");
         
         updateStepIndicators();
+        // If user navigates to the confirmation step, populate the summary immediately
+        if (stepNumber === 3) {
+            populateSummary();
+        }
     }
 
     function updateStepIndicators() {
@@ -280,7 +229,59 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         updateStepIndicators();
+        // populate summary when reaching step 3
+        document.querySelectorAll('.step-item').forEach(item => item.addEventListener('click', function(){
+            if (item.classList.contains('active') || item.classList.contains('completed')) {
+                const idx = Array.from(document.querySelectorAll('.step-item')).indexOf(item) + 1;
+                if (idx === 3) populateSummary();
+            }
+        }));
     });
+
+    function populateSummary(){
+        // Personal
+        const personalFields = ['first_name','last_name','contact','email','address','selling_date','selling_time'];
+        const personalContainer = document.getElementById('summary_personal_content');
+        personalContainer.innerHTML = '';
+        personalFields.forEach(name => {
+            const el = document.querySelector(`[name="${name}"]`);
+            if (el) {
+                const p = document.createElement('p');
+                p.textContent = `${el.name.replace('_',' ')}: ${el.value || '-'} `;
+                personalContainer.appendChild(p);
+            }
+        });
+
+        // Product
+        const productFields = ['product_name','price','description'];
+        const productContainer = document.getElementById('summary_product_content');
+        productContainer.innerHTML = '';
+        productFields.forEach(name => {
+            const el = document.querySelector(`[name="${name}"]`);
+            if (el) {
+                const p = document.createElement('p');
+                p.textContent = `${el.name.replace('_',' ')}: ${el.value || '-'} `;
+                productContainer.appendChild(p);
+            }
+        });
+
+        // Image preview
+        const imageInput = document.querySelector('[name="image"]');
+        const imageContainer = document.getElementById('summary_image_container');
+        imageContainer.innerHTML = '';
+        if (imageInput && imageInput.files && imageInput.files[0]) {
+            const file = imageInput.files[0];
+            const img = document.createElement('img');
+            img.style.maxWidth = '240px';
+            img.style.maxHeight = '240px';
+            img.style.objectFit = 'cover';
+            img.alt = 'Product image preview';
+            img.src = URL.createObjectURL(file);
+            imageContainer.appendChild(img);
+        } else {
+            imageContainer.textContent = 'No image selected';
+        }
+    }
 </script>
 
 {% endblock content %}
