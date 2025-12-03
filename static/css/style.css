@@ -153,6 +153,7 @@ header .header .navbar ul li .sellnav li a{
     display: block;
     padding: .7rem 1rem;
     text-decoration: none;
+    text-transform: uppercase;
     color: black;
     width: 7.5rem;
 }
