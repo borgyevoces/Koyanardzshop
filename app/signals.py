@@ -64,8 +64,12 @@ Koya Nardz Shop Team
                         'Authorization': f'Bearer {api_key}',
                         'Content-Type': 'application/json',
                     }
+                    # Include a sender name and validate the from_email format
                     payload = {
-                        'from': {'email': from_email},
+                        'from': {
+                            'email': from_email,
+                            'name': 'Koya Nardz Shop'
+                        },
                         'to': [{'email': recipient_email}],
                         'subject': subject,
                         'text': message,
@@ -94,12 +98,20 @@ Koya Nardz Shop Team
                         logger.error(f"Failed to send OTP email to {recipient_list}: {str(e)}")
 
                 # Choose MailerSend API if configured, otherwise use Django's send_mail
+                chosen_from = settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') and settings.DEFAULT_FROM_EMAIL else settings.EMAIL_HOST_USER
+                # Log and validate the chosen from address to help diagnose provider rejections
+                logger.info(f"OTP sending: chosen from_email='{chosen_from}' recipient='{instance.email}' for user={instance.username}")
+
                 if os.getenv('MAILERSEND_API_KEY', '').strip():
-                    threading.Thread(
-                        target=_send_via_mailersend,
-                        args=(subject, message, settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else settings.EMAIL_HOST_USER, instance.email),
-                        daemon=True
-                    ).start()
+                    # Basic validation: must contain an @ to be considered an email address
+                    if not chosen_from or '@' not in chosen_from:
+                        logger.error("MailerSend: invalid or missing DEFAULT_FROM_EMAIL/EMAIL_HOST_USER; set a valid sender email in Render env as DEFAULT_FROM_EMAIL and verify it in MailerSend dashboard")
+                    else:
+                        threading.Thread(
+                            target=_send_via_mailersend,
+                            args=(subject, message, chosen_from, instance.email),
+                            daemon=True
+                        ).start()
                 else:
                     threading.Thread(
                         target=_send_via_django,
