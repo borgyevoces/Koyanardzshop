@@ -20,6 +20,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
+import logging
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
@@ -741,13 +742,17 @@ def cancel_appointment(request, appointment_id):
         appointment.cancel_reason = reason
         appointment.save()
 
-        send_mail(
-            subject='Your Appointment Has Been Cancelled',
-            message=f"Hello {appointment.first_name},\n\nYour appointment (Ref: {appointment.reference_number}) has been cancelled.\n\nReason: {reason}\n\nThank you.",
-            from_email='koyanardzshop@gmail.com',
-            recipient_list=[appointment.email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject='Your Appointment Has Been Cancelled',
+                message=f"Hello {appointment.first_name},\n\nYour appointment (Ref: {appointment.reference_number}) has been cancelled.\n\nReason: {reason}\n\nThank you.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[appointment.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send cancellation email for appointment {appointment.id}: {e}")
 
         return JsonResponse({"success": True})
     return JsonResponse({"success": False}, status=400)
@@ -762,13 +767,17 @@ def cancel_trade(request, selling_id):
         selling.cancel_reason = reason
         selling.save()
 
-        send_mail(
-            subject='Your Trade Has Been Cancelled',
-            message=f"Hello {selling.first_name},\n\nYour appointment for trade (Ref: {selling.reference_number}) has been cancelled.\n\nReason: {reason}\n\nThank you.",
-            from_email='rlphjhnjhn@gmail.com',
-            recipient_list=[selling.email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject='Your Trade Has Been Cancelled',
+                message=f"Hello {selling.first_name},\n\nYour appointment for trade (Ref: {selling.reference_number}) has been cancelled.\n\nReason: {reason}\n\nThank you.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[selling.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send trade cancellation email for selling {selling.id}: {e}")
 
         return JsonResponse({"success": True})
     return JsonResponse({"success": False}, status=400)
@@ -1086,12 +1095,17 @@ class AppointmentCompletePage(TemplateView):
             }
         ) 
             
-        send_mail( 
-            subject=f"Appointment Confirmation – Ref #{appointment.reference_number}", 
-            message="", from_email=settings.EMAIL_HOST_USER, 
-            recipient_list=[appointment.email], 
-            html_message=email_html, 
-        )
+        # Send confirmation email, but don't let email failures produce a 500
+        try:
+            send_mail( 
+                subject=f"Appointment Confirmation – Ref #{appointment.reference_number}", 
+                message="", from_email=settings.EMAIL_HOST_USER, 
+                recipient_list=[appointment.email], 
+                html_message=email_html, 
+            )
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to send appointment confirmation email for appointment {appointment.id}: {e}")
             
         del request.session['appointment_data']
 

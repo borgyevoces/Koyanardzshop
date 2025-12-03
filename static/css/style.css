@@ -5409,7 +5409,7 @@ footer .footer .footer_shop {
 @media (max-width: 768px) {
     .sellingpage {
         padding: 0 !important;
-        margin: 0 !important;
+        margin: 3rem 0 !important;
     }
 
     .selling_body {
@@ -5417,6 +5417,7 @@ footer .footer .footer_shop {
         gap: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
+        height: 60rem !important;
     }
 
     .selling_left {
@@ -5436,7 +5437,7 @@ footer .footer .footer_shop {
         background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
         padding: 0.9rem 0.6rem !important;
         border-radius: 0 !important;
-        width: 100%;
+        width: calc(100% + 30rem);
     }
 
     .step-item {
@@ -5454,10 +5455,10 @@ footer .footer .footer_shop {
     }
 
     .step-circle {
-        width: 36px !important;
-        height: 36px !important;
+        width: 46px !important;
+        height: 46px !important;
         min-width: 36px !important;
-        font-size: 0.75rem !important;
+        font-size: 2.5rem !important;
         background: rgba(255, 255, 255, 0.2) !important;
         border: 2px solid rgba(255, 255, 255, 0.3) !important;
         display: flex !important;
@@ -5521,7 +5522,7 @@ footer .footer .footer_shop {
     }
 
     .selling_right .step-box {
-        width: 100% !important;
+        width: 90% !important;
         padding: 1rem !important;
         border-radius: 0 !important;
         background: #fff !important;
@@ -5650,13 +5651,14 @@ footer .footer .footer_shop {
     }
 
     .button {
-        width: 100% !important;
+        width: 95% !important;
+        height: 3.5rem !important;
         padding: 0.75rem 1rem !important;
         margin-top: 1rem !important;
         margin-bottom: 0 !important;
         font-size: 1rem !important;
         font-weight: 600 !important;
-        background: #0b84c6 !important;
+        background: #033f63 !important;
         color: white !important;
         border: none !important;
         border-radius: 4px !important;
@@ -5957,7 +5959,7 @@ footer .footer .footer_shop {
         margin-bottom: 0 !important;
         font-size: 0.9rem !important;
         font-weight: 600 !important;
-        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
+        background: #033f63 !important;
         color: white !important;
         border: none !important;
         border-radius: 3px !important;
