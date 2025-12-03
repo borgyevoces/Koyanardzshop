@@ -2587,7 +2587,7 @@ footer .footer .footer_shop {
 }
 .checkout_left_wrapper{
     position: relative;
-    width: 50%;
+    width: 60%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2631,22 +2631,23 @@ footer .footer .footer_shop {
     display: -ms-flexbox;
     display: flex;
     -webkit-box-pack: justify;
-        -ms-flex-pack: justify;
-            justify-content: space-between;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
     -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    width: 100%;
+    -ms-flex-align: center;
+    align-items: center;
+    margin-left: 15rem;
+    width: calc(55% + 5rem);
     top: 50%;
     -webkit-transform: translateY(-50%);
-        -ms-transform: translateY(-50%);
-            transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
 }
 
 .checkout_nav_buttons button{
     padding: 5px 10px;
     font-size: 1.5rem;
-    color: gray;
+    color: black;
     border: none;
     background-color: transparent;
     cursor: pointer;
@@ -2655,7 +2656,7 @@ footer .footer .footer_shop {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 50%;
+    width: 40%;
     justify-content: flex-start;
     padding-top: 2rem;
     overflow-y: auto;
@@ -2720,7 +2721,7 @@ footer .footer .footer_shop {
     height: 2.5rem;
     font-size: 1.2rem;
     color: whitesmoke;
-    background-color: #3498db;
+    background-color: #033f63;
     border: none;
     border-radius: 2rem;
 }
@@ -2747,17 +2748,25 @@ footer .footer .footer_shop {
     display: flex;
     -webkit-box-pack: justify;
         -ms-flex-pack: justify;
-            justify-content: space-between;
     -webkit-box-align: center;
         -ms-flex-align: center;
             align-items: center;
     padding: .1rem;
 }
+.checkoutright_bodybody p:nth-child(1){
+    width: 18rem;
+    max-width: 18rem;
+    min-width: 18rem;
+    text-align: left;
+    border: none;
+    font-size: 1.1rem;
+    overflow: hidden;
+    color: black;
+}
 .checkoutright_bodybody p{
     text-align: left;
     border: none;
     font-size: 1.1rem;
-    margin-right: 1.2rem;
     overflow: hidden;
     color: black;
 }
@@ -2776,6 +2785,7 @@ footer .footer .footer_shop {
     width: 1.5rem;
     height: 1rem;
     margin-top: -.3rem;
+    margin-left: 1rem;
     color: black;
     background-color: transparent;
     cursor: pointer;
@@ -2859,14 +2869,36 @@ footer .footer .footer_shop {
     .checkoutright_uppertitle p {
         font-size: 2rem;
     }
+    .checkoutright_upperbody .checkoutupper_bodyleft p, .checkoutupper_bodyright p{
+        font-size: 1.5rem !important;
+    }
+        
     
     .checkoutright_bodyupper {
         padding: 0.5rem 0;
     }
     
     .checkoutright_bodyupper p {
-        font-size: 1rem;
+        font-weight:600;
+        font-size: 1.7rem;
         margin-right: 1rem;
+    }
+    .checkoutright_bodybody p:nth-child(1){
+        width: 27rem !important;
+        max-width: 27rem !important;
+        min-width: 27rem !important;
+    }
+    .checkoutright_bodybody p:nth-child(3){
+        margin-left: 2rem;
+    }
+    .checkoutright_bodybody p{
+        font-size: 1.5rem !important;
+    }
+    .checkoutright_body form button{
+        width: 20rem;
+        height: 3.5rem;
+        margin-bottom: 1rem;
+        font-size: 1.7rem;
     }
 }
 
@@ -2919,7 +2951,7 @@ footer .footer .footer_shop {
     }
     
     .checkoutright_upperbody {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.5rem;
         padding: 0.3rem 0.5rem;
     }
@@ -7678,7 +7710,7 @@ footer .footer .footer_shop {
     }
     
     .alert {
-        margin-top: -1rem;
+        margin-top: -1.5rem;
         font-size: 0.75rem;
     }
     
