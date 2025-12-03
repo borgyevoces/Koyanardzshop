@@ -154,6 +154,10 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'koyanardzshop@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'cmbfctwxszqwjqwe')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() in ('1', 'true', 'yes')
+# Timeout (seconds) for SMTP connection attempts. Prevents blocking the worker
+# indefinitely when the SMTP host is unreachable (which caused Gunicorn worker
+# timeouts and process exits in production). Can be overridden via env var.
+EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', 10))
 
 # Mailgun (via Anymail) support - set these env vars on Render when using Mailgun:
 # MAILGUN_API_KEY and MAILGUN_DOMAIN

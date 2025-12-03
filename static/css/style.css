@@ -2201,12 +2201,13 @@ footer .footer .footer_shop {
     }
     
     .appointment_body .appointment_right p {
-        font-size: 1.3rem;
+        font-size: 2rem;
         padding: 0.5rem 0;
+        color: #033f63;
     }
     
     .apppointment_rightform {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.5rem;
     }
     
@@ -2314,19 +2315,20 @@ footer .footer .footer_shop {
     }
     
     .appointment_body .appointment_right p {
-        font-size: 1.1rem;
+        font-size: 1.5rem;
         padding: 0.4rem 0;
     }
     
     .apppointment_rightform {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0;
     }
     
     .appointment_body .appointment_right img {
         width: 1.8rem;
         margin-left: 0;
-        padding: 0.6rem 0;
+        margin-right: .3rem;
+        padding: 0.8rem;
     }
     
     .appointment_body .appointment_right form p input {
@@ -2335,6 +2337,7 @@ footer .footer .footer_shop {
         padding: 0.6rem;
         margin: 0.4rem 0;
         font-size: 0.95rem;
+        gap: .5rem;
     }
     
     .time-dropdown {
@@ -2420,14 +2423,13 @@ footer .footer .footer_shop {
     }
     
     .appointment_body .appointment_right p {
-        font-size: 1rem;
+        font-size: 1.5rem;
     }
     
     .appointment_body .appointment_right img {
         width: 1.6rem;
         padding: 0.5rem 0;
     }
-    
     .appointment_body .appointment_right form p input {
         height: 2rem;
         padding: 0.5rem;
@@ -2470,7 +2472,6 @@ footer .footer .footer_shop {
     display: block;
     min-height: calc(100vh - 5rem);
     padding-top: 1rem;
-    padding-bottom: 2rem;
     background: -webkit-gradient(linear,left top, right top,from(rgba(138, 187, 223, 1)), color-stop(0%, rgba(138, 187, 223, 1)), color-stop(60%, rgba(255, 255, 255, 1)));
     background: -o-linear-gradient(left,rgba(138, 187, 223, 1) 0%, rgba(138, 187, 223, 1) 0%, rgba(255, 255, 255, 1) 60%);
     background: linear-gradient(90deg,rgba(138, 187, 223, 1) 0%, rgba(138, 187, 223, 1) 0%, rgba(255, 255, 255, 1) 60%);
@@ -2667,6 +2668,7 @@ footer .footer .footer_shop {
     font-family: Afacad;
     font-size: 2rem;
     text-transform: uppercase;
+    color: #033f63;
 }
 .checkoutright_upperbody{
     display: -webkit-box;
@@ -2704,12 +2706,14 @@ footer .footer .footer_shop {
     font-size: 2rem;
     text-transform: uppercase;
     border-top: 1px solid gray;
+    color: #033f63;
 }
 .checkoutright_body{
     display: block;
     -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    color: black;
 }
 .checkoutright_body form button{
     width: 15rem;
@@ -2735,6 +2739,7 @@ footer .footer .footer_shop {
     border: none;
     font-size: 1.5rem;
     margin-right: 2.7rem;
+    color: black;
 }
 .checkoutright_bodybody{
     display: -webkit-box;
@@ -2754,6 +2759,7 @@ footer .footer .footer_shop {
     font-size: 1.1rem;
     margin-right: 1.2rem;
     overflow: hidden;
+    color: black;
 }
 .checkoutright_bodybody form .text_quantity{
     display: -webkit-box;
@@ -2798,6 +2804,7 @@ footer .footer .footer_shop {
     text-align: left;
     border: none;
     font-size: 1.5rem;
+    color: black;
 }
 
 /* CHECKOUT RESPONSIVE - TABLET (1024px) */
@@ -2850,7 +2857,7 @@ footer .footer .footer_shop {
     }
     
     .checkoutright_uppertitle p {
-        font-size: 1.4rem;
+        font-size: 2rem;
     }
     
     .checkoutright_bodyupper {
@@ -7671,6 +7678,7 @@ footer .footer .footer_shop {
     }
     
     .alert {
+        margin-top: -1rem;
         font-size: 0.75rem;
     }
     
