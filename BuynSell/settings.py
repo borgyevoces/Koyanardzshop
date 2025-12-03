@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
 ]
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -152,6 +153,21 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'koyanardzshop@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'cmbfctwxszqwjqwe')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() in ('1', 'true', 'yes')
+
+# Mailgun (via Anymail) support - set these env vars on Render when using Mailgun:
+# MAILGUN_API_KEY and MAILGUN_DOMAIN
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY', '').strip()
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', '').strip()
+if MAILGUN_API_KEY:
+    # ensure Anymail is available
+    if 'anymail' not in INSTALLED_APPS:
+        INSTALLED_APPS.append('anymail')
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+    ANYMAIL = {
+        'MAILGUN_API_KEY': MAILGUN_API_KEY,
+        'MAILGUN_SENDER_DOMAIN': MAILGUN_DOMAIN or None,
+    }
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

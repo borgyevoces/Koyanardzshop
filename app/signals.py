@@ -1,5 +1,7 @@
 from django.db.models.signals import post_save
 from django.conf import settings
+import os
+import requests
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -51,8 +53,34 @@ Best regards,
 Koya Nardz Shop Team
                 """
                 
-                # Send the OTP email asynchronously to avoid blocking the request thread
-                def _send_async_mail(subject, message, from_email, recipient_list):
+                # Helper to send via MailerSend HTTP API
+                def _send_via_mailersend(subject, message, from_email, recipient_email):
+                    api_key = os.getenv('MAILERSEND_API_KEY', '').strip()
+                    if not api_key:
+                        raise RuntimeError('MAILERSEND_API_KEY not configured')
+
+                    url = 'https://api.mailersend.com/v1/email'
+                    headers = {
+                        'Authorization': f'Bearer {api_key}',
+                        'Content-Type': 'application/json',
+                    }
+                    payload = {
+                        'from': {'email': from_email},
+                        'to': [{'email': recipient_email}],
+                        'subject': subject,
+                        'text': message,
+                    }
+                    try:
+                        resp = requests.post(url, json=payload, headers=headers, timeout=10)
+                        if resp.status_code not in (200, 201, 202):
+                            logger.error(f"MailerSend API returned {resp.status_code}: {resp.text}")
+                        else:
+                            logger.info(f"MailerSend: email queued/sent to {recipient_email} for user {instance.username}")
+                    except Exception as e:
+                        logger.error(f"Failed to send via MailerSend to {recipient_email}: {e}")
+
+                # Fallback helper using Django send_mail (kept as threaded to avoid blocking)
+                def _send_via_django(subject, message, from_email, recipient_list):
                     try:
                         send_mail(
                             subject,
@@ -65,8 +93,16 @@ Koya Nardz Shop Team
                     except Exception as e:
                         logger.error(f"Failed to send OTP email to {recipient_list}: {str(e)}")
 
-                threading.Thread(
-                    target=_send_async_mail,
-                    args=(subject, message, settings.EMAIL_HOST_USER, [instance.email]),
-                    daemon=True
-                ).start()
+                # Choose MailerSend API if configured, otherwise use Django's send_mail
+                if os.getenv('MAILERSEND_API_KEY', '').strip():
+                    threading.Thread(
+                        target=_send_via_mailersend,
+                        args=(subject, message, settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else settings.EMAIL_HOST_USER, instance.email),
+                        daemon=True
+                    ).start()
+                else:
+                    threading.Thread(
+                        target=_send_via_django,
+                        args=(subject, message, settings.EMAIL_HOST_USER, [instance.email]),
+                        daemon=True
+                    ).start()
