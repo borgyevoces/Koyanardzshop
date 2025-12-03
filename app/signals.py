@@ -3,6 +3,7 @@ from django.conf import settings
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.utils import timezone
+import threading
 from .models import OtpToken
 import logging
 
@@ -50,15 +51,22 @@ Best regards,
 Koya Nardz Shop Team
                 """
                 
-                try:
-                    send_mail(
-                        subject,
-                        message,
-                        settings.EMAIL_HOST_USER,
-                        [instance.email],
-                        fail_silently=False,
-                    )
-                    logger.info(f"OTP email sent successfully to {instance.email} for user {instance.username}")
-                except Exception as e:
-                    logger.error(f"Failed to send OTP email to {instance.email}: {str(e)}")
-                    # Don't raise the exception - let the user know about it through another mechanism if needed
+                # Send the OTP email asynchronously to avoid blocking the request thread
+                def _send_async_mail(subject, message, from_email, recipient_list):
+                    try:
+                        send_mail(
+                            subject,
+                            message,
+                            from_email,
+                            recipient_list,
+                            fail_silently=False,
+                        )
+                        logger.info(f"OTP email sent successfully to {recipient_list} for user {instance.username}")
+                    except Exception as e:
+                        logger.error(f"Failed to send OTP email to {recipient_list}: {str(e)}")
+
+                threading.Thread(
+                    target=_send_async_mail,
+                    args=(subject, message, settings.EMAIL_HOST_USER, [instance.email]),
+                    daemon=True
+                ).start()
