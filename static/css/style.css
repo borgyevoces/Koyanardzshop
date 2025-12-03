@@ -7698,7 +7698,8 @@ footer .footer .footer_shop {
     display: block;
     justify-items: center;
     text-align: center;
-    top: 10rem;
+    top: 4rem;
+    margin-bottom: 5rem
 }
 .forgotpassword_body{
     display: block;
