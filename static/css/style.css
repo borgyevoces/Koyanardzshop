@@ -24,7 +24,7 @@ header{
     position: fixed;
     display: flex;
     align-items: center;
-    background-color: #4F9FBA;
+    background-color: #3583D1;
     width: 100%;
     top: 0;
     z-index: 2;
@@ -288,9 +288,8 @@ footer .footer .footer_shop {
 .hp-hero {
     margin-top: -3rem;
     padding: 4rem 1rem;
-    background: #CF7EDD;
-    background: linear-gradient(240deg, rgba(207, 126, 221, 1) 0%, rgba(226, 177, 234, 1) 50%, rgba(255, 255, 255, 1) 100%);
-    min-height: 600px;
+    background: #4F9FBA;
+    background: linear-gradient(300deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221, 0.5) 60%);min-height: 600px;
     display: flex;
     align-items: center;
 }
@@ -3584,7 +3583,7 @@ footer .footer .footer_shop {
                 .sellinginfo_right img { margin: 1rem 0; max-width: 420px; }
     }
     .product-container .product-card{
-        width: calc(50% - 1.2rem);
+        width: calc(50% rem);
         margin: 1rem 0.6rem;
         height: auto;
         padding: .8rem;
@@ -4614,11 +4613,9 @@ footer .footer .footer_shop {
 .sellinginformationpage{
     position: relative;
     display: block;
-    padding: 2rem 1rem 6rem;
 }
-.sellinginformationpage section { padding: 60px 0; }
-.sellinginfo_body { display: flex; align-items: center; justify-content: space-between; font-family: Montserrat; gap: 32px; 
-    /* container alignment: center content and match header horizontal padding */
+.sellinginformationpage section { padding: 30px 0; }
+.sellinginfo_body { display: flex; align-items: center; justify-content: space-between; font-family: Montserrat; gap: 32px;
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
@@ -4629,25 +4626,62 @@ footer .footer .footer_shop {
 .sellinginfo_left .icon-row img { width:64px; height:64px; object-fit:contain; }
 .sellinginfo_right img, .sellinginfo_left img.bg { max-width:100%; height:auto; display:block; border-radius:8px; }
 .selling-cta { margin-top:24px; }
-.selling-cta a { display:inline-block; padding:14px 28px; background:#072147; color:#fff; border-radius:40px; text-decoration:none; }
-.sellinginfo1 .sellinginfo_left h3{font-size: 2.5rem; color: #072147;}
+.selling-cta a { display:inline-block; padding:16px 28px; text-transform: uppercase; background:#072147; color:#fff; border-radius:40px; text-decoration:none; }
+.selling-cta a:hover{background-color: #084f7f;}
+.sellinginfo1 .sellinginfo_left{width: 40%;}
+.sellinginfo1 .sellinginfo_left h3{font-weight: 400; font-size: 2.8rem; color: #072147;}
+.sellinginfo1 .sellinginfo_left p{width: 85%; font-size: 1.2rem; padding: 1rem 0; color:#333;}
+.sellinginfo3 .sellinginfo_body .sellinginfo_right{justify-items: center;}
 
-            /* Tablet and Mobile responsive rules */
-            @media (max-width: 1024px) {
-                .sellinginfo_body { flex-direction: column; }
-                .sellinginfo_left, .sellinginfo_right { width:100%; }
-                .sellinginfo_left .icon-row img { width:56px; height:56px; }
-            }
-            @media (max-width: 600px) {
-                .sellinginfo_left .icon-row img { width:48px; height:48px; }
-                .sellinginformationpage section { padding: 28px 12px; }
-                .selling-cta a { width:100%; text-align:center; }
-            }/* SELLING PAGE */
+
+@media (max-width: 1024px) {
+    .sellinginfo_body { flex-direction: column; }
+    .sellinginfo_left, .sellinginfo_right { width:100%; }
+    .sellinginfo_left .icon-row img { width:56px; height:56px; }
+}
+@media (max-width: 768px) {
+    .icons .icon-row img { width:88px; height:88px; }
+    .sellinginfo1 .sellinginfo_left{width: 100%;}
+    .sellinginfo1 .sellinginfo_left h3{font-size: 3rem;}
+    .sellinginfo1 .sellinginfo_left p{width: 100%; padding: 1rem 3rem; font-size: 1.5rem;}
+    .sellinginfo1 .sellinginfo_left .selling-cta a{width: 50%; margin-left: 3rem; font-size: 1.5rem;}
+    .sellinginfo2 .sellinginfo_left h2{font-size: 3rem;}
+    .sellinginfo2 .sellinginfo_left .icons{width: 80%; padding: 3rem 0;}
+    .sellinginfo2 .sellinginfo_left .icons .icon-row{justify-content: center;}
+    .sellinginfo2 .sellinginfo_left .icons .icon-row strong{font-size: 2rem;}
+    .sellinginfo3 .sellinginfo_right h2{font-size: 3rem;}
+    .sellinginfo3 .sellinginfo_right .icons{width: 60%;}
+    .sellinginfo3 .sellinginfo_right .icons .icon-row{display: flex; align-items: center;}
+    .sellinginfo3 .sellinginfo_right .icons .icon-row img{margin: 0 2rem;}
+    .sellinginfo3 .sellinginfo_right .icons .icon-row strong{font-size: 1.5rem;}
+}
+@media (max-width: 600px) {
+    .sellinginfo_left .icon-row img { width:48px; height:48px; }
+    .sellinginformationpage section { padding: 28px 12px; }
+    .selling-cta a { width:100%; text-align:center; }
+}
+@media (max-width: 520px){
+    .sellinginfo_body {width: 100%; padding: 0;}
+    .icons .icon-row img { width:48px; height:48px; }
+    .sellinginfo1 .sellinginfo_left{width: 80%; text-align: center;}
+    .sellinginfo1 .sellinginfo_left h3{display: inline-block; text-align: left; font-size: 2rem;}
+    .sellinginfo1 .sellinginfo_left p{padding: 1rem 0; text-align: left; font-size: 1.2rem;}
+    .sellinginfo1 .sellinginfo_left .selling-cta a{width: 100%; margin-left: 0; font-size: 1.2rem;}
+    .sellinginfo2 .sellinginfo_left h2{font-size: 1.7rem;}
+    .sellinginfo2 .sellinginfo_left .icons{padding-bottom: 0;}
+    .sellinginfo2 .sellinginfo_left .icons .icon-row strong{font-weight: 400; font-size: 1.2rem;;}
+    .sellinginfo3 .sellinginfo_right h2{font-size: 1.5rem; margin: 1rem;}
+    .sellinginfo3 .sellinginfo_right .icons{width: 80%;}
+    .sellinginfo3 .sellinginfo_right .icons .icon-row strong{font-weight: 400; font-size: 1rem;}
+}
+
+/* SELLING PAGE */
 .sellingpage {
     position: relative;
     display: block;
     justify-items: center;
-    margin: 7rem;
+    margin-top: 7rem;
+    margin-bottom: 2rem;
 }
 
 .selling_body {
@@ -4831,7 +4865,7 @@ footer .footer .footer_shop {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #0b84c6;
+    border-color: #033f63;
     background: white;
     box-shadow: 0 0 12px rgba(11, 132, 198, 0.25);
 }
@@ -4941,7 +4975,7 @@ footer .footer .footer_shop {
 }
 
 .button {
-    background: linear-gradient(135deg, #0b84c6, #0971a3);
+    background: #033f63;
     color: white;
     padding: 0.7rem 1.5rem;
     border: none;
@@ -4955,10 +4989,12 @@ footer .footer .footer_shop {
     display: inline-block;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 15px rgba(11, 132, 198, 0.3);
 }
 #buttton{
-    margin-top: -1rem;
+    margin-top: -1.5rem;
+}
+.butttton{
+    margin-top: 2rem !important;
 }
 .button:hover {
     transform: translateY(-3px);
@@ -4981,12 +5017,15 @@ footer .footer .footer_shop {
 @media (max-width: 1024px) {
     .sellingpage {
         padding: 1.5rem 0.8rem;
+        margin: 3rem 0;
+        align-items: center;
     }
     
     .selling_body {
         grid-template-columns: 1fr 2fr;
+        width: 95%;
         max-width: 1100px;
-        min-height: 48rem;
+        min-height: 35rem;
         border-radius: 14px;
     }
     
@@ -5017,7 +5056,7 @@ footer .footer .footer_shop {
     }
     
     .button {
-        padding: 0.9rem 2rem;
+        padding: 0.5rem 1rem;
         font-size: 0.95rem;
     }
 }
@@ -5364,6 +5403,759 @@ footer .footer .footer_shop {
         margin-top: 0.6rem;
     }
 }
+/* ========== SELLING PAGE RESPONSIVE ========== */
+
+/* TABLET - 768px and below */
+@media (max-width: 768px) {
+    .sellingpage {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .selling_body {
+        flex-direction: column;
+        gap: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .selling_left {
+        width: 100%;
+        order: -1;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .selling_steps {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 0.8rem !important;
+        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
+        padding: 0.9rem 0.6rem !important;
+        border-radius: 0 !important;
+        width: 100%;
+    }
+
+    .step-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 0.3rem !important;
+        flex-shrink: 0 !important;
+        min-width: 60px !important;
+        text-align: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        cursor: pointer;
+        position: relative !important;
+    }
+
+    .step-circle {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        font-size: 0.75rem !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-weight: bold !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 2 !important;
+        position: relative !important;
+    }
+
+    .step-circle.completed {
+        background: rgba(76, 175, 80, 0.3) !important;
+        border-color: rgba(76, 175, 80, 0.5) !important;
+    }
+
+    .step-circle.active {
+        background: rgba(255, 255, 255, 0.4) !important;
+        border-color: white !important;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .step-label {
+        font-size: 0.65rem !important;
+        line-height: 1.1 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 0 !important;
+        color: white !important;
+        font-weight: 500 !important;
+        display: none !important;
+        width: 100% !important;
+    }
+
+    .step-line {
+        display: block !important;
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: calc(50% + 18px) !important;
+        right: calc(-50% - 18px) !important;
+        height: 2px !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        z-index: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .step-item:last-child .step-line {
+        display: none !important;
+    }
+
+    .selling_right {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .selling_right .step-box {
+        width: 100% !important;
+        padding: 1rem !important;
+        border-radius: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+
+    .sellingright_header {
+        margin-bottom: 1rem !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .sellingright_header h2 {
+        font-size: 1.2rem !important;
+        margin: 0 0 0.4rem 0 !important;
+        padding: 0 !important;
+        color: #0a6fa6;
+    }
+
+    .sellingright_header p {
+        font-size: 0.9rem !important;
+        color: #666;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree {
+        margin-bottom: 0.8rem !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree h3 {
+        font-size: 1.05rem !important;
+        margin: 0 0 0.4rem 0 !important;
+        padding: 0 !important;
+        color: #0a6fa6;
+    }
+
+    .stepthree p {
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree_instructions {
+        margin: 0.8rem 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree_instructions p {
+        font-size: 0.9rem !important;
+        line-height: 1.4 !important;
+        margin-bottom: 0.8rem !important;
+        padding: 0 !important;
+    }
+
+    .stepthree_instructions label {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 0.5rem !important;
+        font-size: 0.9rem !important;
+        margin-top: 0.8rem !important;
+        padding: 0 !important;
+    }
+
+    .stepthree_instructions input[type="checkbox"] {
+        margin-top: 0.3rem !important;
+        min-width: 18px !important;
+        width: 18px !important;
+        height: 18px !important;
+        cursor: pointer;
+    }
+
+    .form-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 0.9rem !important;
+        margin-bottom: 0.8rem !important;
+        padding: 0 !important;
+    }
+
+    .form-group {
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .form-group label {
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.4rem !important;
+        padding: 0 !important;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.65rem 0.75rem !important;
+        border: 1px solid #033f63 !important;
+        border-radius: 4px !important;
+        font-size: 0.95rem !important;
+        font-family: inherit !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none !important;
+        border-color: #0b84c6 !important;
+        box-shadow: 0 0 0 3px rgba(11, 132, 198, 0.1) !important;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .button {
+        width: 100% !important;
+        padding: 0.75rem 1rem !important;
+        margin-top: 1rem !important;
+        margin-bottom: 0 !important;
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+        background: #0b84c6 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        transition: background 0.2s ease !important;
+        display: block !important;
+    }
+
+    .button:hover {
+        background: #0a6fa6 !important;
+    }
+
+    .button:active {
+        transform: scale(0.98) !important;
+    }
+
+    .error-message {
+        color: #dc3545 !important;
+        font-size: 0.85rem !important;
+        margin-top: 0.4rem !important;
+    }
+
+    #submit-error {
+        background: #f8d7da !important;
+        border: 1px solid #f5c6cb !important;
+        border-radius: 4px !important;
+        padding: 0.75rem !important;
+        color: #721c24 !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* MOBILE - 520px and below */
+@media (max-width: 520px) {
+    .sellingpage {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
+    .selling_body {
+        flex-direction: column;
+        gap: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100%;
+    }
+
+    .selling_left {
+        width: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        order: -1;
+    }
+
+    .selling_steps {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 0.6rem !important;
+        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
+        padding: 0.7rem 0.5rem !important;
+        border-radius: 0 !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        width: 100%;
+        margin: 0 !important;
+        position: relative !important;
+    }
+
+    .step-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.2rem !important;
+        flex-shrink: 0 !important;
+        min-width: 55px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        cursor: pointer;
+        position: relative !important;
+    }
+
+    .step-circle {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        font-size: 0.7rem !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-weight: bold !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 2 !important;
+        position: relative !important;
+    }
+
+    .step-circle.completed {
+        background: rgba(76, 175, 80, 0.3) !important;
+        border-color: rgba(76, 175, 80, 0.5) !important;
+    }
+
+    .step-circle.active {
+        background: rgba(255, 255, 255, 0.4) !important;
+        border-color: white !important;
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .step-check {
+        display: none !important;
+    }
+
+    .step-number {
+        display: block !important;
+    }
+
+    .step-label {
+        font-size: 0.55rem !important;
+        line-height: 1 !important;
+        margin-top: 0.2rem !important;
+        margin-bottom: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 0 !important;
+        color: white !important;
+        font-weight: 500 !important;
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .step-line {
+        display: block !important;
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: calc(50% + 16px) !important;
+        right: calc(-50% - 16px) !important;
+        height: 2px !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        z-index: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .step-item:last-child .step-line {
+        display: none !important;
+    }
+
+    .selling_right {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .selling_right .step-box {
+        padding: 0.9rem !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .sellingright_header {
+        margin-bottom: 0.7rem !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .sellingright_header h2 {
+        font-size: 1.05rem !important;
+        margin: 0 0 0.3rem 0 !important;
+        padding: 0 !important;
+        color: #0a6fa6;
+    }
+
+    .sellingright_header p {
+        font-size: 0.8rem !important;
+        color: #666;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree {
+        margin-bottom: 0.6rem !important;
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree h3 {
+        font-size: 0.9rem !important;
+        margin: 0 0 0.3rem 0 !important;
+        padding: 0 !important;
+        color: #0a6fa6;
+    }
+
+    .stepthree p {
+        font-size: 0.8rem !important;
+        line-height: 1.3 !important;
+        color: #666;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree_instructions {
+        margin: 0.6rem 0 !important;
+        padding: 0 !important;
+    }
+
+    .stepthree_instructions p {
+        font-size: 0.8rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 0.5rem !important;
+        padding: 0 !important;
+        color: #333;
+    }
+
+    .stepthree_instructions label {
+        display: flex !important;
+        align-items: flex-start !important;
+        gap: 0.4rem !important;
+        font-size: 0.8rem !important;
+        margin-top: 0.5rem !important;
+        padding: 0 !important;
+        color: #333;
+    }
+
+    .stepthree_instructions input[type="checkbox"] {
+        margin-top: 0.15rem !important;
+        min-width: 15px !important;
+        width: 15px !important;
+        height: 15px !important;
+        cursor: pointer;
+    }
+
+    .form-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 0.6rem !important;
+        margin-bottom: 0.6rem !important;
+        padding: 0 !important;
+    }
+
+    .form-group {
+        display: flex !important;
+        flex-direction: column !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .form-group label {
+        font-size: 0.85rem !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.3rem !important;
+        padding: 0 !important;
+        color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.55rem 0.6rem !important;
+        border: 1px solid #033f63 !important;
+        border-radius: 3px !important;
+        font-size: 0.85rem !important;
+        font-family: inherit !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none !important;
+        border-color: #0b84c6 !important;
+        box-shadow: 0 0 0 2px rgba(11, 132, 198, 0.08) !important;
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 70px;
+    }
+
+    .button {
+        width: 100% !important;
+        padding: 0.65rem !important;
+        margin-top: 0.6rem !important;
+        margin-bottom: 0 !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 3px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        display: block !important;
+    }
+
+    .button:active {
+        background: #084f7f !important;
+        transform: scale(0.98) !important;
+    }
+
+    .error-message {
+        color: #d32f2f !important;
+        font-size: 0.75rem !important;
+        margin-top: 0.25rem !important;
+        display: block !important;
+        background: #ffebee !important;
+        padding: 0.3rem !important;
+        border-radius: 2px !important;
+    }
+
+    #submit-error {
+        background: #ffcdd2 !important;
+        border: 1px solid #ef5350 !important;
+        border-radius: 3px !important;
+        padding: 0.5rem !important;
+        color: #b71c1c !important;
+        font-size: 0.8rem !important;
+        margin-bottom: 0.6rem !important;
+    }
+}
+
+/* EXTRA SMALL - 380px and below */
+@media (max-width: 380px) {
+    .sellingpage{
+        margin: 1rem 0;
+    }
+    .selling_steps {
+        padding: 0.6rem 0.4rem !important;
+        gap: 0.5rem !important;
+        position: relative !important;
+    }
+
+    .step-item {
+        min-width: 50px !important;
+        position: relative !important;
+    }
+
+    .step-circle {
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        font-size: 0.65rem !important;
+        z-index: 2 !important;
+        position: relative !important;
+    }
+
+    .step-label {
+        font-size: 0.5rem !important;
+        margin-top: 0.15rem !important;
+        display: block !important;
+    }
+
+    .step-line {
+        position: absolute !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: calc(50% + 15px) !important;
+        right: calc(-50% - 15px) !important;
+        height: 1px !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        z-index: 1 !important;
+    }
+
+    .selling_right .step-box {
+        padding: 0.8rem !important;
+    }
+
+    .sellingright_header h2 {
+        font-size: 1rem !important;
+    }
+
+    .sellingright_header p {
+        font-size: 0.75rem !important;
+    }
+
+    .stepthree h3 {
+        font-size: 0.85rem !important;
+    }
+
+    .stepthree p {
+        font-size: 0.75rem !important;
+    }
+    .stepthree_instructions{
+        width: 100% !important;
+    }
+    .stepthree_instructions p {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+
+    .stepthree_instructions label {
+        font-size: 0.75rem !important;
+        gap: 0.3rem !important;
+        margin-top: 0.4rem !important;
+    }
+
+    .form-grid {
+        gap: 0.5rem !important;
+    }
+
+    .form-group label {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        font-size: 0.8rem !important;
+        padding: 0.5rem 0.55rem !important;
+    }
+
+    .form-group textarea {
+        min-height: 60px;
+    }
+
+    .button {
+        width: 80% !important;
+        font-size: 0.85rem !important;
+        padding: 0.6rem !important;
+        margin: 0.5rem 2.5rem !important;
+    }
+
+    .error-message {
+        font-size: 0.7rem !important;
+    }
+
+    #submit-error {
+        font-size: 0.75rem !important;
+        padding: 0.4rem !important;
+    }
+}
+/* Step 3 (Selling) specific layout and responsive rules */
+.selling_right .step3-content{display:flex;gap:1.5rem;align-items:flex-start}
+.selling_right .step3-left{flex:1}
+.selling_right .step3-right{width:300px;display:flex;flex-direction:column;align-items:flex-start}
+.selling_right .step3-right #summary_image_container{width:100%;display:flex;align-items:center;justify-content:center}
+.selling_right .step3-right #summary_image_container img{width:100%;height:auto;border-radius:8px;object-fit:cover;box-shadow:0 6px 18px rgba(12,30,60,0.08)}
+.selling_right .step3-right h4{margin:0 0 .5rem 0}
+.selling_right .step3-left .step-summary{margin-bottom:1rem;}
+.selling_right .step3-left .step-summary h3{text-transform: uppercase; font-size: 1.5rem; color: #033f63;}
+#summary_personal_content, #summary_product_content{text-transform: capitalize; font-size: 1.1rem;}
+.selling_right .step3-right .summary_image h4{text-transform: uppercase; font-size: 1.5rem; color: #033f63;}
+.selling_right .step3-right #summary_image_container img{max-width: 240px;max-height: 240px; width: 240px; height: 240px; object-fit: cover;}
+.selling_right .step3-right .step3-actions{margin-top:auto;align-self:flex-end;display:flex;flex-direction:column;gap:0.5rem;width:100%;max-width:220px}
+.selling_right .step3-right .step3-actions .button{
+    background: #033f63;
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;}
+
+/* circle3: show check only when completed, without affecting other steps */
+.selling_left #circle3{position:relative;display:flex;align-items:center;justify-content:center}
+.selling_left #circle3 .step-check{display:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.95rem;color:#fff;background:#0b84c6;width:38px;height:38px;border-radius:50%}
+.selling_left #circle3 .step-number{z-index:1}
+.step-item.completed #circle3 .step-number{display:none}
+.step-item.completed #circle3 .step-check{display:flex}
+
+
+@media (max-width: 768px){
+    .selling_right .step3-content{flex-direction:column-reverse}
+    .selling_right .step3-right{width:100%;align-items:stretch}
+    .selling_right .step3-right #summary_image_container img{max-width: 120px;max-height: 120px;
+    object-fit: cover;
+}
+}
+
+
+/* Mobile: tighter spacing */
+@media (max-width:520px){
+    .selling_right .step3-content{gap:0.75rem}
+    .selling_right .step3-right #summary_image_container img{max-height:280px}
+    .selling_right .step3-right .step3-actions .button{padding:.7rem}
+}
+
 
 /* SELLING INFO SECTIONS RESPONSIVE */
 @media (max-width: 768px){
@@ -5604,7 +6396,7 @@ footer .footer .footer_shop {
 }
 .selling_right .step-box button{
     position: absolute;
-    background: #4F9FBA;
+    background: #033f63;
     width: 6rem;
     height: 2.5rem;
     border: none;
@@ -7143,7 +7935,8 @@ fieldset{
 }
 
 /* ===== Home page modern layout ===== */
-.hp-hero{margin: 0; padding:6.5rem 0 3rem;background:linear-gradient(180deg,#eaf6fb 0,#fff 60%)}
+.hp-hero{margin: 0; padding:6.5rem 0 3rem;background: #4F9FBA;
+    background: linear-gradient(300deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221, 0.5) 60%);min-height: 600px;}
 .hp-hero-inner{display:flex;align-items:center;gap:2.5rem;justify-content:space-between}
 .hero-copy{flex:1;max-width:760px}
 .hero-copy h1{font-family:Montserrat;font-size:2.6rem;line-height:1.05;color:#033f63;margin-bottom:.6rem}
@@ -7208,9 +8001,11 @@ fieldset{
 .hp-about{width: 100%;}
 .about-grid{display:grid;grid-template-columns:1.25fr 420px;gap:2rem;align-items:center}
 .about-media img{max-width:100%;border-radius:10px; padding-top:0}
-.about-left{margin: 0 1rem; padding: 0; margin-bottom: 1.5rem;}
+.about-left{margin: 0; padding: 0; margin-bottom: 1.5rem;}
+.about-left h2, .about-left p{width: 70%;}
 .about-left h2{font-size:2rem;margin-bottom:.6rem;color:#033f63}
 .about-left p{font-size: 1.2rem;}
+.about-left a{margin-left: 4rem;}
 }
 
 @media (max-width: 1200px){
@@ -7223,10 +8018,10 @@ fieldset{
     .hero-media{flex:0 0 320px}
 }
 @media (max-width: 768px){
-    .hp-hero{background: #CF7EDD;
-background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 1) 100%);}
+    .hp-hero{background: #4F9FBA;
+background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221, 0.5) 60%);}
     .hp-hero-inner{flex-direction:column-reverse;align-items:flex-start;gap:1.25rem}
-    .hero-media{text-align:center; width: 100%;}
+    .hero-media{text-align:center; width: 95%;}
     .product-grid{grid-template-columns:repeat(2,1fr)}
     .about-grid{grid-template-columns:1fr}
     .hero-copy{width: 100%; margin-top: 2rem; text-align: center;}
@@ -7237,8 +8032,8 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
 
 }
 @media (max-width:480px){
-    .hp-hero{margin-top: -5rem; background: #CF7EDD;
-background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255, 1) 100%, rgba(255, 255, 255, 1) 100%);}
+    .hp-hero{margin-top: -5rem; background: #4F9FBA;
+background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221, 0.5) 60%);}
     .product-grid{grid-template-columns:1fr}
     .hero-copy{width: 100%; text-align: center; margin: 1rem 0;}
     .hero-copy .hero-highlight{font-size: 2.4rem;}
@@ -7286,7 +8081,7 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
     .map-grid{grid-template-columns:1fr; justify-items: center;}
     .about-highlights{flex-direction:row;flex-wrap:wrap}
     .about-highlights .highlight{min-width:45%}
-    .store-details{padding: 0 5rem;}
+    .store-details{width: 80%;}
     .store-details h3{font-size: 2.5rem; color: #033f63;}
     .store-details p{font-size: 1.7rem;}
     .store-details h4{font-size: 2rem; color: #033f63;}
@@ -7882,704 +8677,6 @@ background: linear-gradient(180deg,rgba(207, 126, 221, 1) 0%, rgba(255, 255, 255
 /* Remove top spacing that existed on older product pages */
 .productpage, .products-main { margin-top: 0 !important; }
 
-/* ========== SELLING PAGE RESPONSIVE ========== */
-
-/* TABLET - 768px and below */
-@media (max-width: 768px) {
-    .sellingpage {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .selling_body {
-        flex-direction: column;
-        gap: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    .selling_left {
-        width: 100%;
-        order: -1;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .selling_steps {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        flex-wrap: nowrap !important;
-        gap: 0.8rem !important;
-        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
-        padding: 0.9rem 0.6rem !important;
-        border-radius: 0 !important;
-        width: 100%;
-    }
-
-    .step-item {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 0.3rem !important;
-        flex-shrink: 0 !important;
-        min-width: 60px !important;
-        text-align: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        cursor: pointer;
-        position: relative !important;
-    }
-
-    .step-circle {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        font-size: 0.75rem !important;
-        background: rgba(255, 255, 255, 0.2) !important;
-        border: 2px solid rgba(255, 255, 255, 0.3) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        color: white !important;
-        font-weight: bold !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        z-index: 2 !important;
-        position: relative !important;
-    }
-
-    .step-circle.completed {
-        background: rgba(76, 175, 80, 0.3) !important;
-        border-color: rgba(76, 175, 80, 0.5) !important;
-    }
-
-    .step-circle.active {
-        background: rgba(255, 255, 255, 0.4) !important;
-        border-color: white !important;
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
-    }
-
-    .step-label {
-        font-size: 0.65rem !important;
-        line-height: 1.1 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        padding: 0 !important;
-        color: white !important;
-        font-weight: 500 !important;
-        display: none !important;
-        width: 100% !important;
-    }
-
-    .step-line {
-        display: block !important;
-        position: absolute !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        left: calc(50% + 18px) !important;
-        right: calc(-50% - 18px) !important;
-        height: 2px !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        z-index: 1 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .step-item:last-child .step-line {
-        display: none !important;
-    }
-
-    .selling_right {
-        width: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .selling_right .step-box {
-        padding: 1rem !important;
-        border-radius: 0 !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        margin: 0 !important;
-    }
-
-    .sellingright_header {
-        margin-bottom: 1rem !important;
-        margin-top: 0 !important;
-        padding: 0 !important;
-    }
-
-    .sellingright_header h2 {
-        font-size: 1.2rem !important;
-        margin: 0 0 0.4rem 0 !important;
-        padding: 0 !important;
-        color: #0a6fa6;
-    }
-
-    .sellingright_header p {
-        font-size: 0.9rem !important;
-        color: #666;
-        line-height: 1.4 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree {
-        margin-bottom: 0.8rem !important;
-        margin-top: 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree h3 {
-        font-size: 1.05rem !important;
-        margin: 0 0 0.4rem 0 !important;
-        padding: 0 !important;
-        color: #0a6fa6;
-    }
-
-    .stepthree p {
-        font-size: 0.9rem !important;
-        line-height: 1.4 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree_instructions {
-        margin: 0.8rem 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree_instructions p {
-        font-size: 0.9rem !important;
-        line-height: 1.4 !important;
-        margin-bottom: 0.8rem !important;
-        padding: 0 !important;
-    }
-
-    .stepthree_instructions label {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 0.5rem !important;
-        font-size: 0.9rem !important;
-        margin-top: 0.8rem !important;
-        padding: 0 !important;
-    }
-
-    .stepthree_instructions input[type="checkbox"] {
-        margin-top: 0.3rem !important;
-        min-width: 18px !important;
-        width: 18px !important;
-        height: 18px !important;
-        cursor: pointer;
-    }
-
-    .form-grid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 0.9rem !important;
-        margin-bottom: 0.8rem !important;
-        padding: 0 !important;
-    }
-
-    .form-group {
-        display: flex !important;
-        flex-direction: column !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .form-group label {
-        font-size: 0.95rem !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.4rem !important;
-        padding: 0 !important;
-        color: #333;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 0.65rem 0.75rem !important;
-        border: 1px solid #ddd !important;
-        border-radius: 4px !important;
-        font-size: 0.95rem !important;
-        font-family: inherit !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        margin: 0 !important;
-        display: block !important;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none !important;
-        border-color: #0b84c6 !important;
-        box-shadow: 0 0 0 3px rgba(11, 132, 198, 0.1) !important;
-    }
-
-    .form-group textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .button {
-        width: 100% !important;
-        padding: 0.75rem 1rem !important;
-        margin-top: 1rem !important;
-        margin-bottom: 0 !important;
-        font-size: 1rem !important;
-        font-weight: 600 !important;
-        background: #0b84c6 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 4px !important;
-        cursor: pointer !important;
-        transition: background 0.2s ease !important;
-        display: block !important;
-    }
-
-    .button:hover {
-        background: #0a6fa6 !important;
-    }
-
-    .button:active {
-        transform: scale(0.98) !important;
-    }
-
-    .error-message {
-        color: #dc3545 !important;
-        font-size: 0.85rem !important;
-        margin-top: 0.4rem !important;
-    }
-
-    #submit-error {
-        background: #f8d7da !important;
-        border: 1px solid #f5c6cb !important;
-        border-radius: 4px !important;
-        padding: 0.75rem !important;
-        color: #721c24 !important;
-        font-size: 0.9rem !important;
-    }
-}
-
-/* MOBILE - 520px and below */
-@media (max-width: 520px) {
-    .sellingpage {
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100vw;
-        overflow-x: hidden;
-    }
-
-    .selling_body {
-        flex-direction: column;
-        gap: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        width: 100%;
-    }
-
-    .selling_left {
-        width: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        order: -1;
-    }
-
-    .selling_steps {
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        gap: 0.6rem !important;
-        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
-        padding: 0.7rem 0.5rem !important;
-        border-radius: 0 !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        width: 100%;
-        margin: 0 !important;
-        position: relative !important;
-    }
-
-    .step-item {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 0.2rem !important;
-        flex-shrink: 0 !important;
-        min-width: 55px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        cursor: pointer;
-        position: relative !important;
-    }
-
-    .step-circle {
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        font-size: 0.7rem !important;
-        background: rgba(255, 255, 255, 0.2) !important;
-        border: 2px solid rgba(255, 255, 255, 0.3) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        color: white !important;
-        font-weight: bold !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        z-index: 2 !important;
-        position: relative !important;
-    }
-
-    .step-circle.completed {
-        background: rgba(76, 175, 80, 0.3) !important;
-        border-color: rgba(76, 175, 80, 0.5) !important;
-    }
-
-    .step-circle.active {
-        background: rgba(255, 255, 255, 0.4) !important;
-        border-color: white !important;
-        box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
-    }
-
-    .step-check {
-        display: none !important;
-    }
-
-    .step-number {
-        display: block !important;
-    }
-
-    .step-label {
-        font-size: 0.55rem !important;
-        line-height: 1 !important;
-        margin-top: 0.2rem !important;
-        margin-bottom: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        padding: 0 !important;
-        color: white !important;
-        font-weight: 500 !important;
-        display: block !important;
-        width: 100% !important;
-    }
-
-    .step-line {
-        display: block !important;
-        position: absolute !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        left: calc(50% + 16px) !important;
-        right: calc(-50% - 16px) !important;
-        height: 2px !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        z-index: 1 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .step-item:last-child .step-line {
-        display: none !important;
-    }
-
-    .selling_right {
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .selling_right .step-box {
-        padding: 0.9rem !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        background: #fff !important;
-        box-shadow: none !important;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .sellingright_header {
-        margin-bottom: 0.7rem !important;
-        margin-top: 0 !important;
-        padding: 0 !important;
-    }
-
-    .sellingright_header h2 {
-        font-size: 1.05rem !important;
-        margin: 0 0 0.3rem 0 !important;
-        padding: 0 !important;
-        color: #0a6fa6;
-    }
-
-    .sellingright_header p {
-        font-size: 0.8rem !important;
-        color: #666;
-        line-height: 1.3 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree {
-        margin-bottom: 0.6rem !important;
-        margin-top: 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree h3 {
-        font-size: 0.9rem !important;
-        margin: 0 0 0.3rem 0 !important;
-        padding: 0 !important;
-        color: #0a6fa6;
-    }
-
-    .stepthree p {
-        font-size: 0.8rem !important;
-        line-height: 1.3 !important;
-        color: #666;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree_instructions {
-        margin: 0.6rem 0 !important;
-        padding: 0 !important;
-    }
-
-    .stepthree_instructions p {
-        font-size: 0.8rem !important;
-        line-height: 1.3 !important;
-        margin-bottom: 0.5rem !important;
-        padding: 0 !important;
-        color: #333;
-    }
-
-    .stepthree_instructions label {
-        display: flex !important;
-        align-items: flex-start !important;
-        gap: 0.4rem !important;
-        font-size: 0.8rem !important;
-        margin-top: 0.5rem !important;
-        padding: 0 !important;
-        color: #333;
-    }
-
-    .stepthree_instructions input[type="checkbox"] {
-        margin-top: 0.15rem !important;
-        min-width: 15px !important;
-        width: 15px !important;
-        height: 15px !important;
-        cursor: pointer;
-    }
-
-    .form-grid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 0.6rem !important;
-        margin-bottom: 0.6rem !important;
-        padding: 0 !important;
-    }
-
-    .form-group {
-        display: flex !important;
-        flex-direction: column !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    .form-group label {
-        font-size: 0.85rem !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.3rem !important;
-        padding: 0 !important;
-        color: #333;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        padding: 0.55rem 0.6rem !important;
-        border: 1px solid #ddd !important;
-        border-radius: 3px !important;
-        font-size: 0.85rem !important;
-        font-family: inherit !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        margin: 0 !important;
-        display: block !important;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        outline: none !important;
-        border-color: #0b84c6 !important;
-        box-shadow: 0 0 0 2px rgba(11, 132, 198, 0.08) !important;
-    }
-
-    .form-group textarea {
-        resize: vertical;
-        min-height: 70px;
-    }
-
-    .button {
-        width: 100% !important;
-        padding: 0.65rem !important;
-        margin-top: 0.6rem !important;
-        margin-bottom: 0 !important;
-        font-size: 0.9rem !important;
-        font-weight: 600 !important;
-        background: linear-gradient(135deg, #0b84c6, #0a6fa6) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 3px !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-        display: block !important;
-    }
-
-    .button:active {
-        background: #084f7f !important;
-        transform: scale(0.98) !important;
-    }
-
-    .error-message {
-        color: #d32f2f !important;
-        font-size: 0.75rem !important;
-        margin-top: 0.25rem !important;
-        display: block !important;
-        background: #ffebee !important;
-        padding: 0.3rem !important;
-        border-radius: 2px !important;
-    }
-
-    #submit-error {
-        background: #ffcdd2 !important;
-        border: 1px solid #ef5350 !important;
-        border-radius: 3px !important;
-        padding: 0.5rem !important;
-        color: #b71c1c !important;
-        font-size: 0.8rem !important;
-        margin-bottom: 0.6rem !important;
-    }
-}
-
-/* EXTRA SMALL - 380px and below */
-@media (max-width: 380px) {
-    .sellingpage{
-        margin: 1rem 0;
-    }
-    .selling_steps {
-        padding: 0.6rem 0.4rem !important;
-        gap: 0.5rem !important;
-        position: relative !important;
-    }
-
-    .step-item {
-        min-width: 50px !important;
-        position: relative !important;
-    }
-
-    .step-circle {
-        width: 30px !important;
-        height: 30px !important;
-        min-width: 30px !important;
-        font-size: 0.65rem !important;
-        z-index: 2 !important;
-        position: relative !important;
-    }
-
-    .step-label {
-        font-size: 0.5rem !important;
-        margin-top: 0.15rem !important;
-        display: block !important;
-    }
-
-    .step-line {
-        position: absolute !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        left: calc(50% + 15px) !important;
-        right: calc(-50% - 15px) !important;
-        height: 1px !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-        z-index: 1 !important;
-    }
-
-    .selling_right .step-box {
-        padding: 0.8rem !important;
-    }
-
-    .sellingright_header h2 {
-        font-size: 1rem !important;
-    }
-
-    .sellingright_header p {
-        font-size: 0.75rem !important;
-    }
-
-    .stepthree h3 {
-        font-size: 0.85rem !important;
-    }
-
-    .stepthree p {
-        font-size: 0.75rem !important;
-    }
-    .stepthree_instructions{
-        width: 100% !important;
-    }
-    .stepthree_instructions p {
-        font-size: 0.75rem !important;
-        margin-bottom: 0.4rem !important;
-    }
-
-    .stepthree_instructions label {
-        font-size: 0.75rem !important;
-        gap: 0.3rem !important;
-        margin-top: 0.4rem !important;
-    }
-
-    .form-grid {
-        gap: 0.5rem !important;
-    }
-
-    .form-group label {
-        font-size: 0.8rem !important;
-        margin-bottom: 0.25rem !important;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        font-size: 0.8rem !important;
-        padding: 0.5rem 0.55rem !important;
-    }
-
-    .form-group textarea {
-        min-height: 60px;
-    }
-
-    .button {
-        width: 80% !important;
-        font-size: 0.85rem !important;
-        padding: 0.6rem !important;
-        margin: 0.5rem 2.5rem !important;
-    }
-
-    .error-message {
-        font-size: 0.7rem !important;
-    }
-
-    #submit-error {
-        font-size: 0.75rem !important;
-        padding: 0.4rem !important;
-    }
-}
 
 /* Favorites page responsive styles (appended) */
 .favoritespage {max-width: 900px; margin: 0 auto 3rem; }

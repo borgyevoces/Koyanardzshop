@@ -17,6 +17,7 @@
                     <div class="step-line"></div>
                     <div class="step-item" onclick="goToStep(2)">
                         <div class="step-circle" id="circle2">
+                            <span class="step-check">✓</span>
                             <span class="step-number">2</span>
                         </div>
                         <p class="step-label">PRODUCT<br>INFORMATION</p>
@@ -100,7 +101,7 @@
                             <label>Product Description:</label>
                              {{ form.description }}
                         </div>
-                        <button type="button" class="button" onclick="nextStep(2)">Next</button>
+                        <button type="button" class="butttton" onclick="nextStep(2)">Next</button>
                     </div>
 
                     <!-- STEP 3: Summary + Terms (was previous step1) -->
@@ -110,31 +111,40 @@
                             <p>Review your submission below. Confirm the details and accept the terms to submit.</p>
                         </div>
 
-                        <div id="summary_personal" class="step-summary">
-                            <h3>Personal Information</h3>
-                            <div id="summary_personal_content"></div>
-                        </div>
+                        <!-- Two-column layout: left = summaries, right = image preview -->
+                        <div class="step3-content">
+                            <div class="step3-left">
+                                <div id="summary_personal" class="step-summary">
+                                    <h3>Personal Information</h3>
+                                    <div id="summary_personal_content"></div>
+                                </div>
 
-                        <div id="summary_product" class="step-summary">
-                            <h3>Product Information</h3>
-                            <div id="summary_product_content"></div>
-                        </div>
+                                <div id="summary_product" class="step-summary">
+                                    <h3>Product Information</h3>
+                                    <div id="summary_product_content"></div>
+                                </div>
+                            </div>
 
-                        <!-- Summary only: show values from Step 1 & 2 -->
-                        <div id="summary_image" style="margin:1rem 0">
-                            <h4>Product Image Preview</h4>
-                            <div id="summary_image_container"></div>
+                            <div class="step3-right">
+                                <div class="summary_image" id="summary_image" style="width:100%; margin:0 0 1rem 0">
+                                    <h4>Product Image Preview</h4>
+                                    <div id="summary_image_container"></div>
+                                </div>
+                                <div class="step3-actions">
+                                    <div id="submit-error" class="submit-error" style="display:none;color:red;margin-top:0;"></div>
+                                    <button type="button" class="button" onclick="submitForm()">Submit</button>
+                                </div>
+                            </div>
                         </div>
-
-                        <div id="submit-error" style="color: red; margin-top: 10px; display: none;"></div>
-                        <button type="button" class="button" onclick="submitForm()">Submit</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-<script>
+    <!-- Step 3 styles moved to `static/css/style.css` -->
+
+    <script>
     let highestStepReached = 1;
 
     function submitForm() {

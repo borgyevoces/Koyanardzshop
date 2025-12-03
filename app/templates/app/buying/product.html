@@ -48,10 +48,9 @@
                     </select>
                 </div>
 
-                <div class="filter-row">
+                    <div class="filter-row">
                     <label>Brand</label>
-                    <form id="brandDropdownForm" action="" method="GET" style="display:none;">
-                        <input type="hidden" name="category" value="{{ category_filter }}">
+                    <div id="brandDropdownForm" style="display:none;">
                         <input type="hidden" name="price_order" value="{{ price_order }}">
                         <select name="brand" id="brandDropdown">
                             <option value="">Select Brand</option>
@@ -59,7 +58,7 @@
                                 <option value="{{ brand.id }}" {% if brand_filter|stringformat:'s' == brand.id|stringformat:'s' %}selected{% endif %}>{{ brand.brand|escape }}</option>
                             {% endfor %}
                         </select>
-                    </form>
+                    </div>
 
                     <div class="brand-list">
                         <ul id="brand_filter">
@@ -261,11 +260,17 @@
             item.addEventListener("click", function () {
                 brandItems.forEach(i => i.classList.remove("selected"));
                 this.classList.add("selected");
-                const brandInput = document.createElement('input');
-                brandInput.type = 'hidden';
-                brandInput.name = 'brand';
-                brandInput.value = this.dataset.id;
-                mainFilterForm.appendChild(brandInput);
+                // prefer to use the existing hidden select if present
+                const brandDropdown = document.getElementById('brandDropdown');
+                if (brandDropdown) {
+                    brandDropdown.value = this.dataset.id;
+                } else {
+                    const brandInput = document.createElement('input');
+                    brandInput.type = 'hidden';
+                    brandInput.name = 'brand';
+                    brandInput.value = this.dataset.id;
+                    mainFilterForm.appendChild(brandInput);
+                }
                 mainFilterForm.submit();
             });
         });
