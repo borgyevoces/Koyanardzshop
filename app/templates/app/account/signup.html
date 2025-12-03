@@ -17,7 +17,7 @@
     .errorlist {position: absolute; list-style: none; padding: 0; margin: 0.5rem 0; }
     .errorlist li { background-color: #fee; color: #c33; padding: 0.6rem 0.8rem; border-radius: 0.4rem; border-left: 4px solid #c33; margin-bottom: 0.4rem; font-size: 0.9rem; line-height: 1.4; }
     
-    .signup_leftbody small { display: block; color: #c33; font-size: 0.85rem; margin-top: 0.3rem; padding: 0.4rem 0.6rem; background-color: #fee; border-radius: 0.3rem; border-left: 3px solid #c33; }
+    .signup_leftbody small {position: absolute; display: block; width:20%; color: #c33; font-size: 0.85rem; margin-top: -1rem; z-index: 0;}
     
     /* Form field styling */
     .signup_leftbody div { margin-bottom: 1rem; }
@@ -30,7 +30,10 @@
     @media (max-width: 768px) {
         .signup-home-btn{ left: 10px; top: 10px; padding: 6px 10px; font-size: 0.85rem; }
         .errorlist li { font-size: 0.8rem; padding: 0.5rem 0.6rem; }
-        .signup_leftbody small { font-size: 0.8rem; padding: 0.3rem 0.5rem; }
+        .signup_leftbody small { font-size: 0.8rem; padding: 0.3rem 0.5rem; width: 50%;}
+    }
+    @media (max-width: 375px) {
+        .signup_leftbody small{width: 80% !important; font-size: .6rem;}
     }
 </style>
 
@@ -44,9 +47,9 @@
                 <form method="POST">
                     {% csrf_token %}
                         {% if otp_code %}
-                        <h3>Verify Your Email</h3>
+                        <h3 style="margin-bottom: .5rem;">Verify Your Email</h3>
                         <label for="otp_code">Enter OTP:</label>
-                            <input type="text" name="otp_code" required>
+                            <input class="verification_code" type="text" name="otp_code" required>
                             <input type="hidden" name="username" value="{{ form.instance.username }}">
                         <button type="submit">Verify OTP</button>
                         {% if not otp_code %}

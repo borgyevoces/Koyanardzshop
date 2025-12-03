@@ -1710,8 +1710,9 @@ footer .footer .footer_shop {
     cursor: pointer;
 }
 .cartleft .cartleft_upper form button img{
-    width: 1.5rem;
+    width: 1.2rem;
     height: auto;
+    margin-top: .5rem;
 }
 .favorite_btn{
     cursor: pointer;
@@ -7099,7 +7100,7 @@ footer .footer .footer_shop {
 /* SIGNUP PAGE RESPONSIVE - SMALL MOBILE (380px) */
 @media (max-width: 380px) {
     .signuppage {
-        margin: -2rem 0;
+        margin: -4rem 0;
         padding: 0.2rem;
     }
     
@@ -7128,7 +7129,7 @@ footer .footer .footer_shop {
     .signup_leftbody form input {
         width: 15rem;
         height: 2.5rem;
-        margin: 0;
+        margin: .3rem 1rem;
         font-size: 1rem;
         padding: 0.5rem;
     }

@@ -1016,7 +1016,11 @@ class AppointmentCompletePage(TemplateView):
         cart = request.session.get('cart', {})
         direct = request.session.get('direct_checkout')
 
-        if not appointment_data and not direct:
+        # Ensure we have appointment data (date/time). If it's missing
+        # we cannot create an appointment — redirect back to the appointment
+        # page. This also avoids accessing `appointment_data[...]` when
+        # `appointment_data` is None (which caused a 500 for some flows).
+        if not appointment_data:
             return redirect('appointment')
 
         if Appointment.objects.filter(
@@ -1099,7 +1103,7 @@ class AppointmentCompletePage(TemplateView):
         try:
             send_mail( 
                 subject=f"Appointment Confirmation – Ref #{appointment.reference_number}", 
-                message="", from_email=settings.EMAIL_HOST_USER, 
+                message="", from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER), 
                 recipient_list=[appointment.email], 
                 html_message=email_html, 
             )
