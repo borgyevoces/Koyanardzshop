@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 import dj_database_url
+import logging
 
 # Load environment variables from .env
 load_dotenv()
@@ -172,6 +173,16 @@ if MAILGUN_API_KEY:
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'app.CustomUser'
+
+# Ensure DEFAULT_FROM_EMAIL is a valid email address. If the environment
+# provides an invalid value (for example missing the '@'), fall back to
+# `EMAIL_HOST_USER` to avoid sending errors such as MailerSend MS42208.
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', '').strip()
+if not DEFAULT_FROM_EMAIL or '@' not in DEFAULT_FROM_EMAIL:
+    logger = logging.getLogger(__name__)
+    if DEFAULT_FROM_EMAIL:
+        logger.warning("Invalid DEFAULT_FROM_EMAIL '%s' — falling back to EMAIL_HOST_USER", DEFAULT_FROM_EMAIL)
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Dynamic SITE_ID based on environment - will be determined at runtime
 # SITE_ID is only used as a fallback; allauth prefers getting site from request

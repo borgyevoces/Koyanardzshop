@@ -109,7 +109,7 @@
                                 <span class="price">₱{{ p.price|intcomma }}</span>
                             </div>
                             <div class="card-actions">
-                                <form class="add-cart-form" method="post" action="{% url 'add_to_cart' p.id %}">
+                                <form class="add-cart-form" method="post" action="{% url 'checkout' p.id %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn-sm">Buy Now</button>
                                 </form>
