@@ -421,6 +421,8 @@ footer .footer .footer_shop {
     }
 }
 
+
+
 @media (max-width: 768px) {
     .hp-hero {
         padding: 2rem 1rem;
@@ -2822,7 +2824,10 @@ footer .footer .footer_shop {
     .checkout_left_wrapper {
         width: 45%;
     }
-    
+    .checkout_nav_buttons{
+        margin-left: 0;
+        width: 100%;
+    }
     .checkout_right {
         width: 55%;
     }
@@ -2865,7 +2870,14 @@ footer .footer .footer_shop {
         width: 18rem;
         height: 18rem;
     }
-    
+    .checkout_nav_buttons{
+        margin-left: 0;
+        width: 100%;
+    }
+    .checkout_nav_buttons button{
+        font-size: 2.2rem;
+        color: rgb(70, 70, 70);
+    }
     .checkoutright_uppertitle p {
         font-size: 2rem;
     }
@@ -2947,7 +2959,7 @@ footer .footer .footer_shop {
     }
     
     .checkoutright_uppertitle p {
-        font-size: 1.2rem;
+        font-size: 1.5rem !important;
     }
     
     .checkoutright_upperbody {
@@ -2961,10 +2973,15 @@ footer .footer .footer_shop {
         width: 100%;
         margin: 0.3rem 0;
     }
-    
+    .checkoutupper_bodyleft p:nth-child(1),
+    .checkoutupper_bodyleft p:nth-child(2), 
+    .checkoutupper_bodyleft p:nth-child(3),
+    .checkoutupper_bodyleft p:nth-child(4){
+        font-size: 0.95rem !important;
+    }
     .checkoutupper_bodyleft p,
     .checkoutupper_bodyright p {
-        font-size: 0.95rem;
+        font-size: 0.95rem !important;
     }
     
     .checkoutright_bottom {
@@ -2976,7 +2993,7 @@ footer .footer .footer_shop {
     }
     
     .checkoutright_bodyupper p {
-        font-size: 0.9rem;
+        font-size: 1rem !important;
         margin-right: 0.8rem;
     }
     
@@ -2984,10 +3001,20 @@ footer .footer .footer_shop {
         padding: 0.3rem 0;
         flex-wrap: wrap;
     }
-    
+    .checkoutright_bodybody p:nth-child(1){
+        width: 8rem !important;
+        max-width: 8rem !important;
+        min-width: 8rem !important;
+    }
     .checkoutright_bodybody p {
-        font-size: 0.95rem;
+        font-size: 0.95rem !important;
         margin-right: 0.5rem;
+    }
+    .checkoutright_bodybody form .text_quantity button{
+        width: 1.2rem;
+        height: 0.8rem;
+        margin-top: .8rem;
+        margin-left: -.2rem;
     }
     
     .checkoutright_body form button {
@@ -3047,7 +3074,7 @@ footer .footer .footer_shop {
     }
     
     .checkoutright_bottom p {
-        font-size: 1rem;
+        font-size: 1.5rem;
     }
     
     .checkoutright_bodyupper p {
@@ -3520,7 +3547,7 @@ footer .footer .footer_shop {
     .product-container .product-card img{height:120px}
     .product-name h4{font-size:0.85rem;line-height:1.1}
     .product-name p{font-size:0.75rem}
-    #homefavorites{right:0.2rem;top:0.2rem;width:20px;height:20px}
+    #homefavorites{right:0.2rem;top:0.2rem;}
     
     /* Product item small mobile */
     .product_itempage{padding:0.3rem}

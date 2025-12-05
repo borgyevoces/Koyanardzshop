@@ -68,9 +68,6 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-select option {
-    background: #000;
-}
 
 ::placeholder {
     color: #fff !important;
@@ -280,7 +277,7 @@ hr {
 }
 
 #sidebar-wrapper {
-  background-color: rgba(0,0,0,.2);
+  background-color: #1560BD;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -495,7 +492,8 @@ hr {
 }
 
 body.bg-theme1 {
-  background-image: url(../images/bg-themes/1.png);
+    background-image: none;
+    background-color: #f6f7fb; /* light neutral background; change if you prefer */
 }
 body.bg-theme2 {
   background-image: url(../images/bg-themes/2.png);
@@ -554,7 +552,7 @@ body.bg-theme15 {
    margin-left: 250px;
    font-size: 14px;
    font-weight: 600;
-   color: #ffffff;
+   color: black;
    cursor: pointer;
    -webkit-transition: all 0.3s ease;
    -moz-transition: all 0.3s ease;
@@ -1846,7 +1844,7 @@ table.grid td {
 .table {
     width: 100%;
     margin-bottom: 1rem;
-    color: rgba(255,255,255,.85);
+    color: black;
 }
 .table.align-items-center td, .table.align-items-center th {
     vertical-align: middle;
@@ -3503,7 +3501,7 @@ table.grid td {
 
 @media only screen and (max-width: 1024px) {
   #sidebar-wrapper {
-	background:#000;  
+	background:#1560BD;  
     position: fixed;
 	top: 0px;
     left: -250px;

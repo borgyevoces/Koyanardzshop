@@ -33,7 +33,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Product ID</th>
+                    <th>ID</th>
                     <th>Product Name</th>
                     <th>Stock</th>
                     <th>Price</th>
@@ -43,10 +43,10 @@
             {% if products %}
                 {% for produkto in products %}
                 <tr>
-                    <td>{{ produkto.id }}</td>
-                    <td>{{ produkto.product_name }}</td>
-                    <td>{{ produkto.stock }}</td>
-                    <td>₱{{ produkto.price|intcomma }}</td>
+                    <td data-label="Product ID">{{ produkto.id }}</td>
+                    <td data-label="Product Name">{{ produkto.product_name }}</td>
+                    <td data-label="Stock">{{ produkto.stock }}</td>
+                    <td data-label="Price">₱{{ produkto.price|intcomma }}</td>
                 </tr>
                 {% endfor %}
             {% endif %}

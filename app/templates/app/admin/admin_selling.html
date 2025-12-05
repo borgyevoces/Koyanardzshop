@@ -9,9 +9,6 @@
     
         </div>
         <div class="admintrade_search">
-            <form action="" method="GET">
-                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
-            </form>
             <div class="trade_status">
                 <form method="get" class="selling-filters">
                     <select name="status">
@@ -23,6 +20,9 @@
                     <button type="submit">Apply</button>
                 </form>
             </div>
+            <form action="" method="GET">
+                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
+            </form>
         </div>
         <div class="popup" id="cancel_popup">
             <button onclick="closeCancelPopup()">X</button>
@@ -40,7 +40,7 @@
             </div>
         </div>
     </div>
-    <div class="tradetable">
+    <div class="tradetable inventorytable">
         <table>
             <thead>
                 <tr>
@@ -50,25 +50,23 @@
                     <th>Customer Name</th>
                     <th>Contact</th>
                     <th>Email</th>
-                    <th>Date</th>
-                    <th>Time</th>
+                    <th>Date & Time</th>
                     <th>Price</th>
                     <th>Status</th>
                 </tr>
             </thead>
             {% for selling in sellings %}
             <tbody>
-                <tr data-id="{{ produkto.id }}">
-                    <td>{{ selling.id }}</td>
-                    <td>{{ selling.reference_number }}</td>
-                    <td>{{ selling.product_name }}</td>
-                    <td>{{ selling.first_name }} {{ selling.last_name }}</td>
-                    <td>{{ selling.contact }}</td>
-                    <td>{{ selling.email }}</td>
-                    <td>{{ selling.selling_date|date:"M d, Y" }}</td>
-                    <td>{{ selling.selling_time|time:"h:i A" }}</td>
-                    <td>₱{{ selling.price|intcomma }}</td>
-                    <td>
+                <tr data-id="{{ selling.id }}">
+                    <td data-label="ID">{{ selling.id }}</td>
+                    <td data-label="Reference Number">{{ selling.reference_number }}</td>
+                    <td data-label="Product Name">{{ selling.product_name }}</td>
+                    <td data-label="Customer Name">{{ selling.first_name }} {{ selling.last_name }}</td>
+                    <td data-label="Contact">{{ selling.contact }}</td>
+                    <td data-label="Email">{{ selling.email }}</td>
+                    <td data-label="Date">{{ selling.selling_date|date:"M d, Y" }} / {{ selling.selling_time|time:"h:i A" }}</td>
+                    <td data-label="Price">₱{{ selling.price|intcomma }}</td>
+                    <td data-label="Status">
                         {% if selling.status == "Cancelled" %}
                         <span style="color: red;">Cancelled</span>
                         {% elif selling.status == "Completed" %}

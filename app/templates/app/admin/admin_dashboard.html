@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="admin_dashboard">
-    <div class="card mt-3">
+    <div class="card mt-3" style="background-color: #033f63;">
     <div class="card-content">
         <div class="row row-group m-0">
             <div class="col-12 col-lg-6 col-xl-3 border-light">
@@ -17,7 +17,7 @@
                   <p class="mb-0 text-white small-font" style="font-size: 1.1rem;">Total Orders</p>
                 </div>
             </div>
-            <div class="col-12 col-lg-6 col-xl-3 border-light">
+            <div class="col-12 col-lg-6 col-xl-3 border-light" style="background-color: #1E88E5;">
                 <div class="card-body">
                   <h5 class="text-white mb-0">₱{{ total_sales|intcomma }}<span class="float-right"><i class="fa fa-usd"></i></span></h5>
                     <div class="progress my-3" style="height:3px;">
@@ -35,7 +35,7 @@
                   <a class="mb-0 text-white small-font" href="{% url 'admin_appointment' %}" style="font-size: 1.1rem;">Pending Appointment</a>
                 </div>
             </div>
-            <div class="col-12 col-lg-6 col-xl-3 border-light">
+            <div class="col-12 col-lg-6 col-xl-3 border-light" style="background-color: #1E88E5;">
                 <div class="card-body">
                   <h5 class="text-white mb-0">{{ traded }}<span class="float-right"><i class="zmdi zmdi-calendar-check"></i></span></h5>
                     <div class="progress my-3" style="height:3px;">
@@ -59,14 +59,14 @@
 			  <li class="list-inline-item"><i class="fa fa-circle mr-2 text-light"></i>Trade</li>
 			</ul>
 			<div class="chart-container-1">
-			  <canvas id="chart1" style="color: rgb(37, 37, 37);"></canvas>
+			  <canvas id="chart1" style="color: black !important;"></canvas>
 			</div>
 		 </div>
 		 
 		 <div class="row m-0 row-group text-center border border-light-3">
 		   <div class="col-12 col-lg-4">
 		     <div class="p-3">
-		       <h5 class="mb-0" style="font-size: 1.2rem;">{{ total_appointments }}</h5>
+		       <h5 class="mb-0" style="font-size: 1.2rem; color: black;">{{ total_appointments }}</h5>
 			   <small class="mb-0" style="font-size: 1rem;">Total Appointment</small>
 		     </div>
 		   </div>
@@ -78,7 +78,7 @@
 		   </div>
 		   <div class="col-12 col-lg-4">
 		     <div class="p-3">
-		       <h5 class="mb-0" style="font-size: 1.2rem;">{{ total_trades }}</h5>
+		       <h5 class="mb-0" style="font-size: 1.2rem; color: black;">{{ total_trades }}</h5>
 			   <small class="mb-0" style="font-size: 1rem;">Total Trades</small>
 		     </div>
 		   </div>
@@ -114,7 +114,7 @@
 	</div>
   <!--End Row-->
 	
-	<div class="row">
+	<div class="row" id="dashboard_tabledata">
 	 <div class="col-12 col-lg-12">
 	   <div class="card">
 	     <div class="card-header" style="font-size: 1.5rem; text-transform: uppercase;">All Appointments
@@ -142,7 +142,7 @@
                 <img src="{{ order.photo }}" class="product-img" alt="product img" style="width: 5rem; height: fit-content;">
               {% endif %}
             </td>
-            <td style="max-width: 20rem; overflow: hidden;">{{ order.product }}</td>
+            <td style="max-width: 10rem; overflow: hidden;">{{ order.product }}</td>
             <td>₱{{ order.amount|intcomma }}</td>
             <td>{{ order.date|date:"d M Y H:i" }}</td>
             <td>{{ order.product_id }}</td>
@@ -241,26 +241,41 @@ $(function() {
             datasets: [{
                 label: 'Appointment',
                 data: {{ appointment_chart_data|safe }},
-                backgroundColor: '#fff',
-                borderColor: "#fff",
+                backgroundColor: '#033f63',
+                borderColor: "#033f63",
                 pointRadius :"0",
                 borderWidth: 3
             }, {
                 label: 'Trade',
                 data: {{ selling_chart_data|safe }},
-                backgroundColor: "grey",
-                borderColor: "grey",
+                backgroundColor: "#1E88E5",
+                borderColor: "#1E88E5",
                 pointRadius :"0",
                 borderWidth: 2
             }]
         },
         options: {
             maintainAspectRatio: false,
-            plugins:{
-                legend: {
-                    display: false
-                }
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              // legend text color and size
+              color: 'whitesmoke',
+              font: {
+                size: 13
+              }
             }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#ddd' }
+          },
+          y: {
+            ticks: { color: '#ddd' }
+          }
+        }
         }
     });
 
@@ -286,14 +301,29 @@ $(function() {
             }]
         },
         options: {
-          responsive: true,
-            maintainAspectRatio: false,
-            plugins:{
-                legend: {
-                    display: true,
-                    position:"bottom"
-                }
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'left',
+            labels: {
+              // move legend labels to the left side styling
+              color: '#ffffff',
+              font: {
+                size: 13
+              }
             }
+          }
+        },
+        layout: {
+          padding: {
+            left: 10,
+            right: 10,
+            top: 10,
+            bottom: 10
+          }
+        }
         }
     });
 

@@ -108,7 +108,7 @@
             </div>
             <div class="adminproduct_adding">
                 <div class="adminproduct_addcategory">
-                    <a href="#" onclick="openAddCategory()">Category +</a>
+                    <a href="#" onclick="openAddCategory()">Category</a>
                     <div class="popup" id="add_category_popup">
                         <button onclick="closeAddCategory()">X</button>
                         <div class="pop_wrapper">
@@ -124,7 +124,7 @@
                     </div>
                 </div>
                 <div class="adminproduct_addbrand">
-                    <a href="#" onclick="openAddBrand()">Brand +</a>
+                    <a href="#" onclick="openAddBrand()">Brand</a>
                     <div class="popup" id="add_brand_popup">
                         <button onclick="closeAddBrand()">X</button>
                         <div class="pop_wrapper">
@@ -140,7 +140,7 @@
                     </div>
                 </div>
                 <div class="adminproduct_addproduct">
-                    <a href="#" onclick="openAddProduct()" class="add_products">New Product</a>
+                    <a href="#" onclick="openAddProduct()" class="add_products">Product</a>
                     <div class="popup" id="add_product_popup">
                         <button onclick="closeAddProduct()">X</button>
                         <div class="pop_wrapper">
@@ -158,7 +158,7 @@
                     </div>
                 </div>
                 <div class="adminproduct_addvariant">
-                    <a href="#" onclick="openAddVariant()">Product Variant +</a>
+                    <a href="#" onclick="openAddVariant()">Product Variant</a>
                     <div class="popup" id="add_variant_popup">
                         <button onclick="closeAddVariant()">X</button>
                         <div class="pop_wrapper">
@@ -179,7 +179,7 @@
             </div>
         </div>
     </div>    
-    <div class="producttable">
+    <div class="producttable inventorytable">
         <table>
             <thead>
                 <tr>
@@ -193,24 +193,30 @@
                     <th>Price</th>
                 </tr>
             </thead>
-            {% if products %}
-                {% for produkto in products %}
             <tbody>
-                <tr data-id="{{ produkto.id }}">
-                    <td><input type="checkbox" class="row_checkbox"></td>
-                    <td>{{ produkto.id }}</td>
-                    {% if produkto.image %}
-                    <td><img src="{{ produkto.image.url }}" alt=""></td>
-                    {% endif %}
-                    <td class="prod_name">{{ produkto.product_name }}</td>
-                    <td>{{ produkto.category_name }}</td>
-                    <td>{{ produkto.brand }}</td>
-                    <td class="prod_stock">{{ produkto.stock }}</td>
-                    <td class="prod_price">₱{{ produkto.price|intcomma }}</td>
-                </tr>
+                {% if products %}
+                    {% for produkto in products %}
+                    <tr data-id="{{ produkto.id }}">
+                        <td data-label="Select"><input type="checkbox" class="row_checkbox"></td>
+                        <td data-label="ID">{{ produkto.id }}</td>
+                        <td data-label="Image">
+                            {% if produkto.image %}
+                                <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}" class="prod_img">
+                            {% endif %}
+                        </td>
+                        <td data-label="Product Name" class="prod_name">{{ produkto.product_name }}</td>
+                        <td data-label="Category">{{ produkto.category_name }}</td>
+                        <td data-label="Brand">{{ produkto.brand }}</td>
+                        <td data-label="Quantity" class="prod_stock">{{ produkto.stock }}</td>
+                        <td data-label="Price" class="prod_price">₱{{ produkto.price|intcomma }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8">No products found.</td>
+                    </tr>
+                {% endif %}
             </tbody>
-                {% endfor %}
-            {% endif %}
         </table>
     </div>
     <div class="bottominventory">

@@ -1,8 +1,416 @@
+/* Admin: Inventory responsive and UI polish */
+:root{
+  --primary-sidebar: #1560BD;
+  --header-teal: #4F9FBA;
+  --primary-dark: #033f63;
+  --primary-blue: #003B8E;
+  --tile-cyan: #1E88E5;
+  --light-blue-bg: #E8F0FF;
+  --page-bg: #F6F7FB;
+  --card-bg: #FFFFFF;
+  --muted-text: #A4A4A4;
+  --text: black;
+  --shadow: rgba(0,26,64,0.12);
+}
+
+/* Basic overrides — tweak selectors to match your CSS */
+body { background-color: var(--page-bg) !important; color: var(--text); }
+.sidebar { background-color: var(--primary-sidebar) !important; color: #fff; }
+header { background-color: var(--header-teal) !important; color: #fff; }
+.inventory_filter form select,
+.product_filter form select { background-color: var(--light-blue-bg) !important; }
+.inventorytable thead { background: linear-gradient(90deg, var(--primary-dark), var(--primary-blue)) !important; color: #fff; }
+.btn-primary { background: linear-gradient(90deg, var(--primary-dark), var(--primary-blue)); color: #fff; border: none; }
+.card, .dashboardupper_notification, .dashboardupper_appointment { background: var(--card-bg); box-shadow: 0 6px 18px var(--shadow); }
+a { color: var(--primary-blue); }
+.text-muted { color: var(--muted-text); }
+
+.inventorypage {
+    padding: 2rem 1rem 3rem 1rem;
+}
+.inventorytable {
+    max-width: 1100px;
+    margin: 1.5rem auto;
+    background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.95) 100%);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(7, 27, 56, 0.12);
+    padding: 1.2rem;
+    overflow: hidden;
+}
+.inventorytable table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* helps long text wrap inside cells */
+    font-family: Montserrat, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+.inventorytable thead th {
+    background: linear-gradient(90deg,#003b72 0%, #0e66a8 100%);
+    color: #fff;
+    font-weight: 700;
+    padding: 14px 18px;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    border-collapse: collapse;
+}
+.inventorytable tbody td {
+    padding: 12px 18px;
+    vertical-align: middle;
+    font-size: 0.95rem;
+    color: rgb(45, 45, 45);
+    border-bottom: 1px solid rgba(15, 23, 42, 0.05);
+    word-wrap: break-word;
+}
+.inventorytable tbody tr:nth-child(even) td {
+    background: rgba(14, 102, 168, 0.03);
+}
+.inventorytable tbody td:nth-child(2) { /* product name */
+    text-align: left;
+}
+.inventorytable tbody td:nth-child(4) { /* price */
+    text-align: right;
+    white-space: nowrap;
+}
+.bottominventory {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.8rem;
+}
+.bottominventory .right_inventory button {
+    background: #0e66a8;
+    color: white;
+    border: none;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+.bottominventory .right_inventory button:hover{
+    background: #084d7a;
+}
+
+/* Mobile / Tablet: stack rows into cards, show label on left and value on right */
+@media (max-width: 768px) {
+    /* Ensure table doesn't force horizontal layout on small screens */
+    .producttable table { min-width: 0 !important; width: 100% !important; }
+    .producttable thead th, .producttable tbody td { min-width: auto !important; }
+    /* reduce side gaps on small screens so cards take more width */
+    .inventorypage { padding-left: 0.6rem; padding-right: 0.6rem; }
+    .inventorytable { padding: 0.6rem; margin: 0.6rem auto; width: calc(100% - 1.2rem); border-radius: 8px; }
+    .inventorytable table, .inventorytable thead, .inventorytable tbody, .inventorytable th, .inventorytable td, .inventorytable tr { display:block; }
+    .inventorytable thead { display: none; }
+    .inventorytable tbody tr { display:block; margin-bottom: 12px; background: #fff; border-radius: 10px; box-shadow: 0 6px 20px rgba(7, 27, 56, 0.06); padding: 10px; }
+    .inventorytable tbody td:nth-child(1){justify-content: space-between;}
+    .inventorytable tbody td { display:flex; padding: 8px 10px; border-bottom: none; font-size: 1.2rem; }
+    .inventorytable tbody td::before { content: attr(data-label); font-weight:700; color:black; margin-right: 8px; }
+    .inventorytable tbody td:nth-child(4) { text-align: left; }
+    .inventorytable tbody td[data-label="Product Name"] { max-width: 100%; justify-content: left;}
+}
+
+/* ===== Consolidated .producttable responsive rules (flattened) ===== */
+/* Tablet & mobile: convert rows to cards with label/value layout */
+@media (max-width: 768px) {
+    /* Convert table into stacked cards where each field is a separate row */
+    .producttable table,
+    .producttable thead,
+    .producttable tbody,
+    .producttable th,
+    .producttable td,
+    .producttable tr {
+        display: block;
+        width: 100%;
+    }
+
+    .producttable thead { display: none; }
+
+    .producttable tbody tr {
+        display: block;
+        margin-bottom: 14px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(7, 27, 56, 0.06);
+        padding: 12px;
+        overflow: visible;
+    }
+
+    /* Each cell is a row: label on the left, value on the right (flex) */
+    .producttable tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        font-size: 0.95rem;
+        color: #222;
+        white-space: normal !important;
+    }
+
+    .producttable tbody td::before {
+        content: attr(data-label);
+        display: inline-block;
+        font-weight: 700;
+        color: #001a40;
+        margin-right: 8px;
+        flex: 0 0 36%;
+        max-width: 40%;
+        text-align: left;
+    }
+
+    .producttable tbody td > *:not(img) {
+        text-align: right;
+    }
+
+    /* For product name keep left alignment and allow wrapping */
+    .producttable tbody td[data-label="Product Name"]::before { flex: 0 0 28%; }
+    .producttable tbody td[data-label="Product Name"] > * { text-align: left; }
+
+    /* Quantity and Price should align right but remain visible */
+    .producttable tbody td[data-label="Quantity"] > *,
+    .producttable tbody td[data-label="Price"] > * { text-align: right; }
+
+    /* Images shown at left of product name or as their own block */
+    .producttable tbody td img.prod_img,
+    .producttable tbody td img {
+        display: inline-block;
+        object-fit: cover;
+        border-radius: 6px;
+        margin: 0 8px 8px 0;
+        vertical-align: middle;
+    }
+
+    /* Make product name more prominent */
+    .producttable tbody td[data-label="Product Name"] {
+        font-weight: 600;
+        color: #222;
+    }
+
+    /* Remove extra border on last cell */
+    .producttable tbody td:last-child { border-bottom: none; }
+
+    /* Reduce outer margins so cards take more width like admin_selling */
+    .admin_productpage { margin: 0.6rem; padding: 0.4rem; }
+    .producttable { margin: 0.6rem auto; }
+}
+
+
+/* Tablet landscape: keep cards but allow 2-column-ish layout for better density */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .producttable thead { display: none; }
+
+    .producttable tbody tr {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 10px;
+        background: #fff;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        box-shadow: 0 6px 18px rgba(7,27,56,0.06);
+    }
+
+    .producttable tbody td {
+        display: block;
+        padding: 0;
+        text-align: left;
+        flex: 1 1 0;
+    }
+
+    .producttable tbody td::before {
+        display: block;
+        content: attr(data-label);
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .producttable tbody td img.prod_img { width: 56px; height: 56px; }
+    /* Avoid forcing large min-widths on tablet landscape so cards can wrap */
+    .producttable table { min-width: 0 !important; width: 100% !important; }
+    .producttable thead th, .producttable tbody td { min-width: auto !important; }
+}
+
+/* ===== Consolidated .appointmenttable responsive rules (flattened) ===== */
+/* Make the appointment table behave like admin_inventory/admin_selling on small screens */
+@media (max-width: 768px) {
+    /* allow table to shrink and use stacked card layout */
+    .appointmenttable table { min-width: 0 !important; width: 100% !important; }
+    .appointmenttable table,
+    .appointmenttable thead,
+    .appointmenttable tbody,
+    .appointmenttable th,
+    .appointmenttable td,
+    .appointmenttable tr {
+        display: block;
+        width: 100%;
+    }
+
+    .appointmenttable thead { display: none; }
+
+    .appointmenttable tbody tr {
+        display: block;
+        margin-bottom: 12px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        padding: 10px;
+        overflow: visible;
+    }
+
+    .appointmenttable tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        white-space: normal !important;
+        font-size: 0.95rem;
+        color: #222;
+    }
+
+    .appointmenttable tbody td::before {
+        content: attr(data-label);
+        display: inline-block;
+        font-weight: 700;
+        color: #001a40;
+        margin-right: 8px;
+        flex: 0 0 36%;
+        max-width: 40%;
+        text-align: left;
+    }
+
+
+    /* Product name stays left-aligned and wraps */
+    .appointmenttable tbody td[data-label="Product Name"]::before { flex: 0 0 28%; }
+    .appointmenttable tbody td[data-label="Product Name"] > * { text-align: left; }
+
+    /* Images in appointment rows (if any) */
+    .appointmenttable tbody td img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; margin: 0 8px 8px 0; }
+
+    .appointmenttable tbody td:last-child { border-bottom: none; }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .appointmenttable thead { display: none; }
+    .appointmenttable tbody tr {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 10px;
+        background: #fff;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .appointmenttable tbody td {
+        display: block;
+        padding: 0;
+        text-align: left;
+        flex: 1 1 0;
+    }
+
+    .appointmenttable tbody td::before {
+        display: block;
+        content: attr(data-label);
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    /* prevent forced large min-widths on tablet landscape */
+    .appointmenttable table { min-width: 0 !important; width: 100% !important; }
+    .appointmenttable thead th, .appointmenttable tbody td { min-width: auto !important; }
+}
+
+/* Tablet landscape tweak */
+@media (min-width:769px) and (max-width: 1024px) {
+    /* tablet: reduce side space so table uses more width */
+    .inventorypage { padding-left: 0.8rem; padding-right: 0.8rem; }
+    .inventorytable { max-width: 920px; padding: 0.9rem; margin: 1rem auto; width: calc(100% - 1.6rem); }
+    .inventorytable thead th { font-size: 0.9rem; padding: 12px 14px; }
+    .inventorytable tbody td { padding: 10px 12px; font-size: 0.92rem; }
+}
+@media(max-width: 768px) {
+    
+    .inventory_search input{width: 18rem !important;}
+}
+@media (max-width: 520px) {
+   
+}
+/* Keep the blue background feeling on the admin area: make the page background gradient subtle
+    NOTE: switched to transparent so the `body` background-color (whitesmoke) shows through.
+    Sidebar remains blue via the `.sidebar` rule. */
+.inventorypage { background: transparent; }
+
+/* small visual polish for filter/search controls */
+.inventory_filter select, .inventory_search input[type="text"] { border-radius: 999px; border: 1px solid #033f63; }
+.inventory_filter button { background: #0069b3; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+
+/* ensure PDF button aligns nicely */
+.right_inventory a button { padding: 8px 14px; }
+
+/* End inventory section */
+
+.container-fluid > .inventorypage {
+    margin: 1.5rem 0.6rem !important;
+    padding-left: 0.6rem !important;
+    padding-right: 0.6rem !important;
+    width: calc(100% - 1.2rem) !important;
+    max-width: none !important;
+}
+.inventorytable {
+    width: 100% !important;
+    margin: 0.4rem auto !important;
+}
+
+@media (max-width: 1024px) {
+    .container-fluid > .inventorypage {
+        margin: 1rem 0.5rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        width: calc(100% - 1rem) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .container-fluid > .inventorypage {
+        margin: 0.8rem 0.4rem !important;
+        padding-left: 0.4rem !important;
+        padding-right: 0.4rem !important;
+        width: calc(100% - 0.8rem) !important;
+    }
+    .inventorytable {
+        margin: 0.2rem auto !important;
+        width: 100% !important;
+    }
+}
+@media (max-width: 520px) {
+    .container-fluid{
+        padding: 0 !important;
+    }
+    .container-fluid > .inventorypage {
+        margin: 0.5rem 0 !important;
+        margin-left: -.5rem !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        width: calc(100% + 1rem) !important;
+    }
+    .upperinventory {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+}
+
 /* BASE, HEADER, NAVIGATION */
-body{
+html, body{
     margin: 0;
+    height: 100%;
     font-family: Afacad;
-    background-color: whitesmoke;
+    background-color: whitesmoke !important;
 }
 header{
     color: white;
@@ -42,8 +450,8 @@ header{
     padding: 1rem;
     width: 200px;
     border-radius: 1rem;
-    background-color: #1560bd;
-    color: white;
+    background-color: #add8e6 !important; /* lightblue */
+    color: #052b3a !important; /* dark text for contrast on light background */
 }
 .sidebar ul{
     margin-top: 3rem;
@@ -59,7 +467,7 @@ header{
     text-decoration: none;
     font-size: 1.4rem;
     font-weight: 500;
-    color: white;
+    color: #052b3a !important; /* match sidebar text color for readability */
 }
 .sidebar ul li:nth-child(5){
     text-align: left;
@@ -70,12 +478,12 @@ header{
     opacity: 0;
 }
 .sidebar ul li a:not(:active):hover, .sidebar ul li a:focus{
-    border-left: .2rem solid whitesmoke;
-    border-right: .2rem solid whitesmoke;
+    border-left: .2rem solid rgba(255,255,255,0.9);
+    border-right: .2rem solid rgba(255,255,255,0.9);
 }
 .sidebar ul li a:focus, .sidebar ul li a:active{
-    border-left: 2px solid whitesmoke;
-    border-right: 2px solid whitesmoke;
+    border-left: 2px solid rgba(255,255,255,0.95);
+    border-right: 2px solid rgba(255,255,255,0.95);
 }
 .sidebar ul li a:focus::after, .sidebar ul li a:active::after{
     opacity: 1;
@@ -169,6 +577,11 @@ header{
 .dashboardbody_sales{
     width: 50rem;
 }
+@media (max-width: 520px) {
+    #dashboard_tabledata{
+        display: none;
+    }
+}
 
 /* Inventory */
 /* CONTAINER */
@@ -258,6 +671,8 @@ header{
 .inventorytable {
     width: 100%;
     overflow-x: auto;
+    background-color: whitesmoke;
+    box-shadow: .5rem 0 1rem rgba(0, 0, 0, 0.5);
 }
 
 .inventorytable table {
@@ -266,13 +681,12 @@ header{
     border-spacing: 0;
     border-radius: 1rem;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 26, 64, 0.12);
-    background: white;
+    background: transparent;
     font-size: 1.1rem;
 }
 
 .inventorytable thead {
-    background: linear-gradient(90deg, #001a40, #003b8e);
+    background: linear-gradient(90deg, #033f63, #003b8e);
     color: white;
 }
 
@@ -281,16 +695,18 @@ header{
     font-weight: 600;
     text-align: center;
     font-family: "Montserrat", sans-serif;
+    border-radius: 0;
 }
 
 .inventorytable thead th:nth-child(1) {
-    border-top-left-radius: 1rem;
+    border-radius: 1rem 0 0 1rem;
+    width: 10%;
 }
 
 .inventorytable thead th:nth-child(2) {
     text-align: left;
     padding-left: 2rem;
-    width: 40%;
+    width: 60%;
 }
 
 .inventorytable thead th:nth-child(4) {
@@ -480,7 +896,7 @@ header{
     width: 100%;
     height: 2.6rem;
     padding: 0 1rem;
-    border-radius: 0.8rem 0 0 0.8rem;
+    border-radius: 0.8rem;
     border: 1.5px solid #001a40;
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -711,6 +1127,7 @@ header{
     width: 100%;
     overflow-x: auto;
     margin-bottom: 2rem;
+    box-shadow: .5rem 0 1rem rgba(0, 0, 0, 0.5);
 }
 
 .producttable table {
@@ -720,11 +1137,10 @@ header{
     background: white;
     border-radius: 0.8rem;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 26, 64, 0.12);
 }
 
 .producttable thead {
-    background: linear-gradient(135deg, #001a40, #004080);
+    background: #033f63;
     color: white;
     position: sticky;
     top: 0;
@@ -739,34 +1155,32 @@ header{
     text-transform: uppercase;
     white-space: nowrap;
 }
-
-.producttable thead th:nth-child(1) {
+.producttable thead th:nth-child(1){
+    border-radius: 0.8rem  0 0 0;
+}
+.producttable thead th:nth-child(1),
+.producttable thead th:nth-child(2){
     width: 50px;
+    padding: 0;
     text-align: center;
 }
 
-.producttable thead th:nth-child(2) {
-    width: 60px;
-}
-
 .producttable thead th:nth-child(3) {
-    width: 80px;
+    width: 120px;
 }
 
 .producttable thead th:nth-child(4) {
     text-align: left;
     min-width: 250px;
     padding-left: 1rem;
+    border-radius: 0; 
 }
 
 .producttable thead th:nth-child(5),
-.producttable thead th:nth-child(6) {
-    width: 120px;
-}
-
+.producttable thead th:nth-child(6),
 .producttable thead th:nth-child(7),
 .producttable thead th:nth-child(8) {
-    width: 100px;
+    width: 120px;
 }
 
 .producttable tbody tr {
@@ -818,8 +1232,8 @@ header{
 }
 
 .producttable tbody td img {
-    width: 45px;
-    height: 45px;
+    width: 55px;
+    height: 50px;
     border-radius: 0.4rem;
     object-fit: cover;
     transition: transform 0.2s ease;
@@ -834,7 +1248,7 @@ input[type="checkbox"] {
     width: 1.1rem;
     height: 1.1rem;
     cursor: pointer;
-    accent-color: #667eea;
+    accent-color: #033f63;
 }
 
 /* RESPONSIVE DESIGN */
@@ -895,6 +1309,7 @@ input[type="checkbox"] {
 @media (max-width: 768px) {
     .admin_productpage {
         margin: 0.5rem;
+        margin-top: 2rem;
     }
 
     .upperproduct {
@@ -907,17 +1322,29 @@ input[type="checkbox"] {
     }
 
     .product_filter form {
-        flex-direction: column;
-    }
-
-    .product_filter form select,
-    .product_filter form button {
         width: 100%;
+        flex-direction: row;
         height: 2.2rem;
+        margin-bottom: 4rem;
         font-size: 0.9rem;
     }
 
+    .product_filter form select {
+        width: 50%;
+        height: 3.2rem;
+        font-size: 2rem;
+    }
+    .product_filter form button{
+        width: 100%;
+        height: 3rem;
+        font-size: 1.8rem;
+    }
+    .product_editdelete button{
+        height: 3rem;
+    }
+
     .adminproduct_search {
+        margin-top: 2rem;
         justify-content: flex-start;
     }
 
@@ -927,12 +1354,13 @@ input[type="checkbox"] {
     }
 
     .adminproduct_search input {
-        height: 2.2rem;
-        font-size: 0.9rem;
+        height: 3.2rem;
+        padding: 1rem;
+        font-size: 1.8rem;
     }
 
     .adminproduct_adding {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.5rem;
         width: 100%;
     }
@@ -943,8 +1371,8 @@ input[type="checkbox"] {
     .adminproduct_addvariant a {
         width: 100%;
         text-align: center;
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
+        padding: 0.8rem 1.2rem;
+        font-size: 1.2rem;
     }
 
     .action-buttons {
@@ -957,7 +1385,7 @@ input[type="checkbox"] {
         flex: 1;
         min-width: 100px;
         padding: 0.5rem 0.8rem;
-        font-size: 0.75rem;
+        font-size: 1.1rem;
     }
 
     .producttable {
@@ -975,228 +1403,152 @@ input[type="checkbox"] {
     }
 
     .producttable tbody td {
+        justify-content: left;
+        width: 100% !important;
+        margin-bottom: 2rem;
         padding: 0.5rem 0.4rem;
-        font-size: 0.8rem;
+        font-size: 2rem;
     }
-
+    .producttable tbody td:last-child{
+        border-bottom: 2px solid #033f63;
+    }
+    .producttable tbody td:nth-child(2){
+        justify-content: space-between;
+    }
     .producttable tbody td img {
-        width: 35px;
-        height: 35px;
-    }
-
-    /* Show all columns on tablet */
-    .producttable thead th:nth-child(n),
-    .producttable tbody td:nth-child(n) {
-        display: table-cell;
+        width: 8rem;
+        height: fit-content;
     }
 }
-
-@media (max-width: 480px) {
-    .admin_productpage {
-        margin: 0.3rem;
+@media (max-width: 520px) {
+    .product_filter form{
+        margin-bottom: 1.2rem;
+    }
+    .product_filter form select {
+        height: 1.8rem;
+        font-size: .9rem;
+    }
+    .product_filter form button{
+        height: 1.8rem;
+        font-size: .9rem;
+    }
+    .product_editdelete button{
+        height: 1.8rem;
     }
 
-    .upperproduct {
-        gap: 0.8rem;
+    .adminproduct_search {
+        margin-top: 2rem;
+        justify-content: flex-start;
     }
 
-    .product_filter form,
-    .adminproduct_adding {
-        flex-direction: column;
-        gap: 0.4rem;
+    .adminproduct_search form {
+        max-width: 100%;
+        width: 100%;
     }
 
-    .product_filter form select,
-    .product_filter form button,
     .adminproduct_search input {
-        height: 2rem;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.6rem;
+        height: 2.4rem;
+        padding: 1rem;
+        font-size: 1.2rem;
     }
 
-    .adminproduct_addcategory a,
-    .adminproduct_addbrand a,
-    .adminproduct_addproduct a,
+    .adminproduct_adding {
+        flex-direction: row;
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .adminproduct_addcategory a{
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem 2rem;
+        font-size: .9rem;
+    }
+    .adminproduct_addbrand a{
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem 3rem;
+        font-size: .9rem;
+    }
+    .adminproduct_addproduct a{
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem 1.7rem;
+        font-size: .9rem;
+    }
     .adminproduct_addvariant a {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.7rem;
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem .7rem;
+        font-size: .9rem;
     }
 
     .action-buttons {
-        gap: 0.4rem;
+        gap: 0.5rem;
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 
     .action-buttons button {
-        min-width: 80px;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.7rem;
+        flex: 1;
+        min-width: 100px;
+        padding: 0.1rem 0.6rem;
+        font-size: 1.1rem;
     }
 
-    .producttable {
-        font-size: 0.7rem;
-        margin-bottom: 0.8rem;
-    }
+    .producttable table { min-width: 0 !important; width: 100% !important; }
 
-    .producttable table {
-        min-width: 650px;
-    }
-
-    .producttable thead th {
-        padding: 0.4rem 0.2rem;
-        font-size: 0.65rem;
+    .producttable tbody tr {
+        display: block;
+        padding: 10px 8px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        background: #fff;
+        box-shadow: 0 6px 18px rgba(7,27,56,0.06);
     }
 
     .producttable tbody td {
-        padding: 0.3rem 0.2rem;
-        font-size: 0.7rem;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        white-space: normal !important;
+        overflow: visible !important;
+        margin-bottom: .5rem;
+        font-size: 1rem;
     }
 
-    .producttable tbody td img {
-        width: 28px;
-        height: 28px;
+    .producttable tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        color: #001a40;
+        margin-bottom: 6px;
     }
 
-    /* On extra small: show Checkbox, ID, Product Name, Quantity, Price */
-    .producttable thead th:nth-child(1),  /* Checkbox */
-    .producttable thead th:nth-child(2),  /* ID */
-    .producttable thead th:nth-child(4),  /* Product Name */
-    .producttable thead th:nth-child(7),  /* Quantity */
-    .producttable thead th:nth-child(8),  /* Price */
-    .producttable tbody td:nth-child(1),
-    .producttable tbody td:nth-child(2),
-    .producttable tbody td:nth-child(4),
-    .producttable tbody td:nth-child(7),
-    .producttable tbody td:nth-child(8) {
-        display: table-cell;
-    }
+    .producttable tbody td img.prod_img,
+    .producttable tbody td img { width: 56px; height: 56px; margin-bottom: 8px; }
 
-    /* Hide: Image, Category, Brand */
-    .producttable thead th:nth-child(3),
-    .producttable thead th:nth-child(5),
-    .producttable thead th:nth-child(6),
-    .producttable tbody td:nth-child(3),
-    .producttable tbody td:nth-child(5),
-    .producttable tbody td:nth-child(6) {
-        display: none;
-    }
-
-    input[type="checkbox"] {
-        width: 0.9rem;
-        height: 0.9rem;
-    }
-}
-
-/* PRODUCT TABLE */
-.producttable {
-    display: block; /* allows horizontal scroll */
-    width: 100%;
-    overflow-x: auto; /* horizontal scroll if needed */
-    margin-top: 1rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 1rem;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.producttable table {
-    width: 100%;
-    min-width: 900px; /* ensures all columns are shown */
-    border-collapse: collapse;
-}
-
-.producttable thead {
-    background: linear-gradient(90deg, #001a40, #004080);
-    color: white;
-    font-weight: 700;
-}
-
-.producttable thead th {
-    padding: 0.8rem 1rem;
-    text-align: center;
-}
-
-.producttable thead th:nth-child(1) {
-    width: 50px; /* checkbox */
-}
-
-.producttable thead th:nth-child(2) {
-    width: 50px; /* ID */
-}
-
-.producttable thead th:nth-child(3) {
-    width: 80px; /* image */
-}
-
-.producttable thead th:nth-child(4) {
-    text-align: left;
-    padding-left: 1rem; /* product name */
-}
-
-.producttable thead th:nth-child(5),
-.producttable thead th:nth-child(6),
-.producttable thead th:nth-child(7),
-.producttable thead th:nth-child(8) {
-    width: 100px; /* category, brand, quantity, price */
-}
-
-.producttable tbody tr {
-    border-bottom: 1px solid #ddd;
-}
-
-.producttable tbody td {
-    text-align: center;
-    padding: 0.8rem 1rem;
-}
-
-.producttable tbody td:nth-child(4) {
-    text-align: left;
-    padding-left: 1rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.producttable tbody td img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 0.25rem;
-}
-
-/* checkbox styling */
-input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-/* hover effect for rows */
-.producttable tbody tr:hover {
-    background-color: #f0f6ff;
-}
-
-/* responsive for small screens */
-@media (max-width: 800px) {
-    .producttable table {
-        min-width: 700px; /* ensures scroll even on small screens */
-    }
 }
 
 /* APPOINTMENT */
 .admin_appointmentpage {
-    margin-left: 5rem;
     padding: 1rem;
     color: black;
 }
 
 /* Search + Filter Section */
+.adminappointment_search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
 .adminappointment_search input {
     width: 20rem;
     height: 2.3rem;
     padding: 0 1rem;
     margin: .5rem;
     border-radius: 2rem;
-    border: 1px solid #1b3b6f;
+    border: 1px solid #033b8e;
     background: #f9fbff;
     transition: 0.3s;
 }
@@ -1211,6 +1563,7 @@ input[type="checkbox"] {
     width: 9rem;
     height: 2.3rem;
     padding-left: .5rem;
+    text-transform: uppercase;
     font-size: 1rem;
     border-radius: 1rem;
     border: 1px solid #1b3b6f;
@@ -1221,6 +1574,7 @@ input[type="checkbox"] {
 .adminappointment_search .appointment_status button {
     width: 5rem;
     height: 2rem;
+    text-transform: uppercase;
     color: white;
     border: none;
     border-radius: .5rem;
@@ -1284,12 +1638,28 @@ input[type="checkbox"] {
     font-family: 'Montserrat';
     font-size: .95rem;
 }
+.appointmenttable thead th:nth-child(1){
+    width: 5rem;
+}
+.appointmenttable thead th:nth-child(8){
+    width: 10rem;
+}
+.appointmenttable thead th:nth-child(2),
+.appointmenttable thead th:nth-child(7){
+    width: 12rem;
+}
+.appointmenttable thead th:nth-child(6){
+    width: 8rem;
+}
 
 .appointmenttable tbody td:nth-child(2),
 .appointmenttable tbody td:nth-child(3),
 .appointmenttable tbody td:nth-child(4) {
     text-align: left;
 }
+.appointmenttable tbody td:nth-child(7){
+    width: 12rem;
+} 
 
 /* Status Tag Styles */
 .status-tag {
@@ -1336,27 +1706,118 @@ input[type="checkbox"] {
 .cancel_btn:hover {
     background-color: #8b0000;
 }
+@media (max-width: 768px) {
+    .adminappointment_search .appointment_status select{
+        height: 2.7rem;
+        font-size: 1.5rem;
+    }
+    .adminappointment_search .appointment_status select option{
+        font-size: .7rem;
+    }
+    .adminappointment_search .appointment_status button{
+        height: 2.7rem;
+        font-size: 1.5rem;
+    }
+    .appointmenttable table {
+        font-size: 1.7rem;
+    }
+
+    .appointmenttable thead th,
+    .appointmenttable tbody td {
+        justify-content: left;
+        padding: 0.5rem;
+        font-size: 1.5rem;
+        color: black;
+    }
+    .appointmenttable tbody td:nth-child(1){
+        justify-content: space-between;
+    }
+    .appointmenttable tbody td:nth-child(7){
+        width: 100%;
+    }
+}
+@media (max-width: 520px) {
+    .appointment_status{
+        display: flex;
+    }
+    .adminappointment_search .appointment_status select{
+        width: 6rem;
+        height: 1.5rem;
+        font-size: .9rem;
+    }
+    .adminappointment_search .appointment_status select option{
+        font-size: .7rem;
+    }
+    .adminappointment_search .appointment_status button{
+        width: 4rem;
+        height: 1.5rem;
+        font-size: .8rem;
+    }
+    .adminappointment_search input{
+        width: 7rem;
+        height: 1.7rem;
+    }
+
+    .appointmenttable table { min-width: 0 !important; width: 100% !important; }
+    .appointmenttable tbody tr {
+        display: block;
+        padding: 8px 6px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+    }
+
+    .appointmenttable tbody td {
+        padding: 6px 4px;
+        font-size: .9rem;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        white-space: normal !important;
+        overflow: visible !important;
+    }
+
+    .appointmenttable tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: 700;
+        color: #001a40;
+        margin-bottom: 6px;
+    }
+
+    .appointmenttable tbody td img { width: 48px; height: 48px; margin-bottom: 8px; }
+    .appointmenttable tbody td:last-child { border-bottom: none; }
+}
+
+
 
 /* TRADES */
 /* MAIN CONTAINER */
 .admin_tradepage {
-    padding: 1rem 2rem;
+    padding: 1rem 0;
 }
 
 /* SEARCH + FILTER */
+.admintrade_search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
 .admintrade_search input {
     width: 20rem;
     height: 2.3rem;
     padding: 0 1rem;
     border-radius: 2rem;
-    border: 1px solid #1b3b6f;
-    background: #f9fbff;
+    border: 1px solid #033f63;
+    background-color: transparent;
+    color: black;
     transition: 0.3s;
 }
 
 .admintrade_search input:focus {
     outline: none;
-    border-color: #003b8e;
+    border-color: #033f63;
     box-shadow: 0 0 5px rgba(0, 70, 160, 0.5);
 }
 
@@ -1366,8 +1827,7 @@ input[type="checkbox"] {
     margin: .5rem;
     font-size: 1rem;
     border-radius: 1rem;
-    border: 1px solid #1b3b6f;
-    background-color: #e8f0ff;
+    border: 1px solid #033f63;
 }
 .admintrade_search .trade_status select option{
     background-color: whitesmoke;
@@ -1376,10 +1836,11 @@ input[type="checkbox"] {
 .admintrade_search .trade_status button {
     width: 5rem;
     height: 2rem;
+    text-transform: uppercase;
     color: white;
     border: none;
     border-radius: .5rem;
-    background-color: #003b8e;
+    background-color: #033f63;
     transition: .2s;
 }
 
@@ -1391,35 +1852,57 @@ input[type="checkbox"] {
 .tradetable {
     display: flex;
     justify-content: center;
+    width: 100%;
+    max-width: 100%;
     margin-top: 1.5rem;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
+    box-shadow: .5rem 0 1rem rgba(0, 0, 0, 0.5);
 }
 
 /* TABLE */
 .tradetable table {
     width: 100%;
-    max-width: 90rem;
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0;
     border-collapse: collapse;
     border-radius: 1rem;
     overflow: hidden;
     background: #ffffff;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 /* HEADER */
 .tradetable thead {
+    width: 100%;
     text-align: center;
-    background: linear-gradient(90deg, #001a40, #003b8e);
+    background: linear-gradient(90deg, #033f63, #003b8e);
     color: white;
 }
-
 .tradetable thead th {
-    padding: 1rem .5rem;
+    width: 10%;
+    padding: .5rem;
     font-size: 1rem;
     font-family: "Montserrat", sans-serif;
+    border-radius: 0;
+} 
+.tradetable thead th:nth-child(5),
+.tradetable thead th:nth-child(7){
+    width: 10%;
+    padding-left: 0;
 }
+.tradetable thead th:nth-child(2),
+.tradetable thead th:nth-child(3),
+.tradetable thead th:nth-child(4),
+.tradetable thead th:nth-child(6){
+    width: 20%; 
+    border-radius: 0;
 
+}
 .tradetable thead th:last-child {
-    border-right: none;
+    width: 15%;
+    border-radius: 0 1rem 0 0;
 }
 
 /* BODY */
@@ -1466,7 +1949,7 @@ input[type="checkbox"] {
 
 /* ACTION BUTTONS */
 .cancel_btn {
-    background-color: transparent;
+    background-color: transparent !important;
     color: red !important;
     font-weight: 600;
     border: none;
@@ -1482,11 +1965,43 @@ input[type="checkbox"] {
     font-weight: 600;
     color: white;
     border-radius: .7rem;
-    background-color: #003b8e;
+    background-color: #033f63;
     border: none;
     cursor: pointer;
 }
 
 .tradetable table tbody tr td form button:hover {
     background-color: #002a66;
+}
+
+@media (max-width: 768px) {
+    .tradetable table {
+        font-size: 0.9rem;
+    }
+
+    .tradetable thead th,
+    .tradetable tbody td {
+        padding: 0.5rem;
+        font-size: 1.5rem;
+        color: black;
+    }
+}
+@media (max-width: 520px) {
+    .admintrade_search {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .admintrade_search form{
+        width: 100%;
+    }
+    .admintrade_search form input {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    .tradetable thead th,
+    .tradetable tbody td {
+        padding: 0.5rem;
+        font-size: 1rem;
+        color: black;
+    }
 }

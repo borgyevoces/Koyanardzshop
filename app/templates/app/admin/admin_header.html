@@ -9,9 +9,17 @@
   </ul>
      
   <ul class="navbar-nav align-items-center right-nav-link">
+    {% if request.user.is_authenticated and request.user.is_staff %}
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'logout' %}" title="Logout">
+        <i class="fa fa-sign-out" style="font-size: 1.7rem; color: black"></i>
+      </a>
+    </li>
+    {% else %}
     <li class="nav-item dropdown-lg">
       <i class="fa fa-user-o" style="font-size: 1.7rem;"></i>
     </li>
+    {% endif %}
   </ul>
 </nav>
 

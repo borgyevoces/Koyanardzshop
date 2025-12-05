@@ -10,9 +10,6 @@
             
         </div>
         <div class="adminappointment_search">
-            <form action="" method="GET">
-                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
-            </form>
             <div class="appointment_status">
                 <form method="get" class="appointment-filters">
                     <select name="status">
@@ -24,6 +21,9 @@
                     <button type="submit">Apply</button>
                 </form>
             </div>
+            <form action="" method="GET">
+                <input type="text" placeholder="Search..." name="search" value="{{ search_query }}">
+            </form>
         </div>
     </div>
     <div class="popup" id="cancel_popup">
@@ -52,8 +52,7 @@
                     <th>Customer Name</th>
                     <th>Contact</th>
                     <th>Email</th>
-                    <th>Date</th>
-                    <th>Time</th>
+                    <th>Date & Time</th>
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Status</th>
@@ -63,17 +62,16 @@
                 {% for appointment in appointments %}
                     {% for produkto in appointment.products.all %}
                     <tr>
-                        <td>{{ appointment.id }}</td>
-                        <td>{{ appointment.reference_number }}</td>
-                        <td>{{ produkto.product.product_name }}</td>
-                        <td>{{ appointment.last_name }} {{ appointment.first_name }}</td>
-                        <td>{{ appointment.contact }}</td>
-                        <td>{{ appointment.email }}</td>
-                        <td>{{ appointment.date|date:"M d, Y" }}</td>
-                        <td>{{ appointment.time|time:"h:i A" }}</td>
-                        <td>{{ produkto.quantity }}</td>
-                        <td>₱{{ produkto.price|intcomma }}</td>
-                        <td>
+                        <td data-label="ID">{{ appointment.id }}</td>
+                        <td data-label="Reference">{{ appointment.reference_number }}</td>
+                        <td data-label="Product Name">{{ produkto.product.product_name }}</td>
+                        <td data-label="Customer">{{ appointment.last_name }} {{ appointment.first_name }}</td>
+                        <td data-label="Contact">{{ appointment.contact }}</td>
+                        <td data-label="Email">{{ appointment.email }}</td>
+                        <td data-label="Date">{{ appointment.date|date:"M d, Y" }} / {{ appointment.time|time:"h:i A" }}</td>
+                        <td data-label="Quantity">{{ produkto.quantity }}</td>
+                        <td data-label="Price">₱{{ produkto.price|intcomma }}</td>
+                        <td data-label="Status">
                             {% if appointment.status == "Cancelled" %}
                             <span class="status-tag status-cancelled">Cancelled</span>
                             {% elif appointment.status == "Finished" %}
