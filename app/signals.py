@@ -80,7 +80,7 @@ Koya Nardz Shop Team
                         else:
                             logger.info(f"MailerSend: email queued/sent to {recipient_email} for user {instance.username}")
                     except Exception as e:
-                        logger.error(f"Failed to send via MailerSend to {recipient_email}: {e}")
+                        logger.exception(f"Failed to send via MailerSend to {recipient_email}")
 
                 # Fallback helper using Django send_mail (kept as threaded to avoid blocking)
                 def _send_via_django(subject, message, from_email, recipient_list):
@@ -94,7 +94,7 @@ Koya Nardz Shop Team
                         )
                         logger.info(f"OTP email sent successfully to {recipient_list} for user {instance.username}")
                     except Exception as e:
-                        logger.error(f"Failed to send OTP email to {recipient_list}: {str(e)}")
+                        logger.exception(f"Failed to send OTP email to {recipient_list}")
 
                 # Choose MailerSend API if configured, otherwise use Django's send_mail
                 chosen_from = settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') and settings.DEFAULT_FROM_EMAIL else settings.EMAIL_HOST_USER

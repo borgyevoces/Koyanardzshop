@@ -760,7 +760,7 @@ def cancel_appointment(request, appointment_id):
             )
         except Exception as e:
             logger = logging.getLogger(__name__)
-            logger.error(f"Failed to send cancellation email for appointment {appointment.id}: {e}")
+            logger.exception(f"Failed to send cancellation email for appointment {appointment.id}")
 
         return JsonResponse({"success": True})
     return JsonResponse({"success": False}, status=400)
@@ -785,7 +785,7 @@ def cancel_trade(request, selling_id):
             )
         except Exception as e:
             logger = logging.getLogger(__name__)
-            logger.error(f"Failed to send trade cancellation email for selling {selling.id}: {e}")
+            logger.exception(f"Failed to send trade cancellation email for selling {selling.id}")
 
         return JsonResponse({"success": True})
     return JsonResponse({"success": False}, status=400)
@@ -1117,7 +1117,7 @@ class AppointmentCompletePage(TemplateView):
             )
         except Exception as e:
             logger = logging.getLogger(__name__)
-            logger.error(f"Failed to send appointment confirmation email for appointment {appointment.id}: {e}")
+            logger.exception(f"Failed to send appointment confirmation email for appointment {appointment.id}")
             
         del request.session['appointment_data']
 
