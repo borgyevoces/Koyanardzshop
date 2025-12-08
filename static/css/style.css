@@ -3609,12 +3609,8 @@ footer .footer .footer_shop {
     justify-items: center;
     align-items: center;
     text-align: center;
-    /* Use max-width and centered margin so this container never overflows */
-    max-width: 1200px;
-    width: 100%;
-    margin: 3rem auto;
-    padding: 0 1rem;
-    box-sizing: border-box;
+    width: 80%;
+    margin: 3rem 4rem;
 }
 .product-container{
     display: flex;
@@ -3624,14 +3620,12 @@ footer .footer .footer_shop {
 .product-container .product-card{
     position: relative;
     padding: 1rem;
-    margin: 1.25rem 0.6rem;
+    margin: 2rem 1rem;
     width: 16rem;
-    height: auto;
+    height: 22rem;
     border: 1px solid #007BFF;
     border-radius: 1.2rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    box-sizing: border-box;
 }
 /* Responsive product-card adjustments */
 @media (max-width: 900px) {
@@ -3657,11 +3651,10 @@ footer .footer .footer_shop {
                 .sellinginfo_right img { margin: 1rem 0; max-width: 420px; }
     }
     .product-container .product-card{
-        width: calc(50% - 1rem);
+        width: calc(50% rem);
         margin: 1rem 0.6rem;
         height: auto;
         padding: .8rem;
-        box-sizing: border-box;
     }
     .product-container .product-card img{
         width: 100%;
@@ -3730,77 +3723,7 @@ footer .footer .footer_shop {
             gap: 1rem !important;
             align-items: start !important;
         }
-    }
-
-/* === Appointment Complete: Responsive tweaks for tablet & mobile === */
-/* Keep content readable and stack image/text on smaller screens. */
-@media (max-width: 1024px) {
-    .completebody_textbody {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem 0.6rem;
-    }
-
-    .completebody_image img {
-        max-width: 220px;
-        height: auto;
-    }
-
-    .completebody_text {
-        padding: 0 1rem;
-        text-align: center;
-    }
-
-    .complete_button a {
-        padding: 0.6rem 1rem;
-        display: inline-block;
-    }
-
-    .complete_bottom {
-        width: 100%;
-        margin: 1.4rem 0;
-    }
-
-    /* Convert product list into a responsive grid at tablet widths */
-    .product-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin: 0 1rem;
-        justify-items: center;
-    }
-
-    .product-container .product-card {
-        width: 100%;
-        margin: 0;
-        height: auto;
-        padding: 0.9rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .completebody_image img { max-width: 180px; }
-    .completebody_text h3 { font-size: 1.3rem; }
-    .completebody_bodytext p { font-size: 0.98rem; }
-
-    .product-container { grid-template-columns: repeat(2, 1fr); }
-    .product-container .product-card img { height: 140px; object-fit:cover; }
-    .product-container .product-card { padding: 0.7rem; }
-}
-
-@media (max-width: 520px) {
-    .completebody_image img { max-width: 140px; }
-    .completebody_text h3 { font-size: 1.1rem; }
-    .completebody_text { padding: 0 0.8rem; }
-
-    .product-container { grid-template-columns: 1fr; margin: 0.6rem; }
-    .product-container .product-card { margin: 0.6rem 0; padding: 0.75rem; }
-
-    .complete_button a { display: block; width: 100%; }
-}
-        .product_itempage .product_itembody .product_itemleft,
+            .product_itempage .product_itembody .product_itemleft,
         .product_itempage .product_itembody .product_itemright {
             width: 100% !important;
             margin: 0 !important;
@@ -3838,7 +3761,7 @@ footer .footer .footer_shop {
         /* Limit image height on tablets to avoid overly tall right panel */
         .productleft_upper img#main_image { max-height: 480px !important; object-fit: contain !important; }
         .productleft_bottom .leftbottom_image .thumbnail { width:56px !important; height:56px !important; }
-    
+    }
     .product-container .product-card .product-name{
         margin-top: 1rem;
     }
