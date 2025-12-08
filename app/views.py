@@ -19,6 +19,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from .email_utils import send_email
 from django.core.exceptions import ValidationError
 import logging
 from django.utils import timezone
@@ -1109,13 +1110,14 @@ class AppointmentCompletePage(TemplateView):
             
         # Send confirmation email, but don't let email failures produce a 500
         try:
-            send_mail( 
-                subject=f"Appointment Confirmation – Ref #{appointment.reference_number}", 
-                message="", from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER), 
-                recipient_list=[appointment.email], 
-                html_message=email_html, 
+            send_email(
+                subject=f"Appointment Confirmation – Ref #{appointment.reference_number}",
+                text="",
+                html=email_html,
+                from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER),
+                recipient_list=[appointment.email],
             )
-        except Exception as e:
+        except Exception:
             logger = logging.getLogger(__name__)
             logger.exception(f"Failed to send appointment confirmation email for appointment {appointment.id}")
             
