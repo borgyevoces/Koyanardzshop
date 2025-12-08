@@ -27,9 +27,10 @@ def create_token(sender, instance, created, **kwargs):
                 instance.save()
                 logger.info(f"Google OAuth account created and activated for {instance.username}")
             else:
-                # Require email verification for normal signups
+                # Create OTP and send verification email for normal signups,
+                # but do NOT block the user from signing in — mark active immediately.
                 otp = OtpToken.objects.create(user=instance, otp_expires_at=timezone.now() + timezone.timedelta(minutes=5))
-                instance.is_active = False
+                instance.is_active = True
                 instance.save()
                 
                 # Send verification email
@@ -44,8 +45,6 @@ Your OTP verification code is:
 
 This code expires in 5 minutes.
 
-Please visit this link to verify your email:
-http://127.0.0.1:8000/signup/{instance.username}
 
 If you didn't create this account, please ignore this email.
 
