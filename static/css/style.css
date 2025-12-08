@@ -7877,14 +7877,19 @@ footer .footer .footer_shop {
     display: block;
 }
 .forgotpassword_form form p input{
+    justify-items: center;
     margin-left: 2rem;
-    width: 14rem;
-    height: 1.5rem;
+    width: 70%;
+    height: 2.5rem;
+    border: 1px solid #033f63;
     border-radius: .5rem;
 }
 .forgotpassword_form form button{
+    width: 9rem;
     margin: .5rem 6rem;
     padding: .5rem;
+    text-transform: uppercase;
+    font-size: .9rem;
     border: none;
     border-radius: 1rem;
     color: white;
@@ -7903,6 +7908,66 @@ footer .footer .footer_shop {
 .forgotpassword_upper a:hover{
     border-bottom: 1px solid white;
 }
+
+@media (max-width: 1024px) {
+    /* Forgot password page: constrain and center the form */
+    .forgotpasswordpage .forgotpassword_body {
+        width: auto !important;
+        max-width: 720px !important;
+        margin: 1.25rem auto !important;
+        padding: 1rem !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+    .forgotpasswordpage .forgotpassword_form {
+        width: 100% !important;
+        max-width: 560px !important;
+        margin: 0.6rem auto !important;
+    }
+    .forgotpasswordpage .forgotpassword_form form input{
+        width: 80% !important;
+        max-width: 80% !important;
+        box-sizing: border-box !important;
+    }
+    .forgotpasswordpage .forgotpassword_form form button{
+        width: 60%;
+        max-width: 60%;
+    }
+
+    /* Appointment complete: ensure text/image stack and product grid adapts */
+    .completepage, .completepage .completebody_textbody {
+        width: auto !important;
+        max-width: 1100px !important;
+        margin: 1rem auto !important;
+        padding: 1rem !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+    }
+    .completepage .product-container { grid-template-columns: repeat(3, 1fr) !important; gap: 1rem !important; }
+    .completepage .product-container .product-card { max-width: 320px !important; margin: 0.6rem auto !important; }
+}
+
+@media (max-width: 768px) {
+    .forgotpasswordpage .forgotpassword_body { max-width: 580px !important; padding: 0.9rem !important; }
+    .forgotpasswordpage .forgotpassword_form { max-width: 480px !important; padding: 0 0.5rem !important; }
+    .completepage .product-container { grid-template-columns: repeat(2, 1fr) !important; }
+    .completepage .completebody_image img { max-width: 180px !important; height: auto !important; }
+}
+
+@media (max-width: 520px) {
+    .forgotpasswordpage .forgotpassword_body { max-width: 100% !important; margin: 0.6rem auto !important; padding: 0.8rem !important; }
+    .forgotpasswordpage .forgotpassword_form { width: 100% !important; margin: 0.5rem auto !important; padding: 0 !important; }
+    .forgotpasswordpage .forgotpassword_form form input,
+    .forgotpasswordpage .forgotpassword_form form button { width: 100% !important; margin: 0.35rem 0 !important; }
+    .completepage .product-container { grid-template-columns: 1fr !important; gap: 0.75rem !important; }
+    .completepage .product-container .product-card { max-width: 100% !important; margin: 0.5rem 0 !important; }
+    /* Small visual tweak: keep page content from creating horizontal scroll */
+    .forgotpasswordpage, .completepage { overflow-x: hidden !important; }
+    .forgotpasswordpage .forgotpassword_form form input,
+    .forgotpasswordpage .forgotpassword_form form button { width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;}
+}
+
+
 .passwordresetpage{
     position: relative;
     display: flex;
