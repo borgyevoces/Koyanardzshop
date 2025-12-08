@@ -200,6 +200,14 @@ def register(request):
             form = RegisterForm(request.POST)
             if form.is_valid():
                 user = form.save()
+                # Auto-login the user after email signup so they remain
+                # authenticated when proceeding to add to cart / checkout.
+                try:
+                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                except Exception:
+                    # If auto-login fails for any reason, continue without raising
+                    # — the user can still log in manually.
+                    pass
                 # OTP creation and email sending is handled by the post_save signal
                 # Get the OTP that was created by the signal
                 otp = OtpToken.objects.filter(user=user).last()
