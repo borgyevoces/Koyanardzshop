@@ -118,13 +118,13 @@ class SellingForm(forms.ModelForm):
         widgets = {
             'first_name': forms.TextInput(attrs={'placeholder': 'First Name'}),
             'last_name': forms.TextInput(attrs={'placeholder': 'Last Name'}),
-            'contact': forms.TextInput(attrs={'placeholder': 'Phone Number'}),
+            'contact': forms.NumberInput(attrs={'placeholder': 'Phone Number'}),
             'email': forms.EmailInput(attrs={'placeholder': 'Email Address'}),
             'address': forms.Textarea(attrs={
                 'placeholder': 'Address',
                 'rows': 4
             }),
-            'selling_date': forms.DateInput(attrs={'type': 'date', 'placeholder': 'Select Appointment Date'}),
+            'selling_date': forms.DateInput(attrs={'type': 'date', 'placeholder': 'Select Appointment Date', 'min': date.today().isoformat()}),
             'selling_time': forms.TimeInput(attrs={'type': 'time', 'placeholder': 'Select Appointment Time'}),
             'product_name': forms.TextInput(attrs={'placeholder': 'Product Type'}),
             'category': forms.Select(attrs={'placeholder': 'Select Category'}),
@@ -140,3 +140,9 @@ class SellingForm(forms.ModelForm):
         for field_name in self.fields:
             if field_name != 'agree':
                 self.fields[field_name].required = True
+
+    def clean_selling_date(self):
+        selling_date = self.cleaned_data.get('selling_date')
+        if selling_date and selling_date < date.today():
+            raise forms.ValidationError("The selling appointment date cannot be in the past.")
+        return selling_date
