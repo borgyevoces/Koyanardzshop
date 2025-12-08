@@ -39,7 +39,7 @@
             <form action="" method="GET" class="filter-form" id="mainFilterForm">
                 <input type="hidden" name="search" value="{{ search_query }}">
                 <div class="filter-row">
-                    <label>Category</label>
+                    <label class="filterrow_label">Category</label>
                     <select class="categoryitem" name="category" id="categorySelect">
                         <option value="">All Categories</option>
                         {% for category in categories %}
@@ -49,7 +49,7 @@
                 </div>
 
                     <div class="filter-row">
-                    <label>Brand</label>
+                    <label class="filterrow_label">Brand</label>
                     <div id="brandDropdownForm" style="display:none;">
                         <input type="hidden" name="price_order" value="{{ price_order }}">
                         <select name="brand" id="brandDropdown">
@@ -70,9 +70,9 @@
                 </div>
 
                 <div id="component_filter_list" class="component-list" style="display:none;">
-                    <label>Components</label>
+                    <label class="filterrow_label">Components</label>
                     <input type="hidden" name="component" id="componentInput" value="{{ component_filter }}">
-                    <ul>
+                    <ul id="component_filters">
                         <li data-id="cpu" class="component-item {% if component_filter == 'cpu' %}selected{% endif %}">CPU</li>
                         <li data-id="gpu" class="component-item {% if component_filter == 'gpu' %}selected{% endif %}">GPU</li>
                         <li data-id="ram" class="component-item {% if component_filter == 'ram' %}selected{% endif %}">RAM / Memory</li>
