@@ -1506,7 +1506,9 @@ footer .footer .footer_shop {
 .itemright_bottom .itemright_button button{
     width: 12rem;
     height: 3rem;
-    font-size: 1.3rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: .9rem;
     background-color: #3498db;
     color: whitesmoke;
     border: none;
@@ -3353,6 +3355,8 @@ footer .footer .footer_shop {
     .product-container .product-card{width:calc(50% - 1rem);height:auto}
     .product-container .product-card img{height:160px}
     .productpage .box .containerbox{width:calc(50% - 1rem);height:auto}
+    .cartpage_emptybody{margin-left: 0;}
+
 }
 
 /* TABLET BREAKPOINT - 768px */
@@ -3393,6 +3397,7 @@ footer .footer .footer_shop {
     .cartleft .cartleft_image img{width:7.5rem;height:7.5rem;min-width:7.5rem;min-height:7.5rem}
     .text_quantity{margin:0.8rem 0}
     .cartleft_price{margin-top:0.5rem}
+    .cartpage_emptybody{margin-left: 0;}
     
     /* Product grid tablet */
     .product-container .product-card{width:calc(50% - 1.2rem);height:auto;margin:0.8rem}
@@ -3598,7 +3603,7 @@ footer .footer .footer_shop {
     /* Make action buttons stacked and full-width on mobile */
     .product_itempage .product_itembody .product_itemright .itemright_bottom .itemright_button { display:flex !important; flex-direction:row !important; gap:0.6rem !important; }
     .product_itempage .product_itembody .product_itemright .itemright_bottom .itemright_button button,
-    .product_itempage .product_itembody .product_itemright .itemright_bottom .itemright_button form button { width:65% !important; box-sizing:border-box !important; }
+    .product_itempage .product_itembody .product_itemright .itemright_bottom .itemright_button form button { width:55% !important; box-sizing:border-box !important; }
     .product_itempage .product_itembody .product_itemright .itemright_bottom .itemright_button form button{width: 100% !important;}
     .productleft_bottom .leftbottom_image .thumbnail { width:48px !important; height:48px !important; }
 }
@@ -3852,6 +3857,7 @@ footer .footer .footer_shop {
 @media (max-width: 480px) {
     .product-container{
         padding: 0 .6rem;
+        margin: 0 !important;
         gap: .8rem;
     }
     .product-container .product-card{

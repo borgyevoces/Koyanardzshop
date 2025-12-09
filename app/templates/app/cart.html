@@ -23,7 +23,7 @@
             <div class="cartbody_product">
                 <div class="cartleft">
                     <div class="cartleft_upper">
-                        <button class="favorite_btn {% if product.id in favorites %}favorited{% endif %}" data-product-id="{{ product_id }}" type="button"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
+                        <button class="favorite_btn {% if product.id in favorites %}favorited{% endif %}" data-product-id="{{ product_id }}" type="button"><i class="fa fa-heart" aria-hidden="true"></i></button>
                         <form action="{% url 'remove_from_cart' product_id %}" method="POST">
                             {% csrf_token %}
                             <button class="cart_trashes"><img src="{% static 'images/icon/trash-red.png' %}" alt=""></button>
