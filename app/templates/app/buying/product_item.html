@@ -13,20 +13,22 @@
     <div class="product_itembody">
         <div class="product_itemleft">
             <div class="productleft_upper">
-                {% if produkto.images.all %}
-                <img id="main_image" src="{{ produkto.images.first.product_image.url }}" alt="no image">
+                {% if main_image %}
+                    <img id="main_image" src="{{ main_image }}" alt="Product image">
+                {% elif produkto.image %}
+                    <img id="main_image" src="{{ produkto.image.url }}" alt="Product image">
                 {% endif %}
             </div>
             <div class="productleft_bottom">
                 <div class="leftbottom_image">
-                    {% for img in produkto.images.all %}
-                        <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img.product_image.url }}" data-image="{{ img.product_image.url }}" alt="Thumbnail {{ forloop.counter }}">
+                    {% for img_url in thumbnails %}
+                        <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img_url }}" data-image="{{ img_url }}" alt="Thumbnail {{ forloop.counter }}">
                     {% endfor %}
                 </div>
             </div>
         </div>
         <div class="product_itemright">
-            <h3>{{ produkto.product_name }}</h3>
+            <h3>{{ display_name }}</h3>
             <div class="productitem_rating">
                 <p id="average_rating_text">⭐ {{ average_rating }} / 5 ({{ reviews.count }} reviews)</p>
             </div>
@@ -42,7 +44,7 @@
             {% endif %}
             <div class="bodyitem">
                 <h4>Description: </h4>
-                <p>{{ produkto.description }}</p>
+                <p>{{ display_description }}</p>
             </div>
             <div class="itemright_bottom">
                 <div class="itemright_total">
@@ -52,6 +54,9 @@
                 <div class="itemright_button">
                     <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
                         {% csrf_token %}
+                        {% if selected_variant %}
+                            <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
+                        {% endif %}
                         <button>Add to Cart</button>
                     </form>
                     <button><a href="{% url 'appointment' %}">Checkout</a></button>

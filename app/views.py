@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, CreateView
-from .models import OtpToken, Category, Brand, Product, ProductImage, ProductReview, Appointment, AppointmentProduct, Selling, Favorite
+from .models import OtpToken, Category, Brand, Product, ProductImage, ProductReview, Appointment, AppointmentProduct, Selling, Favorite, ProductVariation
 from .forms import RegisterForm, LoginForm, ProfileForm, ProfileUpdateForm, AddCategory, AddBrand, Add, AddVariantForm, ProductReviewForm, AppointmentForm, SellingForm
 from .serializers import ProductSerializer
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
@@ -482,20 +482,38 @@ def add_to_cart(request, product_id):
 def update_cart(request, product_id):
     if request.method == 'POST':
         cart = request.session.get('cart', {})
+        # Prefer an explicit cart_key sent by the form (this will be the
+        # session dict key, e.g. 'variant-6' or '6'). Fall back to using
+        # the numeric product_id from the URL.
+        posted_cart_key = request.POST.get('cart_key')
 
-        cart_key = str(product_id)
-        variant_key = f"variant-{product_id}"
-
-        if cart_key in cart:
-            item = cart[cart_key]
-            stock = get_object_or_404(Product, pk=product_id).stock
-        elif variant_key in cart:
-            item = cart[variant_key]
-            variant = get_object_or_404(ProductVariation, pk=item["variant_id"])
-            stock = variant.stock
-            cart_key = variant_key
+        if posted_cart_key:
+            # Use posted key directly
+            cart_key = str(posted_cart_key)
+            if cart_key in cart:
+                item = cart[cart_key]
+                # Determine stock depending on whether this is a variant
+                if cart_key.startswith('variant-'):
+                    variant = get_object_or_404(ProductVariation, pk=item.get('variant_id'))
+                    stock = variant.stock
+                else:
+                    stock = get_object_or_404(Product, pk=item.get('product_id')).stock
+            else:
+                return redirect(request.META.get('HTTP_REFERER', 'cart'))
         else:
-            return redirect(request.META.get('HTTP_REFERER', 'cart'))
+            cart_key = str(product_id)
+            variant_key = f"variant-{product_id}"
+
+            if cart_key in cart:
+                item = cart[cart_key]
+                stock = get_object_or_404(Product, pk=product_id).stock
+            elif variant_key in cart:
+                item = cart[variant_key]
+                variant = get_object_or_404(ProductVariation, pk=item["variant_id"])
+                stock = variant.stock
+                cart_key = variant_key
+            else:
+                return redirect(request.META.get('HTTP_REFERER', 'cart'))
 
         action = request.POST.get('action')
         current_quantity = item['quantity']
@@ -517,14 +535,20 @@ def update_cart(request, product_id):
 def remove_from_cart(request, product_id):
     if request.method == 'POST':
         cart = request.session.get('cart', {})
-        cart_key = str(product_id)
-        variant_key = f"variant-{product_id}"
+        # Allow an explicit cart_key to be sent (handles keys like 'variant-6')
+        posted_cart_key = request.POST.get('cart_key')
+        if posted_cart_key:
+            key = str(posted_cart_key)
+            if key in cart:
+                del cart[key]
+        else:
+            cart_key = str(product_id)
+            variant_key = f"variant-{product_id}"
 
-        if cart_key in cart:
-            del cart[cart_key]
-        
-        elif variant_key in cart:
-            del cart[variant_key]
+            if cart_key in cart:
+                del cart[cart_key]
+            elif variant_key in cart:
+                del cart[variant_key]
 
         request.session['cart'] = cart
     return redirect(request.META.get('HTTP_REFERER', 'cart'))
@@ -904,7 +928,11 @@ class ProductItemPage(TemplateView):
                 context["selected_variant"] = selected_variant
                 context["price"] = selected_variant.price
                 context["stock"] = selected_variant.stock
-                context["images"] = [selected_variant]
+                # Use variant image(s) when a variant is selected
+                images = []
+                if selected_variant.image:
+                    images = [selected_variant.image.url]
+                context["images"] = images
             except ProductVariation.DoesNotExist:
                 context["selected_variant"] = None
                 context["price"] = produkto.price
@@ -914,7 +942,7 @@ class ProductItemPage(TemplateView):
             context["selected_variant"] = None
             context["price"] = produkto.price
             context["stock"] = produkto.stock
-            context["images"] = produkto.images.all()
+            context["images"] = [img.product_image.url for img in produkto.images.all()]
         
         context["products"] = Product.objects.exclude(id=produkto.id).order_by('-id')[:30]
 
@@ -928,7 +956,23 @@ class ProductItemPage(TemplateView):
         
         context["review_form"] = ProductReviewForm()
         context["produkto"] = produkto
-        context["images"] = produkto.images.all()
+        # build display fields for template: name, description, main image and thumbnails
+        if context.get("selected_variant"):
+            sv = context["selected_variant"]
+            # display name: base name + variant label
+            context["display_name"] = f"{produkto.product_name} — {sv.product_variation}"
+            # prefer variant description if provided
+            context["display_description"] = sv.description if sv.description else (produkto.description or "")
+            # main image and thumbnails are already in context['images'] (list of URLs)
+            thumbnails = context.get("images", [])
+        else:
+            context["display_name"] = produkto.product_name
+            context["display_description"] = produkto.description or ""
+            thumbnails = context.get("images", [])
+
+        # Ensure thumbnails is a list of URLs (already handled above), and set main_image
+        context["thumbnails"] = thumbnails
+        context["main_image"] = thumbnails[0] if thumbnails else (produkto.image.url if produkto.image else "")
         context["variations"] = produkto.variations.all()
         return context
     
@@ -996,7 +1040,11 @@ class CheckoutPage(TemplateView):
             
         for product_id, produkto in cart.items():
             produkto['sub_total'] = float(produkto['price']) * int(produkto['quantity'])
-            produkto['product_id'] = product_id
+            # Preserve numeric product_id stored when item was added to cart
+            # (don't overwrite it with the session key which may be 'variant-6')
+            if 'product_id' not in produkto:
+                produkto['product_id'] = product_id
+            produkto['cart_key'] = product_id
 
         context['cart_products'] = cart.values()
         context['total_price'] = sum(item['sub_total'] for item in cart.values())
@@ -1071,23 +1119,55 @@ class AppointmentCompletePage(TemplateView):
             
             del request.session['direct_checkout']
         
+
         else:
-            for product_id, produkto in cart.items():
-                product = Product.objects.get(id=product_id)
-                quantity = produkto["quantity"]
-                price = float(produkto["price"])
+            for cart_key, produkto in cart.items():
+                # cart_key may be a numeric product id string (e.g. '22')
+                # or a variant key like 'variant-6'. Resolve the actual
+                # Product instance accordingly.
+                if str(cart_key).startswith('variant-'):
+                    variant_id = produkto.get('variant_id')
+                    if variant_id:
+                        variant = get_object_or_404(ProductVariation, pk=variant_id)
+                        product = variant.product
+                    else:
+                        # fallback: try to use stored product_id inside the item
+                        pid = produkto.get('product_id')
+                        product = get_object_or_404(Product, pk=pid)
+                else:
+                    # numeric key
+                    product = get_object_or_404(Product, pk=int(cart_key))
+
+                quantity = int(produkto.get('quantity', 1))
+                price = float(produkto.get('price', product.price))
                 subtotal = quantity * price
                 total_price += subtotal
+
+                # If this cart entry was for a variant, record the variation
+                # name on the AppointmentProduct and include it in emails.
+                variation_name = None
+                if str(cart_key).startswith('variant-'):
+                    variation_name = produkto.get('product_name')
+                    # `product_name` for variant entries is like "Base Name (Variation)"; try
+                    # to extract the parenthetical variation if present.
+                    if variation_name and '(' in variation_name and variation_name.endswith(')'):
+                        # extract text inside final parentheses
+                        variation_name = variation_name.split('(')[-1].rstrip(')')
 
                 AppointmentProduct.objects.create(
                     appointment=appointment,
                     product=product,
                     quantity=quantity,
-                    price=price
+                    price=price,
+                    variation=variation_name,
                 )
 
+                display_name = product.product_name
+                if variation_name:
+                    display_name = f"{display_name} ({variation_name})"
+
                 product_list.append({
-                    "name": product.product_name,
+                    "name": display_name,
                     "quantity": quantity,
                     "price": price,
                     "subtotal": subtotal,
@@ -1299,7 +1379,13 @@ class CartPage(TemplateView):
 
         for product_id, produkto in cart.items():
             produkto['sub_total'] = produkto['price'] * produkto['quantity']
-            produkto['product_id'] = product_id
+            # Keep the numeric product_id stored when the item was added to cart
+            # and store the session dict key separately as `cart_key` so templates
+            # can reverse URLs using the numeric id even when the dict key is
+            # a variant string like "variant-6".
+            if 'product_id' not in produkto:
+                produkto['product_id'] = product_id
+            produkto['cart_key'] = product_id
 
         context['cart_products'] = cart
         context['total_price'] = sum(produkto['price'] * produkto['quantity'] for produkto in cart.values())

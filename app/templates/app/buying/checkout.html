@@ -83,10 +83,11 @@
                         {% if not is_direct %}
                         <form action="{% url 'update_cart' produkto.product_id %}" method="POST" class="quantity-form">
                             {% csrf_token %}
+                            <input type="hidden" name="cart_key" value="{{ produkto.cart_key }}">
                             <div class="text_quantity">
-                                <button class="quantity-btn" name="action" value="decrease">-</button>
+                                <button class="quantity-btn" type="submit" name="action" value="decrease">-</button>
                                 <input type="number" value="{{ produkto.quantity }}" min="1" readonly>
-                                <button class="quantity-btn" name="action" value="increase">+</button>
+                                <button class="quantity-btn" type="submit" name="action" value="increase">+</button>
                             </div>
                         </form>
                         {% endif %}

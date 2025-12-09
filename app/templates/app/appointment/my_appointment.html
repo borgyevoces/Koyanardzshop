@@ -46,7 +46,7 @@
                                 <tr>
                                     <td>
                                         <img src="{{ produkto.product.image.url }}" alt="{{ produkto.product.product_name }}">
-                                        {{ produkto.product.product_name }} </br> ₱{{ produkto.price|intcomma }}
+                                        {{ produkto.product.product_name }}{% if produkto.variation %} — {{ produkto.variation }}{% endif %} </br> ₱{{ produkto.price|intcomma }}
                                     </td>
                                     <td>{{ appointment.date|date:"M d, Y" }} </br> {{ appointment.time|time:"h:i A" }}</td>
                                     <td style="color: #DECB00;">{{ appointment.status }}</td>

@@ -12,6 +12,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  color: #1B1A1A;
 }
 
 /* Main content wrapper */
@@ -129,7 +130,7 @@ header .header .navbar ul li .buynav a{
     display: block;
     padding: 10px 15px;
     text-decoration: none;
-    color: black;
+    color: #1B1A1A;
 }
 header .header .navbar ul li .buynav a:hover{
     background-color: #f0f2f5;
@@ -154,7 +155,7 @@ header .header .navbar ul li .sellnav li a{
     padding: .7rem 1rem;
     text-decoration: none;
     text-transform: uppercase;
-    color: black;
+    color: #1B1A1A;
     width: 7.5rem;
 }
 header .header .navbar ul li .sellnav li a:hover{
@@ -191,11 +192,11 @@ header .header .accountbar ul li{
     padding: 10px 16px;
     text-decoration: none;
     font-size: 1rem;
-    color: black;
+    color: #1B1A1A;
 }
 .dropdown .dropdown-content a:hover{
     background-color: whitesmoke;
-    color: black;
+    color: #1B1A1A;
 }
 header .header .accountbar ul li a img{
     width: 1.8rem;
@@ -280,7 +281,7 @@ footer .footer .footer_shop {
   padding: 0.2rem;
 }
 .footer_nav li a:hover {
-  color: black;
+  color: #1B1A1A;
 }
 
 
@@ -678,7 +679,7 @@ footer .footer .footer_shop {
     top: 50%;
     margin: 0 -1rem;
     transform: translateY(-50%);
-    color: black;
+    color: #1B1A1A;
     border: none;
     padding: .6rem .8rem;
     font-size: 1.2rem;
@@ -1082,7 +1083,7 @@ footer .footer .footer_shop {
     text-decoration: none;
     border: 1px solid black;
     border-radius: 10px;
-    color: black;
+    color: #1B1A1A;
 }
 .product_upper .searchbar{
     display: flex;
@@ -1639,7 +1640,7 @@ footer .footer .footer_shop {
 }
 .uppercart a{
     text-decoration: none;
-    color: black;
+    color: #1B1A1A;
 }
 .uppercart a:hover{
     padding: .2rem;
@@ -1655,7 +1656,7 @@ footer .footer .footer_shop {
     color: gray;
 }
 .uppercart ul li:nth-child(1){
-    color: black;
+    color: #1B1A1A;
 }
 .cartbody{
     display: flex;
@@ -1666,7 +1667,7 @@ footer .footer .footer_shop {
     margin: 2rem;
     border-radius: 2rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
-    color: black;
+    color: #1B1A1A;
     gap: 2rem;
 }
 .cartbody p{
@@ -1870,7 +1871,7 @@ footer .footer .footer_shop {
 }
 .uppercart a{
     text-decoration: none;
-    color: black;
+    color: #1B1A1A;
 }
 .uppercart a:hover{
     padding: .2rem;
@@ -1886,7 +1887,7 @@ footer .footer .footer_shop {
     color: gray;
 }
 .uppercart ul li:nth-child(1){
-    color: black;
+    color: #1B1A1A;
 }
 .cartpage_empty{
     display: block;
@@ -1925,7 +1926,7 @@ footer .footer .footer_shop {
 }
 .cartpage_emptybutton button a{
     text-decoration: none;
-    color: black;
+    color: #1B1A1A;
     font-size: 1rem;
 }
 .cart_bottom{
@@ -1958,7 +1959,7 @@ footer .footer .footer_shop {
     text-decoration: none;
     text-transform: uppercase;
     font-size: 1.3rem;
-    color: black;
+    color: #1B1A1A;
 }
 .upperappointment a img{
     width: 1.5rem;
@@ -1979,7 +1980,7 @@ footer .footer .footer_shop {
     color: gray;
 }
 .upperappointment ul li:nth-child(3){
-    color: black;
+    color: #1B1A1A;
 }
 .appointment_body{
     display: block;
@@ -2552,7 +2553,7 @@ footer .footer .footer_shop {
 }
 .uppercheckout a{
     text-decoration: none;
-    color: black;
+    color: #1B1A1A;
 }
 .uppercheckout a:hover{
     padding: .2rem;
@@ -2572,7 +2573,7 @@ footer .footer .footer_shop {
     color: gray;
 }
 .uppercheckout ul li:nth-child(5){
-    color: black;
+    color: #1B1A1A;
 }
 .checkout_body{
     position: relative;
@@ -2640,8 +2641,8 @@ footer .footer .footer_shop {
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    margin-left: 15rem;
-    width: calc(55% + 5rem);
+    margin-left: 5rem;
+    width: calc(75% + 5rem);
     top: 50%;
     -webkit-transform: translateY(-50%);
     -ms-transform: translateY(-50%);
@@ -2651,7 +2652,7 @@ footer .footer .footer_shop {
 .checkout_nav_buttons button{
     padding: 5px 10px;
     font-size: 1.5rem;
-    color: black;
+    color: #1B1A1A;
     border: none;
     background-color: transparent;
     cursor: pointer;
@@ -2718,7 +2719,7 @@ footer .footer .footer_shop {
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    color: black;
+    color: #1B1A1A;
 }
 .checkoutright_body form button{
     width: 15rem;
@@ -2744,7 +2745,7 @@ footer .footer .footer_shop {
     border: none;
     font-size: 1.5rem;
     margin-right: 2.7rem;
-    color: black;
+    color: #1B1A1A;
 }
 .checkoutright_bodybody{
     display: -webkit-box;
@@ -2765,14 +2766,14 @@ footer .footer .footer_shop {
     border: none;
     font-size: 1.1rem;
     overflow: hidden;
-    color: black;
+    color: #1B1A1A;
 }
 .checkoutright_bodybody p{
     text-align: left;
     border: none;
     font-size: 1.1rem;
     overflow: hidden;
-    color: black;
+    color: #1B1A1A;
 }
 .checkoutright_bodybody form .text_quantity{
     display: -webkit-box;
@@ -2790,7 +2791,7 @@ footer .footer .footer_shop {
     height: 1rem;
     margin-top: -.3rem;
     margin-left: 1rem;
-    color: black;
+    color: #1B1A1A;
     background-color: transparent;
     cursor: pointer;
 }
@@ -2818,7 +2819,7 @@ footer .footer .footer_shop {
     text-align: left;
     border: none;
     font-size: 1.5rem;
-    color: black;
+    color: #1B1A1A;
 }
 
 /* CHECKOUT RESPONSIVE - TABLET (1024px) */
@@ -3120,7 +3121,7 @@ footer .footer .footer_shop {
     color: gray;
 }
 .uppercomplete ul li:nth-child(7){
-    color: black;
+    color: #1B1A1A;
 }
 .complete_body{
     justify-content: center;
@@ -3437,7 +3438,7 @@ footer .footer .footer_shop {
     .nav-list a{display:flex;align-items:center;gap:.4rem;padding:.75rem 0.8rem;color:whitesmoke;width:100%;text-decoration:none;font-size:0.9rem}
     .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{display:flex;align-items:center;gap:.4rem;padding:.75rem 0.8rem;color:whitesmoke;width:100%;text-decoration:none; text-transform: uppercase; font-weight: 600; font-size:0.9rem}
     .nav-list a:hover{
-        background: whitesmoke; color:black !important;
+        background: whitesmoke; color:#1B1A1A !important;
     }
     .nav-list a i{margin-right:.4rem}
     .has-sub .subnav{display:none}
@@ -3993,7 +3994,8 @@ footer .footer .footer_shop {
     height: 35rem;
     border-radius: 2rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
-    color: black;
+    background-color: white;
+    color: #1B1A1A;
 }
 .myappointment_left{
     display: flex;
@@ -4032,7 +4034,7 @@ footer .footer .footer_shop {
     text-decoration: none;
     font-size: 1.3rem;
     font-weight: 500;
-    color: black;
+    color: #1B1A1A;
 }
 .myappointment_nav ul li a img{
     width: 2rem;
@@ -4042,7 +4044,7 @@ footer .footer .footer_shop {
 .myappointment_right{
     width: 70%;
     height: 100%;
-    background-color: whitesmoke;
+    background-color: white;
     padding: 2rem;
     border-radius: 0 2rem 2rem 0;
 }
@@ -4839,7 +4841,7 @@ footer .footer .footer_shop {
     height: 35rem;
     border-radius: 2rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
-    color: black;
+    color: #1B1A1A;
 }
 
 .selling_left {
@@ -6913,7 +6915,7 @@ footer .footer .footer_shop {
     justify-content: center;
 }
 .signupacc_logo a img{
-    width: 2.3rem;
+    width: 2rem;
     height: auto;
 }
 .signup_right{
@@ -8335,7 +8337,7 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
 .product-card .product-thumb{display:block;overflow:hidden}
 .product-card .product-thumb img{width:100%;height:220px;object-fit:cover;display:block}
 .product-card .card-body{padding:0.9rem;display:flex;flex-direction:column;gap:.6rem}
-.card-title{font-size:1rem;margin:0;color:#0b3b50}
+.card-title{font-size:1rem;margin:0;color:#1B1A1A}
 .card-actions{display:flex;gap:.6rem;align-items:center;justify-content:space-between;margin-top:auto}
 .product-card .favorite_btn{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fff 0%,#f6fbff 60%);border:1px solid rgba(11,132,198,0.08);box-shadow:0 8px 20px rgba(2,24,40,0.06);cursor:pointer;transition:transform .18s ease,box-shadow .18s}
 .product-card .favorite_btn i{color:#777;font-size:1rem;transition:color .15s ease,transform .15s}
@@ -8508,6 +8510,7 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
         padding: 0.6rem;
         font-size: 0.95rem;
     }
+    #filterClose{width: 5rem; padding: .7rem 0;}
     
     .products-main {
         padding: 2rem 3.5rem;
