@@ -8173,7 +8173,7 @@ fieldset{
 
 /* ===== Home page modern layout ===== */
 .hp-hero{margin: 0; padding:6.5rem 0 3rem;background: #4F9FBA;
-    background: linear-gradient(300deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221, 0.5) 60%);min-height: 600px;}
+background: linear-gradient(250deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221, 1) 35%, rgba(255, 255, 255, 0) 55%);min-height: 600px;}
 .hp-hero-inner{display:flex;align-items:center;gap:2.5rem;justify-content:space-between}
 .hero-copy{flex:1;max-width:760px}
 .hero-copy h1{font-family:Montserrat;font-size:2.6rem;line-height:1.05;color:#033f63;margin-bottom:.6rem}
