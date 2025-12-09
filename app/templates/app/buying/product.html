@@ -113,7 +113,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="product_id" value="{{ p.id }}">
                                     <input type="hidden" name="quantity" value="1">
-                                    <button type="submit" class="btn-sm">Buy Now</button>
+                                    <button type="submit" class="btn-sm" id="product_buynow">Buy Now</button>
                                 </form>
                                 <button class="add-to-cart-btn" data-product-id="{{ p.id }}" aria-label="Add to cart"><i class="fa fa-shopping-cart"></i></button>
                             </div>
