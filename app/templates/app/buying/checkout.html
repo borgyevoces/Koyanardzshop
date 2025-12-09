@@ -90,6 +90,15 @@
                                 <button class="quantity-btn" type="submit" name="action" value="increase">+</button>
                             </div>
                         </form>
+                        {% else %}
+                        <form action="{% url 'update_direct_checkout' %}" method="POST" class="quantity-form">
+                            {% csrf_token %}
+                            <div class="text_quantity">
+                                <button class="quantity-btn" type="submit" name="action" value="decrease">-</button>
+                                <input type="number" value="{{ produkto.quantity }}" min="1" readonly>
+                                <button class="quantity-btn" type="submit" name="action" value="increase">+</button>
+                            </div>
+                        </form>
                         {% endif %}
                         <p>₱{{ produkto.sub_total|floatformat:2|intcomma }}</p>
                     </div>

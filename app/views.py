@@ -561,13 +561,49 @@ def direct_checkout(request):
     if request.method == "POST":
         product_id = request.POST.get('product_id')
         quantity = int(request.POST.get('quantity', 1))
+        # Optional variant id may be provided (from product item Buy Now)
+        variant_id = request.POST.get('variant_id')
 
-        request.session['direct_checkout'] = {
+        dc = {
             'product_id': product_id,
             'quantity': quantity
         }
+        if variant_id:
+            dc['variant_id'] = variant_id
+        request.session['direct_checkout'] = dc
         return redirect('appointment')
     return redirect('product')
+
+@require_POST
+def update_direct_checkout(request):
+    """Update quantity for direct checkout item on checkout page."""
+    action = request.POST.get('action')
+    direct = request.session.get('direct_checkout', {})
+
+    if direct and action:
+        # Get product/variant to check stock
+        variant_id = direct.get('variant_id')
+        product_id = direct.get('product_id')
+
+        if variant_id:
+            variant = get_object_or_404(ProductVariation, pk=variant_id)
+            stock = variant.stock
+        else:
+            product = get_object_or_404(Product, pk=product_id)
+            stock = product.stock
+
+        current_qty = direct.get('quantity', 1)
+
+        if action == 'increase':
+            if current_qty < stock:
+                direct['quantity'] = current_qty + 1
+        elif action == 'decrease':
+            if current_qty > 1:
+                direct['quantity'] = current_qty - 1
+
+        request.session['direct_checkout'] = direct
+
+    return redirect(request.META.get('HTTP_REFERER', 'checkout'))
 
 @csrf_exempt
 def toggle_favorite(request, product_id):
@@ -1098,25 +1134,50 @@ class AppointmentCompletePage(TemplateView):
         total_price = 0
         
         if direct:
-            product = Product.objects.get(id=direct['product_id'])
+            # Support variant-aware direct checkout. If a variant_id was stored
+            # use the variant's price and decrement variant stock; otherwise
+            # use the base product price and decrement product stock.
+            variant_id = direct.get('variant_id')
+            if variant_id:
+                variant = get_object_or_404(ProductVariation, pk=variant_id)
+                product = variant.product
+                price_used = float(variant.price)
+            else:
+                product = Product.objects.get(id=direct['product_id'])
+                variant = None
+                price_used = float(product.price)
+
             quantity = int(direct['quantity'])
-            subtotal = product.price * quantity
+            subtotal = price_used * quantity
             total_price += subtotal
 
             AppointmentProduct.objects.create(
                 appointment=appointment,
                 product=product,
                 quantity=quantity,
-                price=product.price
+                price=price_used,
+                variation=(variant.product_variation if variant else None),
             )
-                
-            product_list.append({ 
-                "name": product.product_name, 
-                "quantity": quantity, 
-                "price": float(product.price), 
-                "subtotal": subtotal, 
+
+            # Decrement stock safely (don't let it go negative)
+            if variant:
+                variant.stock = max(0, variant.stock - quantity)
+                variant.save()
+            else:
+                product.stock = max(0, product.stock - quantity)
+                product.save()
+
+            name = product.product_name
+            if variant:
+                name = f"{name} ({variant.product_variation})"
+
+            product_list.append({
+                "name": name,
+                "quantity": quantity,
+                "price": price_used,
+                "subtotal": subtotal,
             })
-            
+
             del request.session['direct_checkout']
         
 
@@ -1161,6 +1222,20 @@ class AppointmentCompletePage(TemplateView):
                     price=price,
                     variation=variation_name,
                 )
+
+                # Decrement stock safely for variant or base product
+                try:
+                    if str(cart_key).startswith('variant-') and 'variant' in locals() and variant:
+                        variant.stock = max(0, variant.stock - quantity)
+                        variant.save()
+                    else:
+                        product.stock = max(0, product.stock - quantity)
+                        product.save()
+                except Exception:
+                    # If stock decrement fails for any reason, log and continue
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.exception(f"Failed to decrement stock for product in appointment {appointment.id}")
 
                 display_name = product.product_name
                 if variation_name:

@@ -115,29 +115,5 @@
         </div>
     </div>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.favorite_btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const productId = this.getAttribute('data-product-id');
-
-            fetch(`/toggle_favorite/${productId}/`, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'added') {
-                    this.classList.add('favorited');
-                } else if (data.status === 'removed') {
-                    this.classList.remove('favorited');
-
-                    const card = this.closest('.favorites');
-                    if (card) card.remove(); 
-                }
-            })
-            .catch(err => console.error('Error toggling favorite:', err));
-        });
-    });
-});
 </script>
 {% endblock content %}

@@ -3279,7 +3279,7 @@ footer .footer .footer_shop {
 .brand-text{text-transform: uppercase;}
 .brand-logo{width:60px;height:auto;border-radius:6px}
 .brand-title{font-family:Montserrat;font-weight:700;font-size:1.05rem;display:block}
-.brand-sub{display:block;font-size:.7rem;color:rgba(255,255,255,.9)}
+.brand-sub{display:block;font-size:.85rem;color:rgba(255,255,255,.9)}
 
 .nav-toggle{display:none;background:transparent;border:none;cursor:pointer;padding:.5rem}
 .nav-toggle .hamburger{display:block;width:26px;height:2px;background:#fff;position:relative}
@@ -3334,7 +3334,7 @@ footer .footer .footer_shop {
 .dropdown-panel .user-info{font-weight:600}
 
 .user-card{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem}
-.avatar-img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.avatar-img{width:24px;height:24px;border-radius:50%;object-fit:cover}
 
 .site-footer{background:#0f5f7f;color:#fff;margin-top:2rem;padding:2rem 0 1rem}
 .footer-inner{display:flex;gap:2rem;flex-wrap:wrap}

@@ -109,8 +109,10 @@
                                 <span class="price">₱{{ p.price|intcomma }}</span>
                             </div>
                             <div class="card-actions">
-                                <form class="add-cart-form" method="post" action="{% url 'add_to_cart' p.id %}">
+                                <form class="add-cart-form" method="post" action="{% url 'direct_checkout' %}">
                                     {% csrf_token %}
+                                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                                    <input type="hidden" name="quantity" value="1">
                                     <button type="submit" class="btn-sm">Buy Now</button>
                                 </form>
                                 <button class="add-to-cart-btn" data-product-id="{{ p.id }}" aria-label="Add to cart"><i class="fa fa-shopping-cart"></i></button>

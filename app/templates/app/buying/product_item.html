@@ -59,7 +59,15 @@
                         {% endif %}
                         <button>Add to Cart</button>
                     </form>
-                    <button><a href="{% url 'appointment' %}">Checkout</a></button>
+                    <form action="{% url 'direct_checkout' %}" method="POST" style="display:inline-block; margin-left:8px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ produkto.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        {% if selected_variant %}
+                            <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
+                        {% endif %}
+                        <button type="submit" class="btn-sm">Buy Now</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -72,7 +80,7 @@
                 {% if products %}
                     {% for produkto in products %}
                         <div class="product-card">
-                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites" aria-label="Toggle favorite"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
+                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites" aria-label="Toggle favorite"><i class="fa fa-heart" aria-hidden="true"></i></button>
                             {% if produkto.image %}
                                 <a href="{% url 'product_item' produkto.id %}">
                                 <img src="{{ produkto.image.url }}" alt="Product Image">

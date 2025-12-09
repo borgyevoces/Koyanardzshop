@@ -28,6 +28,7 @@ urlpatterns = [
     path('update_cart/<int:product_id>', views.update_cart, name='update_cart'),
     path('remove_from_cart/<int:product_id>', views.remove_from_cart, name='remove_from_cart'),
     path('direct_checkout', views.direct_checkout, name='direct_checkout'),
+    path('update_direct_checkout', views.update_direct_checkout, name='update_direct_checkout'),
     path('favorite', FavoritePage.as_view(), name='favorite'),
     path('toggle_favorite/<int:product_id>/', views.toggle_favorite, name='toggle_favorite'),
     path('admin_dashboard/', AdminDashboard.as_view(), name='admin_dashboard'),
