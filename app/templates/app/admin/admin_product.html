@@ -9,19 +9,20 @@
         <div class="adminproduct_left">
             <div class="product_filter">
                 <form action="" method="GET">
-                    <select name="category">
+                    <select name="category" onchange="this.form.submit()">
                         <option value="">Categories</option>
                         {% for category in categories %}
                             <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>{{ category.category_name }}</option>
                         {% endfor %}
                     </select>
-                    <select name="brand">
+                    <select name="brand" onchange="this.form.submit()">
                         <option value="">Brands</option>
                         {% for brand in brands %}
                             <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.brand }}</option>
                         {% endfor %}
                     </select>
-                    <button type="submit">Filter</button>
+                    {% if search_query and search_query != '' %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                    <button type="submit" style="display: none;">Filter</button>
                 </form>
             </div>
             <div class="product_editdelete">
@@ -104,6 +105,8 @@
             <div class="adminproduct_search">
                 <form action="" method="GET">
                     <input type="text" name="search" placeholder="Search..." value="{{ search_query }}" >
+                    {% if category_filter and category_filter != '' %}<input type="hidden" name="category" value="{{ category_filter }}">{% endif %}
+                    {% if brand_filter and brand_filter != '' %}<input type="hidden" name="brand" value="{{ brand_filter }}">{% endif %}
                 </form>
             </div>
             <div class="adminproduct_adding">
@@ -229,6 +232,62 @@
     </div>
 </div>
 <script>
+    // Toggle component type visibility based on category selection in add form
+    function toggleComponentTypeAddForm() {
+        const addForm = document.getElementById('add_form');
+        if (!addForm) return;
+        
+        const categorySelect = addForm.querySelector('[name="category_name"]');
+        const componentTypeField = addForm.querySelector('[name="component_type"]').closest('p');
+        
+        if (categorySelect) {
+            const updateVisibility = () => {
+                const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+                const selectedText = selectedOption.textContent.toLowerCase();
+                
+                if (selectedText.includes('computer') || selectedText.includes('parts')) {
+                    componentTypeField.style.display = 'block';
+                } else {
+                    componentTypeField.style.display = 'none';
+                }
+            };
+            
+            // Initial check
+            updateVisibility();
+            
+            // Listen for changes
+            categorySelect.addEventListener('change', updateVisibility);
+        }
+    }
+
+    // Same for edit form
+    function toggleComponentTypeEditForm() {
+        const editForm = document.getElementById('edit_form');
+        if (!editForm) return;
+        
+        const categorySelect = editForm.querySelector('[name="category_name"]');
+        const componentTypeField = editForm.querySelector('[name="component_type"]').closest('p');
+        
+        if (categorySelect) {
+            const updateVisibility = () => {
+                const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+                const selectedText = selectedOption.textContent.toLowerCase();
+                
+                if (selectedText.includes('computer') || selectedText.includes('parts')) {
+                    componentTypeField.style.display = 'block';
+                } else {
+                    componentTypeField.style.display = 'none';
+                }
+            };
+            
+            // Initial check
+            updateVisibility();
+            
+            // Listen for changes
+            categorySelect.addEventListener('change', updateVisibility);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const selectAll = document.getElementById('select_all');
         const checkboxes = document.querySelectorAll('.row_checkbox');
@@ -255,7 +314,10 @@
         window.closeAddCategory = () => closePopup('add_category_popup');
         window.openAddBrand = () => openPopup('add_brand_popup');
         window.closeAddBrand = () => closePopup('add_brand_popup');
-        window.openAddProduct = () => openPopup('add_product_popup');
+        window.openAddProduct = () => {
+            openPopup('add_product_popup');
+            setTimeout(toggleComponentTypeAddForm, 100);
+        };
         window.closeAddProduct = () => closePopup('add_product_popup');
         window.openAddVariant = () => {
             const selected = getSelectedIds();
@@ -306,6 +368,7 @@
             });
 
             openPopup('edit_product_popup');
+            setTimeout(toggleComponentTypeEditForm, 100);
         });
 
         // DELETE BUTTON

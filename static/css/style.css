@@ -2643,8 +2643,7 @@ footer .footer .footer_shop {
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
-    margin-left: 5rem;
-    width: calc(75% + 5rem);
+    width: calc(85% + 5rem);
     top: 50%;
     -webkit-transform: translateY(-50%);
     -ms-transform: translateY(-50%);
@@ -6560,6 +6559,7 @@ footer .footer .footer_shop {
     resize: none;
     border-radius: .5rem;
     border: 1px solid #033f63;
+    cursor: pointer;
 }
 .selling_right .step-box button{
     position: absolute;
@@ -8368,6 +8368,15 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
 .add-to-cart-btn i, .add-to-cart-btn img{font-size:1.05rem;color:inherit}
 .add-to-cart-btn:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(11,132,198,0.12)}
 .card-actions{display:flex;gap:.6rem;align-items:center;justify-content:center;margin-top:auto}
+
+/* Product Tag styling */
+.product-tag{position:absolute;top:12px;left:12px;color:#fff;padding:0.4rem 0.8rem;border-radius:0.5rem;font-size:0.9rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1;transition:transform .2s ease}
+
+/* 2nd Hand tag styling */
+.product-tag.tag-secondhand{background:#0877b2}
+
+/* New product tag styling */
+.product-tag.tag-new{background:#28a745}
 
 /* Small screens: slightly smaller buttons */
 @media (max-width:520px){

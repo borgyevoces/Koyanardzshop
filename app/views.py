@@ -107,6 +107,24 @@ def addproduct(request):
     category_form = AddCategory()
     brand_form = AddBrand()
     variant_form = AddVariantForm()
+    
+    # Filtering logic - initialize filter variables
+    category_filter = request.GET.get('category', '').strip()
+    brand_filter = request.GET.get('brand', '').strip()
+    search_query = request.GET.get('search', '').strip()
+    
+    # Apply filters only if they have actual values
+    if category_filter and category_filter != '':
+        products = products.filter(category_name_id=category_filter)
+    
+    if brand_filter and brand_filter != '':
+        products = products.filter(brand_id=brand_filter)
+    
+    if search_query and search_query != '':
+        products = products.filter(
+            Q(product_name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
 
     if request.method == 'POST':
         if 'add_product' in request.POST:
@@ -147,7 +165,10 @@ def addproduct(request):
         'categories': categories,
         'brand_form': brand_form,
         'brands': brands,
-        'variant_form': variant_form
+        'variant_form': variant_form,
+        'category_filter': category_filter,
+        'brand_filter': brand_filter,
+        'search_query': search_query
     })
     
 @csrf_exempt
@@ -869,7 +890,7 @@ class HomePage(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
-        context['products'] = Product.objects.all().order_by('-id')[:5]
+        context['products'] = Product.objects.all().order_by('-created_at')[:5]
         return context
 
 class ProductPage(TemplateView):
@@ -935,8 +956,9 @@ class ProductPage(TemplateView):
             products = products.order_by('-price')
         elif price_order == 'low':
             products = products.order_by('price')
-
-        cart = self.request.session.get('cart', {})
+        else:
+            # Default: show newest products first
+            products = products.order_by('-created_at')
         context.update({
             'products': products,
             'brands': brands,
@@ -944,7 +966,6 @@ class ProductPage(TemplateView):
             'category_filter': category_filter,
             'brand_filter': brand_filter,
             'component_filter': component_filter,
-            'cart_count': sum(produkto['quantity'] for produkto in cart.values()),
         })
         context['price_order'] = price_order
         return context
@@ -980,7 +1001,7 @@ class ProductItemPage(TemplateView):
             context["stock"] = produkto.stock
             context["images"] = [img.product_image.url for img in produkto.images.all()]
         
-        context["products"] = Product.objects.exclude(id=produkto.id).order_by('-id')[:30]
+        context["products"] = Product.objects.exclude(id=produkto.id).order_by('-created_at')[:30]
 
         reviews = produkto.reviews.all().order_by("-created_at")
         context["reviews"] = reviews
@@ -1093,7 +1114,7 @@ class AppointmentCompletePage(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Category.objects.all()
-        context['products'] = Product.objects.all().order_by('-id')[:30]
+        context['products'] = Product.objects.all().order_by('-created_at')[:30]
         return context
 
     def get(self, request, *args, **kwargs):
@@ -1465,7 +1486,7 @@ class CartPage(TemplateView):
         context['cart_products'] = cart
         context['total_price'] = sum(produkto['price'] * produkto['quantity'] for produkto in cart.values())
         context['favorites'] = self.request.session.get('favorites', [])
-        context['products'] = Product.objects.all().order_by('-id')[:30]
+        context['products'] = Product.objects.all().order_by('-created_at')[:30]
         return context
 
 class FavoritePage(TemplateView):
@@ -1629,7 +1650,12 @@ class AdminProduct(TemplateView):
         if brand_filter:
             products = products.filter(brand__id=brand_filter)
         
-        context['products'] = Product.objects.prefetch_related('images').all()
+        # Use the filtered products, not all products
+        context['products'] = products.prefetch_related('images').all()
+        context['search_query'] = search_query
+        context['category_filter'] = category_filter
+        context['brand_filter'] = brand_filter
+        
         
         context['form'] = Add()
         context['category_form'] = AddCategory

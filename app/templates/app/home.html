@@ -31,6 +31,16 @@
                 {% if products %}
                     {% for produkto in products %}
                         <article class="carousel-slide product-card">
+                            {% if produkto.category_name.category_name == 'Others' %}
+                                <span class="product-tag tag-secondhand">2nd Hand</span>
+                            {% elif produkto.created_at %}
+                                {% now "U" as current_timestamp %}
+                                {% with created_timestamp=produkto.created_at|date:"U" %}
+                                    {% if current_timestamp|add:"-604800"|add:"0" < created_timestamp|add:"0" %}
+                                        <span class="product-tag tag-new">New</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
                             <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
                                 <i class="fa fa-heart"></i>
                             </button>
