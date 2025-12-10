@@ -152,7 +152,7 @@
                                 <form action="{% url 'add_product' %}" method="POST" enctype="multipart/form-data" id="add_form">
                                     {% csrf_token %}
                                     {{ form.as_p }}
-                                    <label for="id_images">Product Image(s):</label>
+                                    <label for="id_images" class="pabebe">Product Image(s):</label>
                                     <input type="file" name="images" id="id_images" accept="image/*" multiple>
                                     <button type="submit" name="add_product">Submit</button>
                                 </form>
