@@ -205,17 +205,17 @@
         });
 
         const favButtons = document.querySelectorAll('.favorite_btn');
-    favButtons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const productId = this.dataset.productId;
-            const el = this;
-            fetch(`/toggle_favorite/${productId}/`, { 
-                method: 'POST', 
-                headers: { 
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrftoken
-                },
+        favButtons.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const productId = this.dataset.productId;
+                const el = this;
+                fetch(`/toggle_favorite/${productId}/`, { 
+                    method: 'POST', 
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    },
                 body: JSON.stringify({})
             })
                     .then(res => res.json())
@@ -295,6 +295,7 @@
         });
 
 
+    });
     });
 
 </script>
