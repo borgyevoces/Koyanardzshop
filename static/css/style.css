@@ -1292,11 +1292,14 @@ footer .footer .footer_shop {
 }
 .product_itempage .upperitem{max-width:1200px;margin:0 auto 1rem;display:flex;align-items:center;gap:1rem}
 .product_itempage .upperitem a img{width:36px;height:auto}
-.product_itembody{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:1.25rem;align-items:start}
-.productleft_upper img#main_image{width:100%;height:auto;}
+.product_itembody{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:1.25rem;align-items:stretch;min-height:550px}
+.product_itemleft{display:flex;flex-direction:column}
+.productleft_upper{flex:1;display:flex;align-items:center;justify-content:center;border-radius:8px;min-height:490px}
+.productleft_upper img#main_image{width:100%;height:auto;max-height:100%;object-fit:contain;padding:1rem}
 .productleft_bottom .leftbottom_image{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
 .productleft_bottom .leftbottom_image .thumbnail{width:72px;height:72px;border-radius:8px;object-fit:cover;border:2px solid transparent}
 .thumbnail.active-thumb{border-color:#0b84c6;transform:scale(1.03)}
+.product_itemright{display:flex;flex-direction:column;height:100%;justify-content:space-between}
 .product_itemright h3{font-size:1.5rem;margin:0 0 .6rem}
 .itemright_total{display:flex;justify-content:space-between;align-items:center;gap:1rem}
 .itemright_button{display:flex;gap:.6rem;align-items:center}
@@ -1402,9 +1405,9 @@ footer .footer .footer_shop {
 .product_itempage .product_itembody .product_itemright{
     width: 35%;
     min-height: 39rem;
-    height: auto;
+    height: 100%;
     margin: 1rem;
-    padding: 1rem .8rem;
+    padding: 1rem 1rem;
     margin-left: .2rem;
     border-radius: 1rem;
     box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .5);
@@ -1505,9 +1508,13 @@ footer .footer .footer_shop {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+.itemright_bottom .itemright_button form{
+    width: 100%;
 }
 .itemright_bottom .itemright_button button{
-    width: 12rem;
+    width: 100%;
     height: 3rem;
     text-transform: uppercase;
     font-weight: 600;
@@ -1604,6 +1611,7 @@ footer .footer .footer_shop {
     margin-right: 0;
     font-size: 1.2rem;
     border: 2px solid grey;
+    cursor: text;
 }
 .item_bottomcomms form button{
     border: none;
@@ -1900,7 +1908,7 @@ footer .footer .footer_shop {
 }
 .cartpage_emptybody{
     justify-items: center;
-    align-items: center;
+    align-items: center;    
     margin-left: 21rem;
 }
 .cartpage_emptybody h3{
@@ -3353,7 +3361,7 @@ footer .footer .footer_shop {
 @media (max-width: 1024px) and (min-width: 769px){
     .cartbody{width:85%;margin:1.5rem}
     .cartbody_body{width:100%}
-    .cartright{width:100%;margin-top:1rem;border-radius:0 0 2rem 2rem}
+    .cartright{width:100%;border-radius:0 0 2rem 2rem}
     .product-container .product-card{width:calc(50% - 1rem);height:auto}
     .product-container .product-card img{height:160px}
     .productpage .box .containerbox{width:calc(50% - 1rem);height:auto}
@@ -3537,6 +3545,7 @@ footer .footer .footer_shop {
 /* SMALL MOBILE BREAKPOINT - 480px and below */
 @media (max-width:520px){
     .brand-logo{width:35px;height:35px}
+    .brand-sub{font-size: .75rem;}
     .action-btn img{width:20px}
     .action-btn i{font-size:0.95rem}
     .brand-title{font-size:0.85rem}
@@ -3626,7 +3635,7 @@ footer .footer .footer_shop {
     /* Product grid small mobile */
     .product-container{margin:0 0.2rem;gap:0.2rem}
     .product-container .product-card{width:100%;margin:0.2rem 0;padding:0.4rem;border-radius:0.8rem}
-    .product-container .product-card img{height:120px}
+    .product-container .product-card img{height:120px !important}
     .product-name h4{font-size:0.85rem;line-height:1.1}
     .product-name p{font-size:0.75rem}
     #homefavorites{right:0.2rem;top:0.2rem;}
@@ -3656,7 +3665,7 @@ footer .footer .footer_shop {
     .header-inner{padding:.35rem 0; margin:0 .5rem}
 
     /* Cart page mobile adjustments */
-    .cartpage{height:100%;padding:0;margin:-3rem 0;}
+    .cartpage{height:100%;padding:0;margin:-1rem 0;}
     .cartbody{width:95%;margin:0.5rem;border-radius:1rem}
     .cartbody p{margin:0.8rem 1rem;font-size:1.4rem}
     .cartleft{max-height: 8rem;}
@@ -3666,7 +3675,7 @@ footer .footer .footer_shop {
     .cartright{padding:1rem}
     .cartright h2{font-size:1.3rem}
     .cartright_button h3{font-size:1.1rem}
-    .cart_bottom{width:100%; margin: 10rem 0;}
+    .cart_bottom{width:100%; margin: 5rem 0;}
     .cart_bottom h3{ font-size:1.4rem}
     .cart_bottom .product-container{margin: 0;}
     .cart_bottom .product-container .product-card .product-name{margin-top: 1.2rem;}
@@ -3921,15 +3930,15 @@ footer .footer .footer_shop {
 }
 .product-container .product-card img{
     max-width: 100%;
-    max-height: fit-content;
     border-radius: 5px;
-    width: 10rem;
-    height: 10rem;
+    width:100%;
+    height:220px;
+    object-fit: cover;
 }
 .product-container .product-card .product-name{
     position: relative;
     display: block;
-    margin-top: 3rem;
+    margin-top: .5rem;
 }
 .product-name h4{
     height: 1.7rem;
@@ -3951,10 +3960,14 @@ footer .footer .footer_shop {
     display: flex;
     padding: 0 .5rem;
     top: 0;
+    width: 100%;
+}
+.productcard-button form{
+    width: 100%;
 }
 .productcard-button form button{
-    width: 13rem;
-    height: 2.7rem;
+    width: 100%;
+    height: 2.5rem;
     font-size: 1.1rem;
     font-weight: 500;
     border: none;
@@ -6868,10 +6881,13 @@ footer .footer .footer_shop {
     border-radius: 2rem 10rem 10rem 2rem;
 }
 .signup_leftbody{
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: center;
     width: 100%;
-    margin: 0 5rem;
+    margin-right: 1rem;
+    margin-left: 5rem;
 }
 .signup_leftbody h2{
     font-size: 2.5rem;
@@ -6886,7 +6902,7 @@ footer .footer .footer_shop {
 }
 .signup_leftbody form input{
     display: block;
-    width: 18rem;
+    width: 100%;
     height: 3rem;
     margin: .1rem 0;
     padding: .2rem 1.2rem;
@@ -6977,7 +6993,6 @@ footer .footer .footer_shop {
 /* SIGNUP PAGE RESPONSIVE - TABLET (1024px) */
 @media (max-width: 1024px) {
     .signuppage {
-        min-height: 100vh;
         padding: 0.5rem;
     }
     
@@ -6988,10 +7003,12 @@ footer .footer .footer_shop {
     }
     
     .signup_left {
-        width: 45%;
+        width: 55%;
         border-radius: 1.5rem 0 0 1.5rem;
     }
-    
+    .signup_leftbody{
+        margin: 0;
+    }
     .signup_leftbody h2 {
         font-size: 1.8rem;
         padding: 0.8rem;
@@ -7002,7 +7019,6 @@ footer .footer .footer_shop {
         height: 2.4rem;
         font-size: 1rem;
         padding: 0.8rem 1rem;
-        margin: 0.6rem 0;
     }
     
     .signup_leftbody form button {
@@ -7086,7 +7102,7 @@ footer .footer .footer_shop {
     .signup_leftbody form input {
         width: 100%;
         max-width: 22rem;
-        height: 2.8rem;
+        height: 3rem;
         font-size: 1.4rem;
         padding: 0.7rem 1rem;
         margin: 0.6rem 0;
@@ -7193,7 +7209,7 @@ footer .footer .footer_shop {
     
     .signup_leftbody form input {
         width: 100%;
-        height: 2.2rem;
+        height: 2.5rem;
         font-size: 0.95rem;
         padding: 0.6rem;
         margin: 0.5rem 0;
@@ -7444,7 +7460,6 @@ footer .footer .footer_shop {
 }
 .loginpage_rightbody form input{
     display: block;
-    width: 18rem;
     height: 3rem;
     margin: .8rem 0;
     padding: 1rem 1.2rem;
@@ -7522,6 +7537,7 @@ footer .footer .footer_shop {
     
     .loginpage_right {
         width: 60%;
+        justify-content: center;
     }
     
     .loginpage_rightbody h2 {
@@ -7748,7 +7764,9 @@ footer .footer .footer_shop {
     }
     
     .password-wrapper {
-        width: 75%;
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
     }
     
     .password-wrapper input {
@@ -7757,6 +7775,7 @@ footer .footer .footer_shop {
     
     .password-wrapper .toggle-password {
         width: 1rem;
+        right: 4rem;
     }
     
     .loginpage_right form a {
@@ -7850,6 +7869,7 @@ footer .footer .footer_shop {
     }
     .password-wrapper .toggle-password {
         width: 0.9rem;
+        right: .8rem;
     }
     
     .loginpage_right button {
@@ -8040,7 +8060,7 @@ footer .footer .footer_shop {
     position: relative;
     display: block;
     justify-items: center;
-    top: 5.5rem;
+    top: 3rem;
     height:100vh;
     background-color: whitesmoke;
 }
@@ -8353,7 +8373,7 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
 .product-grid{grid-template-columns:repeat(4,1fr);gap:1rem}
 .product-card{background:#fff;border-radius:10px;border:1px solid #eef6fb;overflow:hidden;display:flex;flex-direction:column;position:relative}
 .product-card .product-thumb{display:block;overflow:hidden}
-.product-card .product-thumb img{width:100%;height:220px;object-fit:cover;display:block}
+.product-card .product-thumb img{width:100%;height:220px;object-fit:cover;display:block;padding:1rem;}
 .product-card .card-body{padding:0.9rem;display:flex;flex-direction:column;gap:.6rem}
 .card-title{font-size:1rem;margin:0;color:#1B1A1A}
 .card-actions{display:flex;gap:.6rem;align-items:center;justify-content:space-between;margin-top:auto}
@@ -8597,7 +8617,6 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
     .btn-sm {
         width: 100%;
         flex: 1;
-        padding: 0.7rem 4rem;
         text-transform: uppercase;
         font-size: 1rem;
         border-radius: 6px;
@@ -8779,7 +8798,6 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
     .product-card {
         display: grid;
         grid-template-columns: 120px 1fr;
-        gap: 0.6rem;
         align-items: start;
         border-radius: 8px;
         padding: 0.6rem;
@@ -8794,11 +8812,17 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
         overflow: hidden;
         border-radius: 6px;
     }
+
+    #product-thumbs img{
+        margin-top: 1.5rem;
+        padding: 0;
+    }
     
     .product-card .product-thumb img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        padding: 0;
     }
     
     .card-body {
@@ -8921,11 +8945,11 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
     }
     
     .card-title {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
     
     .price {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
     }
 }
 

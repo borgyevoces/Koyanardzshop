@@ -103,7 +103,9 @@
                         {% endif %}
                     {% endwith %}
                 {% endif %}
-                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites"><img src="{% static 'images/icon/heart-black.png' %}" alt=""></button>
+                <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
+                    <i class="fa fa-heart"></i>
+                </button>
                 {% if produkto.image %}
                 <a href="{% url 'product_item' produkto.id %}">
                     <img src="{{ produkto.image.url }}" alt="Product Image">

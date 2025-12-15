@@ -1475,10 +1475,6 @@ class CartPage(TemplateView):
 
         for product_id, produkto in cart.items():
             produkto['sub_total'] = produkto['price'] * produkto['quantity']
-            # Keep the numeric product_id stored when the item was added to cart
-            # and store the session dict key separately as `cart_key` so templates
-            # can reverse URLs using the numeric id even when the dict key is
-            # a variant string like "variant-6".
             if 'product_id' not in produkto:
                 produkto['product_id'] = product_id
             produkto['cart_key'] = product_id
