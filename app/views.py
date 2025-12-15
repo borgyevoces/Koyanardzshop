@@ -100,9 +100,9 @@ def products_by_component(request):
 #ADMIN
 
 def addproduct(request):
-    products = Product.objects.all()
+    products = Product.objects.all().order_by('-created_at')
     categories = Category.objects.all()
-    brands = Brand.objects.all()
+    brands = Brand.objects.all().order_by('brand')
     product_form = Add()
     category_form = AddCategory()
     brand_form = AddBrand()
