@@ -3322,20 +3322,28 @@ footer .footer .footer_shop {
 .site-footer .social a i, .site-footer .socials a i { font-size: 1.1rem; display: inline-block; width: 1.6rem; height: 1.6rem; line-height: 1.6rem; text-align: center; border-radius: 50%; background: #111; color: #fff; }
 .site-footer .social a, .site-footer .socials a { margin-right: .5rem; }
 
-.dropdown-panel{display:none;position:absolute;right:0;top:calc(100% + .6rem);background:#fff;color:#222;border-radius:.6rem;box-shadow:0 8px 24px rgba(2,24,40,.12);padding:.4rem;min-width:220px;z-index:200}
-.favorite-dropdown .dropdown-panel{right:0}
+.dropdown-panel{display:none;position:absolute;right:0;top:calc(100% + .6rem);background:#fff;color:#222;border-radius:.8rem;box-shadow:0 12px 32px rgba(2,24,40,.15);padding:0;min-width:280px;z-index:200;max-height:500px;overflow-y:auto}
+.favorite-dropdown .dropdown-panel{right:0;min-width:300px}
 /* dropdown link layout */
 .dropdown-panel a{display:flex;align-items:center;gap:.6rem;padding:.5rem .6rem;color:#222;text-decoration:none;border-radius:.35rem}
 .dropdown-panel a:hover{background:rgba(2,24,40,0.04)}
 
-.fav-item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.45rem .4rem;border-bottom:1px solid #f1f1f1}
-.fav-item .fav-left{display:flex;align-items:center;gap:.6rem;min-width:0}
-.fav-item img{width:46px;height:46px;object-fit:cover;border-radius:6px;flex:0 0 46px}
-.fav-meta{font-size:.95rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fav-actions{display:flex;align-items:center;gap:.4rem;flex:0 0 auto}
-.fav-actions button, .fav-actions form button{width:34px;height:34px;border-radius:6px;border:none;background:#f5f5f5;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.fav-item{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.8rem;border-bottom:1px solid #f0f0f0;transition:background-color 0.2s ease}
+.fav-item:hover{background-color:#fafafa}
+.fav-item:last-child{border-bottom:none}
+.fav-item .fav-left{display:flex;align-items:center;gap:.8rem;min-width:0;flex:1}
+.fav-item img{width:50px;height:50px;object-fit:cover;border-radius:8px;flex:0 0 50px;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.fav-meta{font-size:.9rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:#1a1a1a}
+.fav-actions{display:flex;align-items:center;gap:.6rem;flex:0 0 auto}
+.fav-actions button, .fav-actions form button{width:38px;height:38px;border-radius:8px;border:none;background:#f0f0f0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s ease;font-size:0.9rem}
+.fav-actions button:hover{background:#e8e8e8;transform:scale(1.05)}
 .fav-actions form{margin:0}
-.fav-actions form button{padding:0}
+.fav-actions form button{padding:0;background:#0066cc;color:#fff}
+.fav-actions form button:hover{background:#0052a3;transform:scale(1.05)}
+.fav-actions .fav-remove-btn{color:#e74c3c}
+.fav-actions .fav-remove-btn:hover{background:#ffe6e6}
+.no-fav{padding:2rem 1.5rem;text-align:center;color:#999;font-size:0.95rem}
+.no-fav::before{display:block;content:'♡';font-size:2.5rem;margin-bottom:0.5rem;opacity:0.3}
 
 .user-card{display:flex;align-items:center;gap:.6rem;padding:.6rem .4rem;border-bottom:1px solid #f5f5f5}
 .dropdown-panel .user-info{font-weight:600}
@@ -7920,8 +7928,8 @@ footer .footer .footer_shop {
     display: block;
 }
 .forgotpassword_form form p input{
-    justify-items: center;
     margin-left: 2rem;
+    padding: 0 1rem;
     width: 70%;
     height: 2.5rem;
     border: 1px solid #033f63;

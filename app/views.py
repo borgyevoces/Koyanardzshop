@@ -319,7 +319,8 @@ def forgot_password(request):
                     token = default_token_generator.make_token(user)
                     uid = user.pk
                     current_site = get_current_site(request)
-                    reset_url = f"http://{current_site.domain}/reset-password/{uid}/{token}/"
+                    protocol = 'https' if request.is_secure() else 'http'
+                    reset_url = f"{protocol}://{current_site.domain}/reset-password/{uid}/{token}/"
                     message = f"Click the link to reset your password: {reset_url}"
                     send_mail(
                         "Password Reset Request",

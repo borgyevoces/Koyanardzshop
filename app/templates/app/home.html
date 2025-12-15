@@ -104,7 +104,24 @@
 </section>
 
 <script>
-const favButtons = document.querySelectorAll('.favorite_btn');
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const favButtons = document.querySelectorAll('.favorite_btn');
         favButtons.forEach(btn => {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -131,28 +148,29 @@ const favButtons = document.querySelectorAll('.favorite_btn');
                         alert('Error updating favorite');
                     });
             });
-
-    // Carousel functionality
-    const track = document.querySelector('.carousel-track');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    let currentPosition = 0;
-
-    if (track) {
-        const slideWidth = 16 * 16 + 2 * 16; // 16rem slide + 2rem gap in pixels
-        const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
-
-        nextBtn.addEventListener('click', function () {
-            currentPosition = Math.min(currentPosition + slideWidth, maxScroll);
-            track.style.transform = `translateX(-${currentPosition}px)`;
         });
 
-        prevBtn.addEventListener('click', function () {
-            currentPosition = Math.max(currentPosition - slideWidth, 0);
-            track.style.transform = `translateX(-${currentPosition}px)`;
-        });
-    }
-});
+        // Carousel functionality
+        const track = document.querySelector('.carousel-track');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        let currentPosition = 0;
+
+        if (track) {
+            const slideWidth = 16 * 16 + 2 * 16; // 16rem slide + 2rem gap in pixels
+            const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
+
+            nextBtn.addEventListener('click', function () {
+                currentPosition = Math.min(currentPosition + slideWidth, maxScroll);
+                track.style.transform = `translateX(-${currentPosition}px)`;
+            });
+
+            prevBtn.addEventListener('click', function () {
+                currentPosition = Math.max(currentPosition - slideWidth, 0);
+                track.style.transform = `translateX(-${currentPosition}px)`;
+            });
+        }
+    });
 </script>
 
 {% endblock content %}
