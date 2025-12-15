@@ -204,21 +204,20 @@
             });
         });
 
-        // Favorite buttons - call server toggle endpoint and update UI
         const favButtons = document.querySelectorAll('.favorite_btn');
-        favButtons.forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const productId = this.dataset.productId;
-                const el = this;
-                fetch(`/toggle_favorite/${productId}/`, { 
-                    method: 'POST', 
-                    headers: { 
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: JSON.stringify({})
-                })
+    favButtons.forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            const el = this;
+            fetch(`/toggle_favorite/${productId}/`, { 
+                method: 'POST', 
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({})
+            })
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'added') el.classList.add('favorited');
@@ -232,7 +231,6 @@
                         alert('Error updating favorite');
                     });
             });
-        });
 
         // Sidebar / filter panel toggle
         const filterToggle = document.getElementById('filterToggle');
