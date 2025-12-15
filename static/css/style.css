@@ -1463,18 +1463,16 @@ footer .footer .footer_shop {
 .variant_list{
     display: flex;
     flex-wrap: wrap;
-    height: 6rem;
     max-height: 6rem;
     margin-left: 1.5rem;
     gap: 10px;
 }
 .variant_btn{
-    height: 2.5rem;
-    padding: 8px 12px;
+    height: 2rem;
+    padding: 4px 12px;
     text-decoration: none;
-    border: 1px solid #ccc;
+    border: 1px solid #033f63;
     border-radius: 8px;
-    background: white;
     cursor: pointer;
     transition: 0.2s;
 }
@@ -8813,7 +8811,7 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
         border-radius: 6px;
     }
 
-    #product-thumbs img{
+    #product-thumbs{
         margin-top: 1.5rem;
         padding: 0;
     }
