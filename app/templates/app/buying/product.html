@@ -216,8 +216,8 @@
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRFToken': csrftoken
                     },
-                body: JSON.stringify({})
-            })
+                    body: JSON.stringify({})
+                })
                     .then(res => res.json())
                     .then(data => {
                         if (data.status === 'added') el.classList.add('favorited');
@@ -231,7 +231,7 @@
                         alert('Error updating favorite');
                     });
             });
-
+        });
         // Sidebar / filter panel toggle
         const filterToggle = document.getElementById('filterToggle');
         const filterClose = document.getElementById('filterClose');
@@ -295,7 +295,6 @@
         });
 
 
-    });
     });
 
 </script>
