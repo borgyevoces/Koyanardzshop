@@ -37,8 +37,15 @@ import random
 import urllib.parse
 
 def product_list(request):
-    qs = Product.objects.all().values('id','product_name','price','description','image')
-    return JsonResponse(list(qs), safe=False)
+    component = request.GET.get('component')
+    qs = Product.objects.all()
+
+    if component:
+        qs = qs.filter(component__iexact=component)
+
+    return JsonResponse({
+        "results": list(qs.values())
+    })
 
 def get_products(request):
     component = request.GET.get("component")
@@ -212,9 +219,15 @@ def register(request):
                 if user_otp.otp_expires_at > timezone.now():
                     user.is_active = True
                     user.save()
+                    # Auto-login the user after OTP verification
+                    try:
+                        auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    except Exception:
+                        pass
+                    messages.success(request, "")
                     return redirect("home")
                 else:
-                    messages.warning(request, "The OTP has expired. Please request a new one.")
+                    messages.warning(request, "")
             else:
                 messages.warning(request, "Invalid OTP entered. Please try again.")
 
@@ -222,21 +235,12 @@ def register(request):
             form = RegisterForm(request.POST)
             if form.is_valid():
                 user = form.save()
-                # Auto-login the user after email signup so they remain
-                # authenticated when proceeding to add to cart / checkout.
-                try:
-                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                except Exception:
-                    # If auto-login fails for any reason, continue without raising
-                    # — the user can still log in manually.
-                    pass
-                # OTP creation and email sending is handled by the post_save signal
-                # Get the OTP that was created by the signal
+                # Do NOT auto-login until OTP is verified
                 otp = OtpToken.objects.filter(user=user).last()
                 if otp:
                     otp_code = otp.otp_code
 
-                messages.success(request, "Account created successfully! Please check your email for the OTP.")
+                messages.success(request, "")
 
     context = {
         "form": form,
@@ -801,13 +805,15 @@ def get_appointment_counts(user):
             'count_cancelled': 0
         }
 
+    today = timezone.now().date()
+    
     view_apps = Appointment.objects.filter(email=user.email)
     sell_apps = Selling.objects.filter(email=user.email)
 
     return {
         'count_all': view_apps.count() + sell_apps.count(),
-        'count_pending': view_apps.filter(status="Pending").count() +
-                         sell_apps.filter(status="Pending").count(),
+        'count_pending': view_apps.filter(status="Pending", date__gte=today).count() +
+                         sell_apps.filter(status="Pending", selling_date__gte=today).count(),
         'count_completed': view_apps.filter(status__in=["Completed", "Finished"]).count() +
                            sell_apps.filter(status="Completed").count(),
         'count_cancelled': view_apps.filter(status="Cancelled").count() +
@@ -936,11 +942,26 @@ class ProductPage(TemplateView):
             try:
                 category_id = int(category_filter)
                 products = products.filter(category_name__id=category_id)
-                brands = Brand.objects.filter(product__category_name__id=category_id).distinct()
+                brands = Brand.objects.filter(product__category_name__id=category_id).distinct().order_by('brand')
             except (ValueError, TypeError):
-                brands = Brand.objects.annotate(product_count=Count('product')).order_by('-product_count')
+                brands = Brand.objects.annotate(product_count=Count('product')).order_by('brand')
         else:
-            brands = Brand.objects.annotate(product_count=Count('product')).order_by('-product_count')
+            brands = Brand.objects.annotate(product_count=Count('product')).order_by('brand')
+        
+        # Sort brands alphabetically with "Others" at the end
+        brands_list = list(brands)
+        others_brand = None
+        regular_brands = []
+        for brand in brands_list:
+            if brand.brand.lower() == 'others':
+                others_brand = brand
+            else:
+                regular_brands.append(brand)
+        
+        if others_brand:
+            brands = regular_brands + [others_brand]
+        else:
+            brands = regular_brands
         
         # Convert brand_filter to integer if it exists
         if brand_filter:
@@ -953,12 +974,22 @@ class ProductPage(TemplateView):
         if component_filter:
             products = products.filter(component_type=component_filter)
 
+        # Always annotate total_bought for all products to show best seller tag
+        products = products.annotate(
+            total_bought=Sum('appointmentproduct__quantity')
+        )
+
         if price_order == 'high':
             products = products.order_by('-price')
         elif price_order == 'low':
             products = products.order_by('price')
+        elif price_order == 'newest':
+            products = products.order_by('-created_at')
+        elif price_order == 'oldest':
+            products = products.order_by('created_at')
+        elif price_order == 'most_buy':
+            products = products.order_by('-total_bought')
         else:
-            # Default: show newest products first
             products = products.order_by('-created_at')
         context.update({
             'products': products,
@@ -1355,8 +1386,10 @@ class MyAppointmentPage(TemplateView):
         search_query = self.request.GET.get('q', '')
 
         if user.is_authenticated:
+            today = timezone.now().date()
             appointments = Appointment.objects.filter(email=user.email) \
                 .exclude(status__in=['Cancelled', 'Finished']) \
+                .filter(date__gte=today) \
                 .order_by('-created_at')
 
             if status_filter:
@@ -1388,8 +1421,10 @@ class MySellingAppointmentPage(TemplateView):
         search_query = self.request.GET.get('q', '')
 
         if user.is_authenticated:
+            today = timezone.now().date()
             sellings = Selling.objects.filter(email=user.email) \
                 .exclude(status__in=['Cancelled', 'Completed']) \
+                .filter(selling_date__gte=today) \
                 .order_by('-selling_date')
 
             if status_filter:
@@ -1437,12 +1472,16 @@ class MyHistoryAppointmentPage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
         status_filter = self.request.GET.get('status', '')
         search_query = self.request.GET.get('q', '')
 
-        if self.request.user.is_authenticated:
-            history_appointments = Appointment.objects.filter(email=self.request.user.email, status__in=['Cancelled', 'Finished']).order_by('-created_at')
-            history_sellings = Selling.objects.filter(email=self.request.user.email, status__in=['Cancelled', 'Completed']).order_by('-selling_at')
+        counts = get_appointment_counts(user)
+        context.update(counts)
+
+        if user.is_authenticated:
+            history_appointments = Appointment.objects.filter(email=user.email, status__in=['Cancelled', 'Finished']).order_by('-created_at')
+            history_sellings = Selling.objects.filter(email=user.email, status__in=['Cancelled', 'Completed']).order_by('-selling_at')
             
             historyappointment = list(history_appointments) + list(history_sellings)
             historyappointment = sorted(historyappointment, key=lambda x: getattr(x, 'created_at', getattr(x, 'selling_at', None)), reverse=True)

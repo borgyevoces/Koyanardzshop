@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from datetime import date
 
 class RegisterForm(UserCreationForm):
+    first_name = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "First Name", "class": "form-control"}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Last Name", "class": "form-control"}))
     email = forms.CharField(widget=forms.EmailInput(attrs={"placeholder": "Email Address", "class": "form-control"}))
     username = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Username", "class": "form-control"}))
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput(attrs={"placeholder": "Enter password", "class": "form-control"}))
@@ -12,7 +14,7 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = get_user_model()
-        fields = ["email", "username", "password1", "password2"]
+        fields = ["first_name", "last_name", "email", "username", "password1", "password2"]
     
     def clean_email(self):
         email = self.cleaned_data.get('email')

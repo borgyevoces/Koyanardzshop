@@ -4,6 +4,69 @@
 
 {% block content %}
 
+<script>
+    function togglePasswordVisibility(button) {
+        event.preventDefault();
+        const wrapper = button.parentElement;
+        const input = wrapper.querySelector('input[type="password"], input[type="text"]');
+        const icon = button.querySelector('i');
+        
+        if (!input || !icon) return;
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {    
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    function startOTPCountdown() {
+        const timerDisplay = document.getElementById('otp-timer');
+        const verifyBtn = document.querySelector('button[type="submit"]');
+        const otpInput = document.querySelector('input[name="otp_code"]');
+        
+        if (!timerDisplay) return;
+        
+        // Calculate expiration time (5 minutes from now)
+        const endTime = new Date(new Date().getTime() + 5 * 60 * 1000);
+        
+        const countdown = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+            
+            if (distance <= 0) {
+                clearInterval(countdown);
+                timerDisplay.innerHTML = '<span style="color: #c33; font-weight: bold;">OTP Expired - Redirecting to signup...</span>';
+                if (verifyBtn) verifyBtn.disabled = true;
+                if (verifyBtn) verifyBtn.style.opacity = '0.5';
+                if (verifyBtn) verifyBtn.style.cursor = 'not-allowed';
+                
+                // Redirect to signup page after 2 seconds
+                setTimeout(() => {
+                    window.location.href = '{% url "register" %}';
+                }, 2000);
+                return;
+            }
+            
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            timerDisplay.innerHTML = `<span style="color: #666; font-weight: bold;">Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}</span>`;
+        }, 1000);
+    }
+
+    // Start countdown when OTP verification form is shown
+    document.addEventListener('DOMContentLoaded', function() {
+        const otpForm = document.querySelector('input[name="otp_code"]');
+        if (otpForm) {
+            startOTPCountdown();
+        }
+    });
+</script>
 
 <style>
     /* Hide global header/navigation and footer for the signup page */
@@ -23,6 +86,12 @@
     .signup_leftbody div { margin-bottom: .5rem; }
     .signup_leftbody input, .signup_leftbody select { width: 100%; box-sizing: border-box; }
     .signup_leftbody input.form-control { border: 1px solid black; padding: 0.7rem; border-radius: 0.8rem; }
+    
+    /* Password visibility toggle */
+    .password-input-wrapper { position: relative; margin-bottom: 0.5rem; }
+    .password-input-wrapper input { padding-right: 40px; }
+    .password-toggle-btn { position: absolute; width: 1rem !important; right: 12px; top: 50%; transform: translateY(-50%); background: none !important; border: none !important; cursor: pointer; color: #666 !important; font-size: 1.1rem !important; padding: .5px 1px !important; display: flex; align-items: center; justify-content: center; transition: color 0.2s; }
+    .password-toggle-btn:active { color: #333; }
     
     @media (min-width: 768px){ .signup-home-btn{ left: 24px; top: 24px } }
     
@@ -47,6 +116,7 @@
                     {% csrf_token %}
                         {% if otp_code %}
                         <h3 style="margin-bottom: .5rem;">Verify Your Email</h3>
+                        <div id="otp-timer" style="margin-bottom: 1rem; font-size: 0.95rem;"></div>
                         <label for="otp_code">Enter OTP:</label>
                             <input class="verification_code" type="text" name="otp_code" required>
                             <input type="hidden" name="username" value="{{ form.instance.username }}">
@@ -56,8 +126,13 @@
                         {% endif %}
                         {% else %}
                         {% for field in form %}
-                            <div>
-                                {{ field }}
+                            {% if field.name == 'password1' or field.name == 'password2' %}
+                                <div class="password-input-wrapper">
+                                    {{ field }}
+                                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility(this)">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
                                 {% if field.errors %}
                                     <small>
                                         {% for error in field.errors %}
@@ -65,7 +140,18 @@
                                         {% endfor %}
                                     </small>
                                 {% endif %}
-                            </div>
+                            {% else %}
+                                <div>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <small>
+                                            {% for error in field.errors %}
+                                                {{ error }}<br>
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         {% endfor %}
                     <button type="submit">Sign up</button>
                 </form>

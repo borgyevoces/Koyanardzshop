@@ -49,7 +49,7 @@
                                         {{ produkto.product.product_name }} </br> ₱{{ produkto.price|intcomma }}
                                     </td>
                                     <td>{{ cancelling.date|date:"M d, Y" }} </br> {{ cancelling.time|time:"h:i A" }}</td>
-                                    <td style="color: red;">{{ cancelling.status }}</td>
+                                    <td style="font-weight: 600; color: red;">{{ cancelling.status }}</td>
                                     <td>{{ cancelling.reference_number }}</td>
                                 </tr>
                             {% endfor %}

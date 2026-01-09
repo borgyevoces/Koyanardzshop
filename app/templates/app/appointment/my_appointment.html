@@ -49,7 +49,7 @@
                                         {{ produkto.product.product_name }}{% if produkto.variation %} — {{ produkto.variation }}{% endif %} </br> ₱{{ produkto.price|intcomma }}
                                     </td>
                                     <td>{{ appointment.date|date:"M d, Y" }} </br> {{ appointment.time|time:"h:i A" }}</td>
-                                    <td style="color: #DECB00;">{{ appointment.status }}</td>
+                                    <td style="font-weight: 600; color: #DECB00;">{{ appointment.status }}</td>
                                     <td>{{ appointment.reference_number }}</td>
                                 </tr>   
                             {% endfor %}
