@@ -47,6 +47,13 @@ class Add(forms.ModelForm):
     class Meta:
         model = Product
         fields = '__all__'
+        widgets = {
+            'model_3d': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': '.glb,.gltf',
+                'help_text': 'Upload a GLB or GLTF 3D model file'
+            }),
+        }
 
 class AddCategory(forms.ModelForm):
     class Meta:
