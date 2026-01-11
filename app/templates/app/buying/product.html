@@ -109,8 +109,8 @@
                         {% if p.total_bought and p.total_bought > 0 %}
                             <span class="product-tag tag-bestseller">Best Seller</span>
                         {% endif %}
-                        <button class="favorite_btn {% if p.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites">
-                            <i class="fa fa-heart"></i>
+                        <button class="favorite_btn {% if p.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites">
+                            <i class="{% if p.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
                         </button>
                         <a href="{% url 'product_item' p.id %}" class="product-thumb" id="product-thumbs">
                             {% if p.image %}
@@ -132,9 +132,6 @@
                                     <button type="submit" class="btn-sm" id="product_buynow">Buy Now</button>
                                 </form>
                                 <button class="add-to-cart-btn" data-product-id="{{ p.id }}" aria-label="Add to cart"><i class="fa fa-shopping-cart"></i></button>
-                                {% if p.model_3d %}
-                                    <button class="view-3d-btn" data-product-id="{{ p.id }}" data-product-name="{{ p.product_name }}" data-model-url="{{ p.model_3d.url }}" aria-label="View 3D Model"><i class="fa fa-cube"></i> 3D</button>
-                                {% endif %}
                             </div>
                         </div>
                     </article>
@@ -158,57 +155,2768 @@
 </div>
 
 
-<script src="https://cdn.botpress.cloud/webchat/v3.4/inject.js"></script>
-<script src="https://files.bpcontent.cloud/2025/11/05/07/20251105070326-3GYR6OU8.js" defer></script>
-<script>
-    // Wait for Botpress to load
-    function initBotpress() {
-        if (typeof window.botpressWebChat === 'undefined') {
-            // Botpress not loaded yet, retry in 500ms
-            setTimeout(initBotpress, 500);
-            return;
-        }
-        
-        window.botpressWebChat.init({
-            botId: '4b04a836-814b-48e0-a021-3f5e77b25de4',
-            hostUrl: 'https://premorning-unadvantaged-melvin.ngrok-free.dev/',
-            enableQuickReplies: true,
-            showConversationsButton: true,
-        })
 
-        // ===== BOTPRESS 3D MODEL INTEGRATION =====
-        // Listen for messages from Botpress and show 3D models when requested
-        window.botpressWebChat.onEvent(function(event) {
-            console.log('Botpress event:', event);
-        
-        // Check if event is a custom payload from Botpress
-        if (event.type === 'MESSAGE' && event.payload) {
-            const payload = event.payload;
+<div id="custom-chat-widget" class="custom-chat-widget hidden">
+    <div class="custom-chat-header">
+        <div class="custom-chat-header-content">
+            <h3 class="custom-chat-title">💬 Chat Assistant</h3>
+            <p class="custom-chat-subtitle">Ask us anything!</p>
+        </div>
+        <div class="custom-chat-header-actions">
+            <button id="custom-chat-clear" class="custom-chat-icon-btn" aria-label="Clear chat" title="Clear chat history"><i class="fa fa-trash"></i></button>
+            <button id="custom-chat-minimize" class="custom-chat-icon-btn" aria-label="Minimize">−</button>
+            <button id="custom-chat-close" class="custom-chat-icon-btn" aria-label="Close">✕</button>
+        </div>
+    </div>
+    <div class="custom-chat-messages" id="custom-chat-messages">
+    </div>
+    <div class="custom-chat-quick-actions" id="custom-chat-quick-actions" style="display: none; padding: 10px; border-top: 1px solid #e0e0e0;">
+        <p style="margin: 0 0 10px 0; font-size: 12px; color: #666; text-align: center;">Quick actions:</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <button class="custom-chat-quick-btn" data-message="I need product recommendations">📦 Product Recommendations</button>
+            <button class="custom-chat-quick-btn" data-message="Help me build a computer">🖥️ Build Computer</button>
+            <button class="custom-chat-quick-btn" data-message="Tell me about your store">🏪 Store Information</button>
+            <button class="custom-chat-quick-btn" data-message="I want to schedule an appointment">📅 Appointments</button>
+        </div>
+    </div>
+    <div class="custom-chat-input-area">
+        <input 
+            type="text" 
+            id="custom-chat-input" 
+            class="custom-chat-input" 
+            placeholder="Type your message..."
+            aria-label="Type your message"
+        >
+        <button id="custom-chat-send" class="custom-chat-send-btn" aria-label="Send message">
+            <i class="fa fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Chat Toggle Button -->
+<button id="custom-chat-toggle" class="custom-chat-toggle" aria-label="Open chat">
+    <i class="fa fa-comments"></i>
+    <span class="custom-chat-badge" id="custom-chat-badge" style="display: none;">1</span>
+</button>
+
+<script>
+    class GeminiChat {
+        constructor() {
+            // Get API key from Django template context
+            this.apiKey = '{{ gemini_api_key }}';
+            // System prompt will be loaded from server
+            this.systemPrompt = '';
+            this.storeInfo = null;
+            this.conversationHistory = [];
+            this.isMinimized = false;
+            this.unreadCount = 0;
+            this.messagesLoaded = false;
+            this.firstMessageShown = false;
+            // Generate or get unique session ID
+            this.sessionId = this.getOrCreateSessionId();
+            this.isLoggedIn = '{{ user.is_authenticated }}' === 'True';
             
-            // Check for 3D model request
-            if (payload.type === '3d_model' || payload.action === 'show_3d') {
-                const productId = payload.product_id;
-                if (productId) {
-                    console.log('Loading 3D model for product:', productId);
-                    loadAndShow3DModel(productId);
+            // Build Computer State
+            this.buildInProgress = false;
+            this.selectedComponents = {}; // { category: { id, name, price, image, hasModel } }
+            this.componentOrder = ['monitor', 'mouse', 'keyboard', 'headset', 'case', 'storage', 'gpu', 'motherboard', 'ram', 'fan'];
+            this.currentComponentIndex = 0;
+            
+            this.loadStoreInfo(); // Load store info first
+            this.loadSystemPrompt(); // Load prompt from server on initialization
+            this.init();
+            this.loadChatHistory();
+            
+            // Restore build state if one was in progress
+            if (this.loadBuildState()) {
+                // Build was in progress, need to restore the UI
+                this.addMessage(`🔧 Restoring your build in progress...`, 'bot');
+                setTimeout(() => {
+                    this.displayComponentCategories();
+                }, 500);
+            }
+        }
+
+        getOrCreateSessionId() {
+            /**
+             * Generate unique session ID for this user
+             * Logged-in users use email, anonymous users use localStorage UUID
+             */
+            if ('{{ user.is_authenticated }}' === 'True') {
+                // For logged-in users, use email as session key
+                return 'user-{{ user.id }}-chat';
+            } else {
+                // For anonymous users, create/get a unique session ID
+                let sessionId = localStorage.getItem('gemini_session_id');
+                if (!sessionId) {
+                    sessionId = 'anon-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('gemini_session_id', sessionId);
+                }
+                return sessionId;
+            }
+        }
+
+        async loadStoreInfo() {
+            /**
+             * Load store information from database (categories, price range, etc)
+             * This ensures AI only knows about real products
+             */
+            try {
+                const response = await fetch('/api/store-info/');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        this.storeInfo = data;
+                        console.log('Store info loaded:', data);
+                    } else {
+                        console.warn('Store info error:', data.error);
+                    }
+                } else {
+                    const text = await response.text();
+                    console.warn('Failed to load store info:', response.status, text);
+                }
+            } catch (error) {
+                console.error('Error loading store info:', error);
+            }
+        }
+
+        async loadSystemPrompt() {
+            /**
+             * Load system prompt from Django backend
+             * This allows updating AI behavior without redeploying the frontend
+             */
+            try {
+                const response = await fetch('/api/gemini/system-prompt/');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.prompt) {
+                        this.systemPrompt = data.prompt;
+                        console.log('System prompt loaded from server');
+                    }
+                } else {
+                    console.warn('Failed to load system prompt from server, using fallback');
+                    this.useDefaultSystemPrompt();
+                }
+            } catch (error) {
+                console.error('Error loading system prompt:', error);
+                this.useDefaultSystemPrompt();
+            }
+        }
+
+        useDefaultSystemPrompt() {
+            /**
+             * Fallback system prompt if server endpoint fails
+             */
+            this.systemPrompt = `You are a friendly and helpful AI assistant for Koyanardzshop, a computer parts and electronics retail store located at 341 Molino Road, Bacoor, Cavite. Your name is "Koyanardz Assistant".
+
+CRITICAL: ONLY recommend products from these actual categories:
+- Laptops
+- Desktop Computers
+- Monitors
+- Motherboards
+- Processors (CPUs)
+- Graphics Cards (GPUs)
+- RAM Memory
+- Storage Drives (SSD/HDD)
+- Power Supplies
+- Computer Cases
+- Cooling Solutions
+- Keyboards
+- Mouse/Pointing Devices
+- Cables & Adapters
+- Accessories
+
+STORE INFO:
+- Hours: Monday-Saturday, 9 AM - 6 PM
+- Location: 341 Molino Road, Bacoor, Cavite
+- Walk-ins welcome!
+- NO online payments - all in-person
+- Trade-in services available
+- 1-month warranty on secondhand items
+- No delivery service
+
+SERVICES:
+- Browse and book viewing appointments (in-person preferred)
+- Trade-in evaluation (bring device + valid ID)
+- Device inspection before purchase
+- Custom builds and bundles
+- New and secondhand items
+- Repair assessment
+
+KEY POINTS:
+- All payments made IN PERSON with cash
+- Bring valid ID for trade-ins
+- Book appointments through account for faster service
+- Call Facebook page for urgent inquiries
+- Damaged devices accepted for evaluation
+- NEVER write code or Python in chat
+- ONLY recommend products from the categories listed above
+
+Always be warm, helpful, and encourage customers to visit in person. Support both English and Filipino responses.`;
+        }
+
+        init() {
+            this.setupEventListeners();
+        }
+
+        loadChatHistory() {
+            // Load previous conversation from database for all users (both logged-in and anonymous)
+            // Each user has their own separate conversation
+            try {
+                this.loadFromDatabase();
+            } catch (e) {
+                console.log('Could not load chat history:', e);
+                this.conversationHistory = [];
+            }
+        }
+
+        async loadFromDatabase() {
+            /**
+             * Load conversation from database for all users (logged-in and anonymous)
+             * Each user has their own separate conversation stored with their session_id
+             */
+            try {
+                const response = await fetch(`/api/chat/load/?session_id=${encodeURIComponent(this.sessionId)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.found) {
+                        this.conversationHistory = data.messages;
+                        console.log('Loaded chat history from database with', this.conversationHistory.length, 'messages');
+                    }
+                }
+            } catch (e) {
+                console.log('Could not load chat from database:', e);
+            }
+        }
+
+        saveChatHistory() {
+            // Save conversation to database for both logged-in and anonymous users
+            // Each user has their own separate conversation
+            try {
+                this.saveToDatabase();
+            } catch (e) {
+                console.log('Could not save chat history:', e);
+            }
+        }
+
+        async saveToDatabase() {
+            /**
+             * Save conversation to database for all users (logged-in and anonymous)
+             * Each user maintains their own separate conversation
+             */
+            try {
+                await fetch('/api/chat/save/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        session_id: this.sessionId,
+                        messages: this.conversationHistory
+                    })
+                });
+            } catch (e) {
+                console.log('Could not save chat to database:', e);
+            }
+        }
+
+        getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
             }
-            
-            // Check for product search results with 3D models
-            if (payload.type === 'product_search' && payload.products) {
-                console.log('Products with 3D models:', payload.products);
-                // Handle search results
+            return cookieValue;
+        }
+
+        showQuickActions() {
+            /**
+             * Show quick action buttons when conversation starts
+             */
+            const quickActionsContainer = document.getElementById('custom-chat-quick-actions');
+            if (quickActionsContainer) {
+                quickActionsContainer.style.display = 'block';
             }
         }
-    }, ['MESSAGE']);
+
+        hideQuickActions() {
+            /**
+             * Hide quick action buttons once user starts interacting
+             */
+            const quickActionsContainer = document.getElementById('custom-chat-quick-actions');
+            if (quickActionsContainer) {
+                quickActionsContainer.style.display = 'none';
+            }
+        }
+
+        setupEventListeners() {
+            const toggleBtn = document.getElementById('custom-chat-toggle');
+            const minimizeBtn = document.getElementById('custom-chat-minimize');
+            const closeBtn = document.getElementById('custom-chat-close');
+            const clearBtn = document.getElementById('custom-chat-clear');
+            const sendBtn = document.getElementById('custom-chat-send');
+            const input = document.getElementById('custom-chat-input');
+            const quickActionBtns = document.querySelectorAll('.custom-chat-quick-btn');
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => this.toggleChat());
+            }
+
+            if (minimizeBtn) {
+                minimizeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.minimizeChat();
+                });
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.closeChat();
+                });
+            }
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.clearChat();
+                });
+            }
+
+            if (sendBtn) {
+                sendBtn.addEventListener('click', () => this.sendMessage());
+            }
+
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+            }
+
+            // Setup quick action buttons
+            quickActionBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const message = btn.dataset.message;
+                    
+                    // Special handling for "Build Computer" button
+                    if (message === 'Help me build a computer') {
+                        document.getElementById('custom-chat-input').value = '';
+                        this.hideQuickActions();
+                        
+                        // Always start fresh build - don't auto-load old state
+                        this.buildInProgress = true;
+                        this.selectedComponents = {};
+                        this.currentComponentIndex = 0;
+                        
+                        // Add user message
+                        this.addMessage(message, 'user');
+                        this.conversationHistory.push({
+                            role: 'user',
+                            content: message,
+                            timestamp: new Date().getTime()
+                        });
+                        
+                        // Show the build computer intro
+                        setTimeout(() => {
+                            this.addMessage('👋 Hi! I\'m Koyanardz Assistant. I\'d love to help you build a computer! To give you the best recommendations, could you tell me a bit more about what you\'re looking for?\n\n• **What will be the primary use for your computer** (e.g., gaming, work, video editing, general use)?\n• **Do you have an approximate budget in mind?**\n• **Are you interested in new or secondhand parts**, or a mix of both?\n• **Do you need help with just the core computer components**, or a full setup including a monitor and peripherals?\n\nWe also offer custom PC builds and can help you inspect components before purchase. Let me know your preferences, and we can start looking at the right parts for you!', 'bot');
+                            
+                            // After intro, add the component categories
+                            setTimeout(() => {
+                                this.displayComponentCategories();
+                            }, 800);
+                        }, 300);
+                    } else {
+                        // Normal quick action handling
+                        document.getElementById('custom-chat-input').value = message;
+                        this.sendMessage();
+                    }
+                    this.hideQuickActions();
+                });
+            });
+        }
+
+        toggleChat() {
+            const widget = document.getElementById('custom-chat-widget');
+            const toggleBtn = document.getElementById('custom-chat-toggle');
+            
+            if (widget && toggleBtn) {
+                if (widget.classList.contains('hidden')) {
+                    widget.classList.remove('hidden');
+                    toggleBtn.classList.add('active');
+                    toggleBtn.style.display = 'none';
+                    this.unreadCount = 0;
+                    this.updateBadge();
+                    
+                    // Load previous chat messages only if this is the first time opening
+                    if (!this.messagesLoaded) {
+                        const savedMessages = this.loadMessagesFromStorage();
+                        this.messagesLoaded = true;
+                        
+                        // Show AI introduction ONLY if no saved messages exist
+                        if (savedMessages === 0 && !this.firstMessageShown) {
+                            setTimeout(() => {
+                                this.addMessage('👋 Hello! Welcome to **Koyanardzshop**! I\'m your Koyanardz Assistant, here to help you find the perfect computer parts and electronics. Whether you\'re looking for a gaming setup, need device trade-ins, or want to learn about our products, I\'m here to assist! How can I help you today?', 'bot');
+                                this.firstMessageShown = true;
+                                // Show quick action buttons when starting a new conversation
+                                this.showQuickActions();
+                            }, 300);
+                        } else if (savedMessages > 0) {
+                            // Hide quick actions if there are already messages
+                            this.hideQuickActions();
+                        }
+                    }
+                    
+                    document.getElementById('custom-chat-input')?.focus();
+                } else {
+                    widget.classList.add('hidden');
+                    toggleBtn.classList.remove('active');
+                    toggleBtn.style.display = 'flex';
+                }
+            }
+        }
+
+        closeChat() {
+            const widget = document.getElementById('custom-chat-widget');
+            const toggleBtn = document.getElementById('custom-chat-toggle');
+            
+            if (widget && toggleBtn) {
+                widget.classList.add('hidden');
+                toggleBtn.classList.remove('active');
+                toggleBtn.style.display = 'flex';
+            }
+        }
+
+        clearChat() {
+            // Clear all messages from the chat and delete from database/localStorage
+            const messagesContainer = document.getElementById('custom-chat-messages');
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '';
+            }
+            // Reset conversation state
+            this.conversationHistory = [];
+            this.messagesLoaded = false;
+            
+            // IMPORTANT: Clear build state from sessionStorage
+            sessionStorage.removeItem('currentBuildState');
+            this.selectedComponents = {};
+            this.currentComponentIndex = 0;
+            this.buildInProgress = false;
+
+            // FULLY Clear all localStorage entries for this chat
+            const keysToRemove = [
+                'gemini_chat_history_' + this.sessionId,
+                'gemini_chat_messages',
+                'gemini_chat_history',
+                'currentBuildState'
+            ];
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+            });
+
+            // Delete from database or localStorage based on user status
+            if (this.isLoggedIn) {
+                // Delete from database for logged-in users
+                this.deleteFromDatabase();
+            }
+
+            // Add welcome message
+            this.addMessage('👋 Hello! Welcome to **Koyanardzshop**! I\'m your Koyanardz Assistant, here to help you find the perfect computer parts and electronics. Whether you\'re looking for a gaming setup, need device trade-ins, or want to learn about our products, I\'m here to assist! How can I help you today?', 'bot');
+            
+            // Show quick action buttons again after clearing
+            this.showQuickActions();
+
+            console.log('Chat history cleared');
+        }
+
+        async deleteFromDatabase() {
+            /**
+             * Delete conversation from database for logged-in users
+             */
+            try {
+                const response = await fetch('/api/chat/delete/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        session_id: this.sessionId
+                    })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Conversation deleted from database:', data.message);
+                }
+            } catch (e) {
+                console.log('Could not delete chat from database:', e);
+            }
+        }
+
+        minimizeChat() {
+            const widget = document.getElementById('custom-chat-widget');
+            if (widget) {
+                widget.classList.toggle('minimized');
+                this.isMinimized = !this.isMinimized;
+            }
+        }
+
+        async sendMessage() {
+            const input = document.getElementById('custom-chat-input');
+            
+            if (!input || !input.value.trim()) return;
+
+            const userMessage = input.value.trim();
+            const messageLower = userMessage.toLowerCase();
+            
+            // Hide quick actions when user sends a message
+            this.hideQuickActions();
+
+            // Check if user wants to build a PC BEFORE sending to AI (natural language detection)
+            // Detects: "build pc", "build computer", "help build", "custom pc build", etc.
+            const buildTriggers = [
+                /build.*pc/i,
+                /build.*computer/i,
+                /help.*build/i,
+                /custom.*pc/i,
+                /custom.*build/i,
+                /want.*build/i,
+                /create.*pc/i,
+                /assemble.*pc/i
+            ];
+            
+            const shouldTriggerBuild = buildTriggers.some(regex => regex.test(messageLower)) && !this.buildInProgress;
+            
+            if (shouldTriggerBuild) {
+                // Display user message
+                this.addMessage(userMessage, 'user');
+                this.conversationHistory.push({
+                    role: 'user',
+                    content: userMessage,
+                    timestamp: new Date().getTime()
+                });
+                input.value = '';
+                
+                // Trigger build computer mode immediately
+                this.buildInProgress = true;
+                this.selectedComponents = {};
+                this.currentComponentIndex = 0;
+                
+                // Show the build computer intro
+                setTimeout(() => {
+                    this.addMessage('👋 Perfect! I\'d love to help you build a computer! Let me ask you a few questions first:\n\n• **What will be the primary use** (gaming, work, video editing, general use)?\n• **Do you have an approximate budget?**\n• **New or secondhand parts**, or a mix?\n• **Full setup** (monitor + peripherals) or just core components?\n\nWe offer custom PC builds and component inspection. Let me know, and we\'ll find the perfect parts for you!', 'bot');
+                    
+                    // After intro, start component selection
+                    setTimeout(() => {
+                        this.displayComponentCategories();
+                    }, 800);
+                }, 300);
+                
+                return;
+            }
+            
+            // Display user message
+            this.addMessage(userMessage, 'user');
+            this.conversationHistory.push({
+                role: 'user',
+                content: userMessage,
+                timestamp: new Date().getTime()
+            });
+            input.value = '';
+
+            // Show typing indicator
+            this.showTypingIndicator();
+
+            // Send to Gemini API
+            try {
+                // Use models with billing enabled (1000 req/min, pay per token)
+                // gemini-2.5-flash: better quality responses (primary)
+                // gemini-2.0-flash: fast fallback
+                const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+                let response = null;
+                
+                for (const modelName of models) {
+                    try {
+                        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.apiKey}`;
+                        
+                        console.log(`Trying ${modelName}...`);
+                        
+                        response = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                systemInstruction: {
+                                    parts: [{ text: this.systemPrompt }]
+                                },
+                                contents: this.conversationHistory.map(msg => ({
+                                    role: msg.role === 'user' ? 'user' : 'model',
+                                    parts: [{ text: msg.content }]
+                                })),
+                                tools: [
+                                    {
+                                        googleSearch: {}
+                                    }
+                                ]
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            console.log(`✅ Success with ${modelName}`);
+                            break;
+                        } else {
+                            console.log(`${modelName} failed with status ${response.status}`);
+                        }
+                    } catch (e) {
+                        console.error(`Error trying ${modelName}:`, e);
+                    }
+                }
+
+                this.hideTypingIndicator();
+
+                if (!response || !response.ok) {
+                    try {
+                        const errorData = await (response?.json?.() || Promise.resolve({}));
+                        console.error('Gemini API error:', errorData);
+                        this.addMessage('⚠️ AI service unavailable. Please try again in a moment.', 'bot');
+                    } catch (e) {
+                        this.addMessage('Unable to connect to AI service.', 'bot');
+                    }
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('Gemini response:', data);
+
+                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
+                    const botResponse = data.candidates[0].content.parts[0].text;
+                    
+                    // Check if response contains product carousel trigger
+                    if (botResponse.includes('@SHOW_PRODUCTS_FOR:')) {
+                        // Extract product search parameters
+                        const match = botResponse.match(/@SHOW_PRODUCTS_FOR:([^\n]+)/);
+                        if (match) {
+                            const searchParams = match[1].trim();
+                            
+                            // Extract text before the trigger
+                            const textBefore = botResponse.split('@SHOW_PRODUCTS_FOR:')[0].trim();
+                            
+                            // Display text response if any
+                            if (textBefore) {
+                                this.addMessage(textBefore, 'bot');
+                            }
+                            
+                            // Parse search parameters
+                            const params = new URLSearchParams();
+                            const parts = searchParams.split(',');
+                            
+                            // First part is the query
+                            params.append('query', parts[0].trim());
+                            
+                            // Additional parameters like max_price:50000
+                            for (let i = 1; i < parts.length; i++) {
+                                const param = parts[i].split(':');
+                                if (param.length === 2) {
+                                    params.append(param[0].trim(), param[1].trim());
+                                }
+                            }
+                            
+                            // Fetch and display products
+                            this.searchAndDisplayProducts(params.toString());
+                        }
+                    } else {
+                        // Regular text response - display as is
+                        this.addMessage(botResponse, 'bot');
+                    }
+                    
+                    this.conversationHistory.push({
+                        role: 'assistant',
+                        content: botResponse,
+                        timestamp: new Date().getTime()
+                    });
+                    
+                    // Save conversation
+                    this.saveChatHistory();
+                } else {
+                    console.error('Unexpected response format:', data);
+                    this.addMessage('Unexpected response. Please try again.', 'bot');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.hideTypingIndicator();
+                this.addMessage('Connection error. Please check your internet.', 'bot');
+            }
+        }
+
+        displayComponentCategories() {
+            /**
+             * Display the NEXT component category button for Build Computer feature
+             * Only show one component at a time in sequence
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            // Get the current component in the order
+            if (this.currentComponentIndex >= this.componentOrder.length) {
+                // All components done
+                setTimeout(() => {
+                    this.showBuildSummary();
+                }, 500);
+                return;
+            }
+
+            const currentComponentId = this.componentOrder[this.currentComponentIndex];
+            
+            const categories = [
+                { id: 'monitor', name: '🖥️ Monitor', label: 'Monitor' },
+                { id: 'mouse', name: '🖱️ Mouse', label: 'Mouse' },
+                { id: 'keyboard', name: '⌨️ Keyboard', label: 'Keyboard' },
+                { id: 'headset', name: '🎧 Headset', label: 'Headset' },
+                { id: 'case', name: '📦 PC Case', label: 'Case' },
+                { id: 'storage', name: '💾 Storage', label: 'Storage' },
+                { id: 'gpu', name: '🎮 Graphics Card (GPU)', label: 'Graphics Card' },
+                { id: 'motherboard', name: '🔌 Motherboard', label: 'Motherboard' },
+                { id: 'ram', name: '⚡ RAM', label: 'RAM' },
+                { id: 'fan', name: '❄️ Cooling Fan', label: 'Cooling Fan' }
+            ];
+
+            // Find the current category
+            const currentCategory = categories.find(cat => cat.id === currentComponentId);
+            if (!currentCategory) return;
+
+            // Check if already selected (skip if yes)
+            if (this.selectedComponents[currentComponentId]) {
+                // Already selected, move to next
+                this.currentComponentIndex++;
+                this.displayComponentCategories();
+                return;
+            }
+
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'custom-chat-message bot-message';
+            categoryDiv.innerHTML = `
+                <div class="custom-chat-bubble" style="max-width: 100%; padding: 16px;">
+                    <p style="margin: 0 0 12px 0; font-weight: 600; color: #333;">Which ${currentCategory.label} would you like?</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="skip-component-btn" data-category="${currentComponentId}" data-label="${currentCategory.label}" style="padding: 10px 12px; background: #e8f0ff; border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: #667eea; transition: all 0.3s;">
+                            ⏭️ Skip ${currentCategory.label}
+                        </button>
+                        <button class="browse-component-btn" data-category="${currentComponentId}" data-label="${currentCategory.label}" style="padding: 10px 12px; background: #667eea; border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: white; transition: all 0.3s;">
+                            🔍 Browse ${currentCategory.label}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(categoryDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Add event listeners
+            categoryDiv.querySelectorAll('.browse-component-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const category = btn.dataset.category;
+                    const label = btn.dataset.label;
+                    this.handleCategorySelection(category, label);
+                });
+            });
+
+            categoryDiv.querySelectorAll('.skip-component-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.addMessage(`Skipping ${btn.dataset.label}`, 'user');
+                    this.currentComponentIndex++;
+                    this.saveBuildState();
+                    setTimeout(() => {
+                        this.displayComponentCategories();
+                    }, 500);
+                });
+            });
+        }
+
+        async handleCategorySelection(category, label) {
+            /**
+             * Handle when user selects a component category
+             * Only search by component_type category, not by description
+             */
+            // Add user selection message
+            this.addMessage(`Show me ${label}${label.endsWith('s') || label === 'RAM' ? '' : 's'}`, 'user');
+            
+            // Show loading indicator
+            this.showTypingIndicator();
+
+            try {
+                // Map labels to search terms that work with backend
+                const searchTerms = {
+                    'Monitor': 'monitor',
+                    'Mouse': 'mouse',
+                    'Keyboard': 'keyboard',
+                    'Headset': 'headset',
+                    'Case': 'case',
+                    'Storage': 'storage',
+                    'Graphics Card': 'gpu',
+                    'Motherboard': 'motherboard',
+                    'RAM': 'ram',
+                    'Cooling Fan': 'cooling'
+                };
+                
+                const searchTerm = searchTerms[label] || label;
+                
+                // Search for products in this category - use ONLY category filter, no description search
+                const url = `/api/products/recommend/?category=${encodeURIComponent(searchTerm)}&max_results=12`;
+                const response = await fetch(url);
+
+                this.hideTypingIndicator();
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.products && data.products.length > 0) {
+                        // Display products with 3D model preview
+                        this.displayProductsWithModels(data.products, label, category);
+                        
+                        // Add followup question only if NOT in build mode
+                        if (!this.buildInProgress) {
+                            setTimeout(() => {
+                                this.addMessage(`Great! Here are the ${label}s we have available. Click on any product to see details or view 3D models if available. Would you like to see another component?`, 'bot');
+                            }, 500);
+                        }
+                    } else {
+                        this.addMessage(`Sorry, we don't have ${label}s available right now. Let's move to the next component.`, 'bot');
+                        // Auto move to next if no products found
+                        setTimeout(() => {
+                            this.moveToNextComponent();
+                        }, 1500);
+                    }
+                } else {
+                    this.addMessage(`Sorry, we couldn't load ${label}s right now. Let's move to the next component.`, 'bot');
+                    setTimeout(() => {
+                        this.moveToNextComponent();
+                    }, 1500);
+                }
+            } catch (error) {
+                this.hideTypingIndicator();
+                console.error('Error fetching products:', error);
+                this.addMessage('Error loading products. Please try again.', 'bot');
+            }
+        }
+
+        displayProductsWithModels(products, categoryLabel, categoryId) {
+            /**
+             * Display products in a grid with 3D model previews
+             * If in build mode, add "Select" buttons instead of "Details"
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container || !products) return;
+
+            const productsDiv = document.createElement('div');
+            productsDiv.className = 'custom-chat-message bot-message';
+            const productsHtml = `
+                <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%;">
+                    <p class="carousel-title">${categoryLabel} - Available Options</p>
+                    <div class="product-carousel" style="display: flex; gap: 12px; overflow-x: auto; padding: 8px 0;">
+                        ${products.map(product => `
+                            <div class="product-card-build" data-product-id="${product.id}" style="cursor: pointer; flex: 0 0 160px; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div class="product-image" style="width: 100%; height: 120px; background: #f0f0f0; overflow: hidden;">
+                                    <img src="${product.image_url || '/static/images/placeholder.png'}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div class="product-info" style="padding: 8px;">
+                                    <h4 class="product-name" style="margin: 0 0 2px 0; font-size: 12px; font-weight: 600; color: #333; line-height: 1.2;">${product.name.substring(0, 35)}</h4>
+                                    <p class="product-price" style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #667eea;">₱${parseFloat(product.price).toLocaleString('en-PH')}</p>
+                                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        ${this.buildInProgress ? 
+                                            `<button class="product-select-btn" data-product-id="${product.id}" data-category="${categoryId}" style="flex: 1; padding: 4px 6px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 600;">Select</button>` :
+                                            `<button class="product-details-btn" data-product-id="${product.id}" style="flex: 1; padding: 4px 6px; background: #667eea; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">Details</button>`
+                                        }
+                                        ${product.model_3d ? `<button class="product-3d-ask-btn" data-product-id="${product.id}" data-product-name="${product.name}" data-model-url="${product.model_3d}" style="flex: 1; padding: 4px 6px; background: #764ba2; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">3D?</button>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            productsDiv.innerHTML = productsHtml;
+
+            container.appendChild(productsDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Save carousel HTML to localStorage for persistence
+            this.saveChatMessage(productsHtml, 'bot', true);
+
+            // Add event listeners for component selection
+            if (this.buildInProgress) {
+                productsDiv.querySelectorAll('.product-select-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const productId = btn.dataset.productId;
+                        const category = btn.dataset.category;
+                        const product = products.find(p => p.id == productId);
+                        if (product) {
+                            this.selectComponent(category, product);
+                        }
+                    });
+                });
+            } else {
+                productsDiv.querySelectorAll('.product-details-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const productId = btn.dataset.productId;
+                        const product = products.find(p => p.id == productId);
+                        if (product) {
+                            this.addMessage(`📦 ${product.name} - ₱${parseFloat(product.price).toLocaleString('en-PH')}\n\nWould you like to add this to your cart?`, 'bot');
+                        }
+                    });
+                });
+            }
+
+            // 3D Model Ask buttons (only show if available, ask first)
+            productsDiv.querySelectorAll('.product-3d-ask-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const productId = btn.dataset.productId;
+                    const productName = btn.dataset.productName;
+                    const modelUrl = btn.dataset.modelUrl;
+                    const product = products.find(p => p.id == productId);
+                    
+                    if (product) {
+                        this.askForModel3DView(product, modelUrl);
+                    }
+                });
+            });
+        }
+
+        askForModel3DView(product, modelUrl) {
+            /**
+             * Show the 3D model for viewing ONLY
+             * Does NOT advance to next component
+             * User must explicitly Select or Skip component to proceed
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const askDiv = document.createElement('div');
+            askDiv.className = 'custom-chat-message bot-message';
+            askDiv.innerHTML = `
+                <div class="custom-chat-bubble" style="max-width: 100%; padding: 10px;">
+                    <p style="margin: 0 0 10px 0; font-size: 13px; color: #333;">Viewing 3D model of <strong>${product.name}</strong></p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="close-3d-btn" style="flex: 1; padding: 6px 10px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Close 3D View</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(askDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Show the 3D model
+            this.show3DModelInChat(modelUrl, product.name);
+
+            // Close button - just remove the 3D view, don't proceed
+            askDiv.querySelector('.close-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                askDiv.remove();
+                // User must go back and select or skip the component
+                // Don't proceed to next component
+            });
+        }
+
+        selectComponent(category, product) {
+            /**
+             * User selects a component during build
+             * Remember the selection and move to next component
+             */
+            this.selectedComponents[category] = {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image_url: product.image_url,
+                model_3d: product.model_3d
+            };
+            this.saveBuildState();
+
+            // Confirm selection
+            this.addMessage(`✅ Selected: ${product.name}\n💰 Price: ₱${parseFloat(product.price).toLocaleString('en-PH')}`, 'bot');
+
+            // Move to next component
+            setTimeout(() => {
+                this.moveToNextComponent();
+            }, 500);
+        }
+
+        moveToNextComponent() {
+            /**
+             * Move to the next component in the build process
+             * Skip components that are already selected
+             */
+            this.currentComponentIndex++;
+            this.saveBuildState();
+
+            // Show next component or finish
+            setTimeout(() => {
+                this.displayComponentCategories();
+            }, 500);
+        }
+
+        showComponentOptions(categoryId, categoryName) {
+            /**
+             * Show options to browse components or skip
+             */
+            const categoryNames = {
+                'monitor': 'Monitor',
+                'mouse': 'Mouse',
+                'keyboard': 'Keyboard',
+                'headset': 'Headset',
+                'case': 'PC Case',
+                'storage': 'Storage',
+                'gpu': 'Graphics Card',
+                'motherboard': 'Motherboard',
+                'ram': 'RAM',
+                'fan': 'Cooling Fan'
+            };
+
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'custom-chat-message bot-message';
+            optionsDiv.innerHTML = `
+                <div class="custom-chat-bubble" style="max-width: 100%; padding: 10px;">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="browse-component-btn" data-category="${categoryId}" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Browse ${categoryName}</button>
+                        <button class="skip-component-btn" style="flex: 1; padding: 8px 12px; background: #999; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Skip This</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(optionsDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Browse button
+            optionsDiv.querySelector('.browse-component-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const category = e.target.dataset.category;
+                const categoryNameForSearch = categoryNames[category];
+                optionsDiv.remove();
+                
+                // Fetch and display products
+                this.showTypingIndicator();
+                const url = `/api/products/recommend/?query=${encodeURIComponent(categoryNameForSearch)}&max_results=8`;
+                
+                try {
+                    const response = await fetch(url);
+                    this.hideTypingIndicator();
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.products && data.products.length > 0) {
+                            this.displayProductsWithModels(data.products, categoryNameForSearch, category);
+                        } else {
+                            this.addMessage(`Sorry, we don't have ${categoryNameForSearch}s available right now. Let's move to the next component.`, 'bot');
+                            setTimeout(() => this.moveToNextComponent(), 800);
+                        }
+                    }
+                } catch (error) {
+                    this.hideTypingIndicator();
+                    console.error('Error fetching products:', error);
+                }
+            });
+
+            // Skip button
+            optionsDiv.querySelector('.skip-component-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                optionsDiv.remove();
+                this.addMessage(`⏭️ Skipping this component. Moving on...`, 'bot');
+                setTimeout(() => this.moveToNextComponent(), 500);
+            });
+        }
+
+        showBuildSummary() {
+            /**
+             * Show summary of all selected components in a carousel
+             * Offer option to view 3D canvas
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            // Check if any components were selected
+            const selectedCount = Object.keys(this.selectedComponents).length;
+            if (selectedCount === 0) {
+                this.addMessage('You didn\'t select any components. Let\'s start fresh!', 'bot');
+                this.resetBuild();
+                return;
+            }
+
+            // Create summary message
+            this.addMessage('🎉 **Your Custom Build Summary**', 'bot');
+
+            // Show components in carousel
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'custom-chat-message bot-message';
+            summaryDiv.innerHTML = `
+                <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%;">
+                    <p class="carousel-title">Selected Components (${selectedCount} items)</p>
+                    <div class="product-carousel" style="display: flex; gap: 12px; overflow-x: auto; padding: 8px 0;">
+                        ${Object.values(this.selectedComponents).map(product => `
+                            <div class="product-card-build" style="cursor: default; flex: 0 0 160px; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div class="product-image" style="width: 100%; height: 120px; background: #f0f0f0; overflow: hidden;">
+                                    <img src="${product.image_url || '/static/images/placeholder.png'}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                                <div class="product-info" style="padding: 8px;">
+                                    <h4 class="product-name" style="margin: 0 0 2px 0; font-size: 12px; font-weight: 600; color: #333; line-height: 1.2;">${product.name.substring(0, 35)}</h4>
+                                    <p class="product-price" style="margin: 0; font-size: 13px; font-weight: 700; color: #667eea;">₱${parseFloat(product.price).toLocaleString('en-PH')}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(summaryDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Calculate total price
+            const totalPrice = Object.values(this.selectedComponents).reduce((sum, p) => sum + parseFloat(p.price), 0);
+            this.addMessage(`📊 **Build Total:** ₱${totalPrice.toLocaleString('en-PH')}`, 'bot');
+
+            // Check for 3D models
+            const has3DModels = Object.values(this.selectedComponents).some(p => p.model_3d);
+            
+            if (has3DModels) {
+                setTimeout(() => {
+                    this.showMultiModel3DOption();
+                }, 800);
+            } else {
+                setTimeout(() => {
+                    this.showBuildFinishOptions();
+                }, 800);
+            }
+        }
+
+        showMultiModel3DOption() {
+            /**
+             * Ask if user wants to view all 3D models together
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'custom-chat-message bot-message';
+            optionDiv.innerHTML = `
+                <div class="custom-chat-bubble" style="max-width: 100%; padding: 12px;">
+                    <p style="margin: 0 0 12px 0; font-size: 13px; color: #333;">💡 Would you like to view all your selected components in one 3D canvas?</p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="view-multi-3d-btn" style="flex: 1; padding: 8px 12px; background: #764ba2; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">View 3D Canvas</button>
+                        <button class="skip-multi-3d-btn" style="flex: 1; padding: 8px 12px; background: #999; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">No, Continue</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(optionDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // View 3D Canvas
+            optionDiv.querySelector('.view-multi-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                optionDiv.remove();
+                this.show3DMultiModelCanvas();
+            });
+
+            // Skip
+            optionDiv.querySelector('.skip-multi-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                optionDiv.remove();
+                this.showBuildFinishOptions();
+            });
+        }
+
+        show3DMultiModelCanvas() {
+            /**
+             * Display all selected 3D models in a single canvas
+             * Models are positioned and spaced to avoid overlap
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const modelDiv = document.createElement('div');
+            modelDiv.className = 'custom-chat-message bot-message';
+            // Use unique ID with random suffix to ensure no collisions
+            const viewerId = `multi-3d-viewer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const multiModelHtml = `
+                <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
+                    <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">Your Build - 3D View</p>
+                    <div id="${viewerId}" style="width: 100%; height: 350px; background: #1a1a1a; border-radius: 6px; position: relative; margin-bottom: 8px; pointer-events: auto; touch-action: none;"></div>
+                    <p style="margin: 0 0 8px 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
+                        🖱️ Click & drag to move | Shift + drag to rotate | Scroll to zoom | Right-click & drag to pan
+                    </p>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button class="fullscreen-multi-3d-btn" style="flex: 1; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">⛶ Full Screen</button>
+                        <button class="continue-after-3d-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Continue with Build</button>
+                    </div>
+                </div>
+            `;
+            modelDiv.innerHTML = multiModelHtml;
+
+            container.appendChild(modelDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Save multi-model viewer to localStorage
+            this.saveChatMessage(
+                `Your Build - Multi 3D View`,
+                'bot',
+                false,
+                {
+                    type: 'multi-3d-model',
+                    selectedComponents: JSON.stringify(this.selectedComponents)
+                }
+            );
+
+            // Load multi-model viewer after ensuring THREE extensions are available
+            this.waitForThreeExtensions().then(() => {
+                this.loadMultiModel3DViewer(viewerId);
+            });
+
+            // Add fullscreen button listener
+            modelDiv.querySelector('.fullscreen-multi-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openFullscreenMultiModel3D();
+            });
+
+            // Add continue button listener
+            modelDiv.querySelector('.continue-after-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.addMessage('Ready to finalize your build?', 'user');
+                setTimeout(() => {
+                    this.showBuildFinishOptions();
+                }, 500);
+            });
+
+        }
+
+        loadMultiModel3DViewer(viewerId) {
+            /**
+             * Load and display all selected 3D models in one canvas
+             * PER-MODEL INTERACTION: Each model rotates individually when dragged
+             * Uses raycasting to detect which model is being interacted with
+             */
+            
+            // Prevent multiple 3D viewers from loading simultaneously
+            const container = document.getElementById(viewerId);
+            if (!container || container.dataset.viewerLoading === 'true') {
+                console.log('3D viewer already loading or container not found');
+                return;
+            }
+            
+            // Mark this viewer as loading
+            container.dataset.viewerLoading = 'true';
+
+            // Get products with 3D models
+            const modelsToLoad = Object.entries(this.selectedComponents)
+                .filter(([_, product]) => product.model_3d)
+                .map(([category, product]) => ({ 
+                    category, 
+                    ...product,
+                    model_3d: product.model_3d.startsWith('http') ? product.model_3d : window.location.origin + product.model_3d
+                }));
+
+            if (modelsToLoad.length === 0) {
+                container.innerHTML = '<p style="color: #999; padding: 20px; text-align: center; font-size: 12px;">No 3D models available</p>';
+                return;
+            }
+
+            if (typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined') {
+                container.innerHTML = '<p style="color: red; padding: 20px; text-align: center; font-size: 12px;">3D viewer not available</p>';
+                return;
+            }
+
+            try {
+                container.innerHTML = '';
+                const canvas = document.createElement('canvas');
+                
+                // Check if this is fullscreen mode
+                const isFullscreen = container.id.includes('fullscreen');
+                
+                // Lower resolution for better performance - cap at 1280x720 for chat, full size for fullscreen
+                let canvas_width, canvas_height;
+                if (isFullscreen) {
+                    // Use full window dimensions for fullscreen
+                    canvas_width = window.innerWidth;
+                    canvas_height = window.innerHeight - 80; // Leave room for header/footer
+                } else {
+                    // Cap at 1280x720 for chat view
+                    const maxWidth = 1280;
+                    const maxHeight = 720;
+                    canvas_width = Math.min(container.clientWidth, maxWidth);
+                    canvas_height = Math.min(container.clientHeight, maxHeight);
+                }
+                
+                canvas.width = canvas_width;
+                canvas.height = canvas_height;
+                canvas.style.pointerEvents = 'auto';
+                canvas.style.touchAction = 'none';
+                canvas.style.display = 'block';
+                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                container.appendChild(canvas);
+
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x1a1a1a);
+
+                const camera = new THREE.PerspectiveCamera(
+                    65, 
+                    canvas.width / canvas.height, 
+                    0.1, 
+                    1000
+                );
+                camera.position.set(0, 0, 15);
+
+                const renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    antialias: false, 
+                    alpha: false,
+                    powerPreference: 'high-performance',
+                    precision: 'lowp'
+                });
+                renderer.setSize(canvas.width, canvas.height);
+                renderer.setClearColor(0x1a1a1a);
+                renderer.setPixelRatio(1); // Fixed pixel ratio for better performance
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+                directionalLight.position.set(10, 15, 10);
+                scene.add(directionalLight);
+
+                const loader = new THREE.GLTFLoader();
+                const models = [];
+                const modelRotations = []; // Track rotation for each model
+                let modelIndex = 0;
+                let animationFrameId = null;
+                let isAnimating = false;
+                
+                // Per-model interaction state
+                let selectedModel = null;
+                let isDragging = false;
+                let isRotating = false;
+                let isPanning = false;
+                let previousMousePosition = { x: 0, y: 0 };
+                let dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+                let dragPoint = new THREE.Vector3();
+                let initialDragPoint = new THREE.Vector3();
+                let initialModelPosition = new THREE.Vector3();
+                let panOffset = new THREE.Vector3(0, 0, 0);
+                
+                // Raycaster for detecting which model is clicked
+                const raycaster = new THREE.Raycaster();
+                const mouse = new THREE.Vector2();
+                
+                // Performance optimization: throttle mousemove
+                let lastMouseMoveTime = 0;
+                const mouseMoveThrottle = 16; // ~60fps
+
+                // Animation loop
+                const animate = () => {
+                    // Check if container still exists
+                    if (!document.contains(container)) {
+                        isAnimating = false;
+                        renderer.dispose();
+                        if (container._cleanup) container._cleanup();
+                        return;
+                    }
+                    
+                    animationFrameId = requestAnimationFrame(animate);
+                    renderer.render(scene, camera);
+                };
+                
+                // Start animation only once
+                if (!isAnimating) {
+                    isAnimating = true;
+                    animate();
+                }
+
+                // Mouse down - detect which model is clicked
+                const onMouseDown = (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    
+                    // Calculate mouse position in normalized device coordinates
+                    const rect = canvas.getBoundingClientRect();
+                    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                    
+                    previousMousePosition = { x: event.clientX, y: event.clientY };
+                    
+                    // Left-click (button 0) = rotate model
+                    if (event.button === 0) {
+                        // Update raycaster
+                        raycaster.setFromCamera(mouse, camera);
+                        
+                        // Check which models are intersected
+                        const intersects = raycaster.intersectObjects(models, true);
+                        
+                        if (intersects.length > 0) {
+                            // Find which model was hit
+                            for (let model of models) {
+                                const isIntersected = intersects.some(intersection => {
+                                    let obj = intersection.object;
+                                    while (obj) {
+                                        if (obj === model) return true;
+                                        obj = obj.parent;
+                                    }
+                                    return false;
+                                });
+                                
+                                if (isIntersected) {
+                                    selectedModel = model;
+                                    isRotating = true;
+                                    isDragging = false;
+                                    break;
+                                }
+                            }
+                        }
+                        return;
+                    }
+                    
+                    // Right-click (button 2) = drag individual model
+                    if (event.button === 2) {
+                        // Update raycaster
+                        raycaster.setFromCamera(mouse, camera);
+                        
+                        // Check which models are intersected
+                        const intersects = raycaster.intersectObjects(models, true);
+                        
+                        if (intersects.length > 0) {
+                            // Find which model was hit
+                            for (let model of models) {
+                                const isIntersected = intersects.some(intersection => {
+                                    let obj = intersection.object;
+                                    while (obj) {
+                                        if (obj === model) return true;
+                                        obj = obj.parent;
+                                    }
+                                    return false;
+                                });
+                                
+                                if (isIntersected) {
+                                    selectedModel = model;
+                                    isDragging = true;
+                                    isRotating = false;
+                                    
+                                    // Set up drag plane perpendicular to camera view at model's depth
+                                    // Use Z-axis as normal so movement is on XY plane
+                                    dragPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -model.position.z);
+                                    
+                                    // Get initial drag point on the plane
+                                    raycaster.setFromCamera(mouse, camera);
+                                    initialDragPoint = new THREE.Vector3();
+                                    raycaster.ray.intersectPlane(dragPlane, initialDragPoint);
+                                    initialModelPosition = model.position.clone();
+                                    break;
+                                }
+                            }
+                        }
+                        return;
+                    }
+                };
+
+                // Mouse move - handle dragging (pan or model manipulation)
+                const onMouseMove = (event) => {
+                    // Throttle mousemove for performance
+                    const now = Date.now();
+                    if (now - lastMouseMoveTime < mouseMoveThrottle) {
+                        previousMousePosition = { x: event.clientX, y: event.clientY };
+                        return;
+                    }
+                    lastMouseMoveTime = now;
+                    
+                    event.stopPropagation();
+                    event.preventDefault();
+                    
+                    const deltaX = event.clientX - previousMousePosition.x;
+                    const deltaY = event.clientY - previousMousePosition.y;
+                    
+                    // Handle model rotation (left-click drag)
+                    if (isRotating && selectedModel) {
+                        selectedModel.rotation.y += deltaX * 0.01;
+                        selectedModel.rotation.x += deltaY * 0.01;
+                    }
+                    // Handle model dragging (right-click drag)
+                    else if (isDragging && selectedModel && dragPlane && initialDragPoint) {
+                        // Calculate mouse position in normalized device coordinates
+                        const rect = canvas.getBoundingClientRect();
+                        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                        
+                        // Raycast to drag plane to get world position
+                        raycaster.setFromCamera(mouse, camera);
+                        const currentDragPoint = new THREE.Vector3();
+                        
+                        // Raycast to get world position on the drag plane
+                        const result = raycaster.ray.intersectPlane(dragPlane, currentDragPoint);
+                        
+                        if (result) {
+                            // Calculate delta from initial drag point
+                            const delta = result.clone().sub(initialDragPoint);
+                            selectedModel.position.copy(initialModelPosition).add(delta);
+                        }
+                    }
+                    
+                    previousMousePosition = { x: event.clientX, y: event.clientY };
+                };
+
+                // Mouse up - stop dragging
+                const onMouseUp = (event) => {
+                    event.stopPropagation();
+                    isDragging = false;
+                    isRotating = false;
+                    selectedModel = null;
+                    dragPlane = null;
+                    dragPoint = null;
+                    initialDragPoint = null;
+                    initialModelPosition = null;
+                };
+
+                // Wheel - zoom selected model or all if none selected
+                const onWheel = (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    
+                    const rect = canvas.getBoundingClientRect();
+                    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                    
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(models, true);
+                    
+                    const zoomAmount = event.deltaY > 0 ? 0.95 : 1.05;
+                    
+                    if (intersects.length > 0) {
+                        // Find which model was hit - optimized search
+                        const hitObject = intersects[0].object;
+                        for (let model of models) {
+                            // Check if hitObject is part of this model
+                            if (model.uuid === hitObject.uuid || model.children.includes(hitObject) || hitObject.parent === model) {
+                                model.scale.multiplyScalar(zoomAmount);
+                                break;
+                            }
+                        }
+                    }
+                };
+
+                // Attach event listeners
+                canvas.addEventListener('mousedown', onMouseDown);
+                canvas.addEventListener('mousemove', onMouseMove);
+                canvas.addEventListener('mouseup', onMouseUp);
+                canvas.addEventListener('wheel', onWheel, { passive: false });
+
+                // Load models sequentially
+                const loadNextModel = () => {
+                    if (modelIndex >= modelsToLoad.length) {
+                        if (models.length === 0) {
+                            container.innerHTML = '<p style="color: red; padding: 20px; text-align: center; font-size: 12px;">Unable to load models</p>';
+                        }
+                        return;
+                    }
+
+                    const item = modelsToLoad[modelIndex];
+                    const index = modelIndex;
+                    modelIndex++;
+
+                    loader.load(item.model_3d, (gltf) => {
+                        let model = gltf.scene;
+                        
+                        // Position models
+                        const spacing = 8;
+                        const xPos = (index - modelsToLoad.length / 2 + 0.5) * spacing;
+                        model.position.x = xPos;
+                        
+                        // Scale model
+                        const box = new THREE.Box3().setFromObject(model);
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 3.5 / maxDim;
+                        
+                        const center = box.getCenter(new THREE.Vector3());
+                        model.position.sub(center);
+                        model.position.x = xPos;
+                        model.scale.multiplyScalar(scale);
+                        
+                        scene.add(model);
+                        models.push(model);
+                        modelRotations.push({ x: 0, y: 0 });
+                        
+                        setTimeout(loadNextModel, 50);
+                    }, undefined, () => {
+                        setTimeout(loadNextModel, 50);
+                    });
+                };
+
+                loadNextModel();
+
+                // Handle resize
+                const handleResize = () => {
+                    const w = container.clientWidth;
+                    const h = container.clientHeight;
+                    if (w > 0 && h > 0) {
+                        camera.aspect = w / h;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(w, h);
+                    }
+                };
+                window.addEventListener('resize', handleResize);
+                
+                // Store cleanup function
+                container._cleanup = () => {
+                    window.removeEventListener('resize', handleResize);
+                    canvas.removeEventListener('mousedown', onMouseDown);
+                    canvas.removeEventListener('mousemove', onMouseMove);
+                    canvas.removeEventListener('mouseup', onMouseUp);
+                    canvas.removeEventListener('wheel', onWheel);
+                    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                    renderer.dispose();
+                };
+                
+            } catch (error) {
+                console.error('Error in multi-model viewer:', error);
+                container.innerHTML = '<p style="color: red; padding: 20px; text-align: center; font-size: 12px;">Error loading viewer</p>';
+            }
+        }
+
+        showBuildFinishOptions() {
+            /**
+             * Show options to finish building (add to cart, modify, continue chat)
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'custom-chat-message bot-message';
+            
+            // Different buttons based on login status
+            const cartButtonHTML = this.isLoggedIn ? 
+                `<button class="add-to-cart-btn" style="flex: 1; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">➕ Add All to Cart</button>` :
+                `<button class="login-to-cart-btn" style="flex: 1; padding: 8px 12px; background: #FF6B35; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">🔐 Login to Add to Cart</button>`;
+            
+            optionDiv.innerHTML = `
+                <div class="custom-chat-bubble" style="max-width: 100%; padding: 12px;">
+                    <p style="margin: 0 0 12px 0; font-size: 13px; color: #333;">What would you like to do next?</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        ${cartButtonHTML}
+                        <button class="modify-build-btn" style="flex: 1; padding: 8px 12px; background: #ff9800; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">✏️ Modify Build</button>
+                        <button class="start-over-btn" style="flex: 1; padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">🔄 Start Over</button>
+                        <button class="continue-chat-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">💬 Continue Chat</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(optionDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Add to Cart - add all selected components (logged-in users only)
+            if (this.isLoggedIn) {
+                optionDiv.querySelector('.add-to-cart-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    optionDiv.remove();
+                    this.addAllBuildItemsToCart();
+                });
+            } else {
+                // Login to Add to Cart button
+                optionDiv.querySelector('.login-to-cart-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    optionDiv.remove();
+                    this.showLoginPrompt();
+                });
+            }
+
+            // Modify Build - go back to component selection
+            optionDiv.querySelector('.modify-build-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                optionDiv.remove();
+                this.addMessage('Which component would you like to modify or add?', 'bot');
+                this.currentComponentIndex = 0;
+                this.buildInProgress = true;
+                this.saveBuildState();
+                setTimeout(() => {
+                    this.displayComponentCategories();
+                }, 500);
+            });
+
+            // Start Over - begin a completely new build
+            optionDiv.querySelector('.start-over-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                optionDiv.remove();
+                // Clear build state completely
+                this.selectedComponents = {};
+                this.currentComponentIndex = 0;
+                this.buildInProgress = true;
+                sessionStorage.removeItem('currentBuildState');
+                this.addMessage('🔄 Starting a fresh build! Let\'s build a new computer from scratch.', 'bot');
+                setTimeout(() => {
+                    this.addMessage('👋 Hi! I\'m Koyanardz Assistant. I\'d love to help you build a computer! To give you the best recommendations, could you tell me a bit more about what you\'re looking for?\n\n• **What will be the primary use for your computer** (e.g., gaming, work, video editing, general use)?\n• **Do you have an approximate budget in mind?**\n• **Are you interested in new or secondhand parts**, or a mix of both?\n• **Do you need help with just the core computer components**, or a full setup including a monitor and peripherals?\n\nWe also offer custom PC builds and can help you inspect components before purchase. Let me know your preferences, and we can start looking at the right parts for you!', 'bot');
+                    
+                    // After intro, add the component categories
+                    setTimeout(() => {
+                        this.displayComponentCategories();
+                    }, 800);
+                }, 500);
+            });
+
+            // Continue chat - keep build state saved for future reference
+            optionDiv.querySelector('.continue-chat-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                optionDiv.remove();
+                this.addMessage('Great! How else can I help you today? (Your build has been saved - just say "show me my build" or "modify my build" anytime!)', 'bot');
+                this.saveBuildState();
+                this.saveChatConversation();
+                this.showQuickActions();
+            });
+        }
+
+        showLoginPrompt() {
+            /**
+             * Show login prompt for users who want to add to cart
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const loginDiv = document.createElement('div');
+            loginDiv.className = 'custom-chat-message bot-message';
+            loginDiv.innerHTML = `
+                <div class="custom-chat-bubble" style="max-width: 100%; padding: 12px; background: #FFF3CD; border: 1px solid #FFE69C;">
+                    <p style="margin: 0 0 12px 0; font-size: 13px; color: #333; font-weight: 600;">🔐 Login Required</p>
+                    <p style="margin: 0 0 12px 0; font-size: 12px; color: #555;">To add items to your cart and complete your purchase, please log in or create an account.</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="goto-login-btn" style="flex: 1; padding: 8px 12px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">✅ Go to Login</button>
+                        <button class="save-build-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">💾 Save Build</button>
+                        <button class="continue-shopping-btn" style="flex: 1; padding: 8px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">🛍️ Keep Shopping</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(loginDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Go to Login button
+            loginDiv.querySelector('.goto-login-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Save build and conversation before redirecting
+                this.saveBuildState();
+                this.saveChatConversation();
+                window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+            });
+
+            // Save Build button
+            loginDiv.querySelector('.save-build-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                loginDiv.remove();
+                this.saveBuildState();
+                this.saveChatConversation();
+                this.addMessage('✅ Your build and chat have been saved! You can continue when you log in.', 'bot');
+                setTimeout(() => {
+                    this.showBuildFinishOptions();
+                }, 800);
+            });
+
+            // Continue Shopping button
+            loginDiv.querySelector('.continue-shopping-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                loginDiv.remove();
+                this.saveBuildState();
+                this.addMessage('Got it! Feel free to continue exploring and modifying your build. Log in anytime to add to cart!', 'bot');
+                setTimeout(() => {
+                    this.showQuickActions();
+                }, 500);
+            });
+        }
+
+        addAllBuildItemsToCart() {
+            /**
+             * Add all selected components to cart via CSRF protected endpoint
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const items = Object.entries(this.selectedComponents).map(([category, product]) => ({
+                product_id: product.id,
+                quantity: 1
+            }));
+
+            if (items.length === 0) {
+                this.addMessage('No items to add to cart.', 'bot');
+                return;
+            }
+
+            // Show loading message
+            this.showTypingIndicator();
+
+            // Add items one by one to cart
+            let addedCount = 0;
+            let failedCount = 0;
+
+            const addItemToCart = (index) => {
+                if (index >= items.length) {
+                    this.hideTypingIndicator();
+                    
+                    if (failedCount === 0) {
+                        this.addMessage(`✅ **Success!** Added ${addedCount} item${addedCount !== 1 ? 's' : ''} to your cart!\n\n🛒 You can review your cart and proceed to checkout.`, 'bot');
+                        // Save conversation after successful cart addition
+                        this.saveChatConversation();
+                        // Trigger cart update event if listeners exist
+                        window.dispatchEvent(new CustomEvent('cartUpdated', { detail: { itemsAdded: addedCount } }));
+                    } else {
+                        this.addMessage(`⚠️ Added ${addedCount} item${addedCount !== 1 ? 's' : ''} but ${failedCount} failed to add. Please try again.`, 'bot');
+                    }
+                    
+                    setTimeout(() => {
+                        this.showBuildFinishOptions();
+                    }, 500);
+                    return;
+                }
+
+                const item = items[index];
+                
+                // Get CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
+
+                fetch(`/add-to-cart/${item.product_id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken || ''
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        quantity: item.quantity
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message || data.cart_count) {
+                        addedCount++;
+                    } else if (data.error) {
+                        failedCount++;
+                    } else {
+                        addedCount++;
+                    }
+                    addItemToCart(index + 1);
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    failedCount++;
+                    addItemToCart(index + 1);
+                });
+            };
+
+            addItemToCart(0);
+        }
+
+        resetBuild() {
+            /**
+             * Reset build state
+             */
+            this.selectedComponents = {};
+            this.currentComponentIndex = 0;
+            this.buildInProgress = false;
+            // Clear build state from localStorage
+            localStorage.removeItem('currentBuildState');
+        }
+
+        saveBuildState() {
+            /**
+             * Save current build state to localStorage for persistence across page refreshes
+             */
+            const buildState = {
+                selectedComponents: this.selectedComponents,
+                currentComponentIndex: this.currentComponentIndex,
+                buildInProgress: this.buildInProgress,
+                currentBuildCategory: this.currentBuildCategory,
+                timestamp: new Date().getTime()
+            };
+            localStorage.setItem('currentBuildState', JSON.stringify(buildState));
+        }
+
+        loadBuildState() {
+            /**
+             * Load build state from localStorage if available
+             */
+            try {
+                const savedState = localStorage.getItem('currentBuildState');
+                if (savedState) {
+                    const buildState = JSON.parse(savedState);
+                    // Only restore if build was in progress
+                    if (buildState.buildInProgress) {
+                        this.selectedComponents = buildState.selectedComponents || {};
+                        this.currentComponentIndex = buildState.currentComponentIndex || 0;
+                        this.buildInProgress = buildState.buildInProgress || false;
+                        this.currentBuildCategory = buildState.currentBuildCategory || 'PC';
+                        return true;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading build state:', error);
+            }
+            return false;
+        }
+
+        saveChatConversation() {
+            /**
+             * Save current chat conversation to backend
+             */
+            if (!this.conversationHistory || this.conversationHistory.length === 0) {
+                return;
+            }
+
+            const payload = {
+                session_id: this.sessionId,
+                messages: this.conversationHistory,
+                build_state: {
+                    selectedComponents: this.selectedComponents,
+                    currentComponentIndex: this.currentComponentIndex,
+                    buildInProgress: this.buildInProgress
+                }
+            };
+
+            // Get CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+
+            if (csrfToken) {
+                headers['X-CSRFToken'] = csrfToken;
+            }
+
+            fetch('/api/chat/save/', {
+                method: 'POST',
+                headers: headers,
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Chat conversation saved successfully');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving chat conversation:', error);
+            });
+        }
+
+        show3DModelInChat(modelUrl, productName) {
+            /**
+             * Display 3D model in a chat-embedded viewer with full-screen option
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const modelDiv = document.createElement('div');
+            modelDiv.className = 'custom-chat-message bot-message';
+            // Use unique ID with Math.random() to ensure no collisions
+            const viewerId = `chat-3d-viewer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            modelDiv.innerHTML = `
+                <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
+                    <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">${productName} - 3D Model</p>
+                    <div id="${viewerId}" style="width: 100%; height: 280px; background: #1a1a1a; border-radius: 6px; position: relative; margin-bottom: 8px; cursor: pointer; pointer-events: auto; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;" class="fullscreen-3d-trigger"></div>
+                    <div style="display: flex; gap: 8px;">
+                        <p style="flex: 1; margin: 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
+                            🖱️ Left-click + drag to rotate | Scroll to zoom
+                        </p>
+                        <button class="fullscreen-3d-btn" style="padding: 6px 10px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 600; white-space: nowrap;">⛶ Full Screen</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(modelDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Save 3D model metadata to localStorage for persistence
+            this.saveChatMessage(
+                `3D Model: ${productName}`,
+                'bot',
+                false,
+                {
+                    type: '3d-model',
+                    modelUrl: modelUrl,
+                    productName: productName
+                }
+            );
+
+            // Load 3D model after ensuring THREE extensions are available
+            this.waitForThreeExtensions().then(() => {
+                this.loadChatEmbedded3DModel(viewerId, modelUrl, productName);
+                
+                // Add full-screen button listener
+                modelDiv.querySelector('.fullscreen-3d-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.openFullscreen3DViewer(modelUrl, productName);
+                });
+            });
+        }
+
+        openFullscreen3DViewer(modelUrl, productName) {
+            /**
+             * Open 3D model in a full-screen modal
+             */
+            const modal = document.createElement('div');
+            modal.className = 'fullscreen-3d-modal';
+            modal.innerHTML = `
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #000;">
+                    <div style="background: #667eea; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 600;">
+                        <span>🎮 ${productName} - 3D Model Viewer</span>
+                        <button class="close-fullscreen-btn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                    <div id="fullscreen-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #1a1a1a;"></div>
+                    <div style="background: #333; color: #aaa; padding: 10px 16px; font-size: 12px; border-top: 1px solid #555;">
+                        🖱️ <strong>Controls:</strong> Left-click + drag to rotate | Scroll to zoom | Right-click + drag to pan
+                    </div>
+                </div>
+            `;
+            
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #000;
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                will-change: transform;
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Get canvas ID and load model
+            const canvasId = modal.querySelector('[id^="fullscreen-3d-canvas-"]').id;
+            
+            // Close button
+            modal.querySelector('.close-fullscreen-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Load the 3D model in full screen
+            setTimeout(() => {
+                this.waitForThreeExtensions().then(() => {
+                    this.loadChatEmbedded3DModel(canvasId, modelUrl, productName, true);
+                });
+            }, 100);
+        }
+
+        openFullscreenMultiModel3D() {
+            /**
+             * Open all selected 3D models in a full-screen modal
+             */
+            const modal = document.createElement('div');
+            modal.className = 'fullscreen-multi-3d-modal';
+            modal.innerHTML = `
+                <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #000; margin: 0; padding: 0; overflow: hidden;">
+                    <div style="background: #764ba2; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; flex-shrink: 0;">
+                        <span>🎮 Your Build - Multi-Model 3D Viewer</span>
+                        <button class="close-fullscreen-multi-btn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    </div>
+                    <div id="fullscreen-multi-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #1a1a1a; width: 100%; overflow: hidden;"></div>
+                    <div style="background: #333; color: #aaa; padding: 10px 16px; font-size: 12px; border-top: 1px solid #555; flex-shrink: 0;">
+                        🖱️ <strong>Controls:</strong> Left-click + drag to rotate | Scroll to zoom | Right-click + drag to pan | View multiple models side-by-side
+                    </div>
+                </div>
+            `;
+            
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #000;
+                z-index: 2000;
+                display: flex;
+                flex-direction: column;
+                will-change: transform;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Get canvas ID and load models
+            const canvasId = modal.querySelector('[id^="fullscreen-multi-3d-canvas-"]').id;
+            
+            // Close button
+            modal.querySelector('.close-fullscreen-multi-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // Load the 3D models in full screen
+            setTimeout(() => {
+                this.waitForThreeExtensions().then(() => {
+                    this.loadMultiModel3DViewer(canvasId);
+                });
+            }, 100);
+        }
+
+        async waitForThreeExtensions() {
+            /**
+             * Wait for THREE.js, GLTFLoader, and OrbitControls to be available
+             * They are loaded from local static files via navigation.html
+             */
+            return new Promise((resolve) => {
+                let attempts = 0;
+                const maxAttempts = 50; // 5 seconds max (100ms per attempt)
+                
+                const checkReady = () => {
+                    attempts++;
+                    
+                    // Check for the ready flag first
+                    if (typeof window.THREE_READY !== 'undefined' && window.THREE_READY === true) {
+                        console.log('✓ THREE.js ready flag detected');
+                        resolve();
+                        return;
+                    }
+                    
+                    // Check if THREE exists with extensions attached
+                    if (typeof THREE !== 'undefined') {
+                        let hasGLTF = typeof THREE.GLTFLoader !== 'undefined';
+                        let hasOrbit = typeof THREE.OrbitControls !== 'undefined';
+                        
+                        // If both extensions are ready, we're done
+                        if (hasGLTF && hasOrbit) {
+                            console.log('✓ All THREE extensions ready');
+                            window.THREE_READY = true;
+                            resolve();
+                            return;
+                        }
+                        
+                        // If at least THREE is loaded, keep waiting
+                        if (attempts >= maxAttempts) {
+                            console.warn('⚠️ THREE.js loaded but waiting for extensions (may still work)');
+                            console.warn(`  - GLTFLoader: ${hasGLTF ? '✓' : '✗'}`);
+                            console.warn(`  - OrbitControls: ${hasOrbit ? '✓' : '✗'}`);
+                            resolve(); // Continue anyway
+                            return;
+                        }
+                    }
+                    
+                    // Timeout check
+                    if (attempts >= maxAttempts) {
+                        console.error('❌ THREE.js extensions failed to load');
+                        resolve(); // Resolve anyway to prevent infinite loops
+                        return;
+                    }
+                    
+                    // Keep checking
+                    setTimeout(checkReady, 100);
+                };
+                
+                checkReady();
+            });
+        }
+
+        loadChatEmbedded3DModel(viewerId, modelUrl, productName, isFullscreen = false) {
+            /**
+             * Load and display 3D model in chat or fullscreen
+             * ISOLATED: Each viewer has its own scene, camera, renderer, and controls
+             * WITH PROPER EVENT SCOPING
+             */
+            const container = document.getElementById(viewerId);
+            if (!container) {
+                console.error('Container not found:', viewerId);
+                return;
+            }
+
+            // Ensure URL is absolute
+            const absoluteUrl = modelUrl.startsWith('http') ? modelUrl : window.location.origin + modelUrl;
+
+            // Check if THREE is available
+            if (typeof THREE === 'undefined') {
+                console.error('THREE.js not available');
+                container.innerHTML = '<p style="color: red; padding: 20px; text-align: center; font-size: 12px;">3D viewer not available. Please refresh the page.</p>';
+                return;
+            }
+
+            try {
+                // First, clear container and create canvas element
+                container.innerHTML = '';
+                const canvas = document.createElement('canvas');
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+                canvas.style.display = 'block';
+                canvas.style.pointerEvents = 'auto';
+                canvas.style.touchAction = 'none';
+                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                container.appendChild(canvas);
+                
+                // Initialize Three.js scene - ISOLATED FOR THIS VIEWER ONLY
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x1a1a1a);
+
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                if (width <= 0 || height <= 0) {
+                    console.error('Invalid container dimensions:', width, height);
+                    container.innerHTML = '<p style="color: red; padding: 20px; text-align: center; font-size: 12px;">Invalid container size</p>';
+                    return;
+                }
+
+                const camera = new THREE.PerspectiveCamera(65, width / height, 0.1, 1000);
+                camera.position.set(0, 2, 4);
+
+                const renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas,
+                    antialias: false, 
+                    alpha: false,
+                    powerPreference: 'high-performance'
+                });
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+                renderer.setClearColor(0x1a1a1a);
+
+                // Lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(5, 10, 7);
+                scene.add(directionalLight);
+
+                // Animation frame ID for this specific viewer - ISOLATED
+                let animationFrameId = null;
+                let isAnimating = false;
+                const eventListeners = [];
+
+                // Controls - Try to use OrbitControls, fallback if not available
+                let controls = null;
+                if (typeof THREE.OrbitControls !== 'undefined') {
+                    controls = new THREE.OrbitControls(camera, renderer.domElement);
+                    controls.enableDamping = false;
+                    controls.autoRotate = false;
+                    controls.autoRotateSpeed = 0;
+                    
+                    // Prevent event propagation from OrbitControls
+                    const origMouseDown = controls.onMouseDown;
+                    if (origMouseDown) {
+                        controls.onMouseDown = (event) => {
+                            event.stopPropagation();
+                            origMouseDown.call(controls, event);
+                        };
+                    }
+                } else {
+                    console.warn('⚠️ OrbitControls not available - basic camera controls only');
+                    // Add basic mouse control fallback - ISOLATED TO THIS CANVAS ONLY
+                    let isDragging = false;
+                    let previousMousePosition = { x: 0, y: 0 };
+                    
+                    const onMouseDown = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        isDragging = true;
+                        previousMousePosition = { x: e.clientX, y: e.clientY };
+                    };
+                    
+                    const onMouseMove = (e) => {
+                        if (isDragging) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            const deltaX = e.clientX - previousMousePosition.x;
+                            const deltaY = e.clientY - previousMousePosition.y;
+                            
+                            // Simple rotation fallback - ONLY affects THIS scene
+                            if (scene.children.length > 2) { // Skip lights
+                                const models = scene.children.filter(child => !(child instanceof THREE.Light || child instanceof THREE.Camera));
+                                if (models.length > 0) {
+                                    const model = models[0];
+                                    model.rotation.y += deltaX * 0.005;
+                                    model.rotation.x += deltaY * 0.005;
+                                }
+                            }
+                            
+                            previousMousePosition = { x: e.clientX, y: e.clientY };
+                        }
+                    };
+                    
+                    const onMouseUp = (e) => {
+                        e.stopPropagation();
+                        isDragging = false;
+                    };
+                    
+                    const onWheel = (e) => {
+                        if (isDragging) return;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (scene.children.length > 2) {
+                            const models = scene.children.filter(child => !(child instanceof THREE.Light || child instanceof THREE.Camera));
+                            if (models.length > 0) {
+                                const model = models[0];
+                                const zoomAmount = e.deltaY > 0 ? 1.1 : 0.9;
+                                model.scale.multiplyScalar(zoomAmount);
+                            }
+                        }
+                    };
+                    
+                    renderer.domElement.addEventListener('mousedown', onMouseDown);
+                    renderer.domElement.addEventListener('mousemove', onMouseMove);
+                    renderer.domElement.addEventListener('mouseup', onMouseUp);
+                    renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
+                    
+                    eventListeners.push({ type: 'mousedown', handler: onMouseDown });
+                    eventListeners.push({ type: 'mousemove', handler: onMouseMove });
+                    eventListeners.push({ type: 'mouseup', handler: onMouseUp });
+                    eventListeners.push({ type: 'wheel', handler: onWheel });
+                    
+                    // Store cleanup function for when container is removed
+                    container._cleanup = () => {
+                        eventListeners.forEach(({ type, handler }) => {
+                            renderer.domElement.removeEventListener(type, handler);
+                        });
+                    };
+                }
+
+                // Load model
+                if (typeof THREE.GLTFLoader === 'undefined') {
+                    console.error('GLTFLoader not available - cannot load model');
+                    container.innerHTML = '<p style="color: #ff6b6b; padding: 20px; text-align: center; font-size: 12px;">⚠️ 3D loader not available. <br/>Please refresh the page to reload libraries.</p>';
+                    return;
+                }
+
+                const loader = new THREE.GLTFLoader();
+                console.log('Loading 3D model:', absoluteUrl);
+
+                loader.load(
+                    absoluteUrl,
+                    (gltf) => {
+                        console.log('✓ Model loaded successfully');
+                        const model = gltf.scene;
+                        scene.add(model);
+
+                        // Auto-center and scale
+                        const box = new THREE.Box3().setFromObject(model);
+                        const center = box.getCenter(new THREE.Vector3());
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 4 / maxDim;
+
+                        model.position.sub(center);
+                        model.scale.multiplyScalar(scale);
+
+                        // Animation loop - ISOLATED TO THIS VIEWER ONLY
+                        // Only start animation if not already animating
+                        if (!isAnimating) {
+                            isAnimating = true;
+                            
+                            function animate() {
+                                // Only continue if container is still in DOM
+                                if (!document.contains(container)) {
+                                    isAnimating = false;
+                                    renderer.dispose();
+                                    if (container._cleanup) container._cleanup();
+                                    return;
+                                }
+                                
+                                animationFrameId = requestAnimationFrame(animate);
+                                if (controls) {
+                                    controls.update();
+                                }
+                                renderer.render(scene, camera);
+                            }
+                            animate();
+                        }
+                    },
+                    (progress) => {
+                        const percent = Math.round((progress.loaded / progress.total) * 100);
+                        console.log('Loading progress:', percent + '%');
+                    },
+                    (error) => {
+                        console.error('Error loading 3D model:', error);
+                        container.innerHTML = '<p style="color: #999; padding: 20px; text-align: center; font-size: 12px;">❌ Unable to load 3D model. The file may be corrupted or inaccessible.</p>';
+                    }
+                );
+            } catch (error) {
+                console.error('Error initializing 3D viewer:', error);
+                container.innerHTML = '<p style="color: red; padding: 20px; text-align: center; font-size: 12px;">❌ Error loading 3D viewer: ' + error.message + '</p>';
+            }
+        }
+
+        addMessage(text, sender) {
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `custom-chat-message ${sender}-message`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'custom-chat-bubble';
+            
+            const content = document.createElement('div');
+            content.className = 'custom-chat-text';
+            
+            // Format text with proper line breaks and markdown support
+            let formattedText = text
+                .split('\n')
+                .map(line => {
+                    // Convert **bold** to <strong>bold</strong>
+                    line = line.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+                    // Convert __italic__ to <em>italic</em>
+                    line = line.replace(/__([^_]+)__/g, '<em>$1</em>');
+                    return line;
+                })
+                .join('<br>');
+            
+            content.innerHTML = formattedText;
+            bubble.appendChild(content);
+            
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
+
+            // Auto scroll
+            container.scrollTop = container.scrollHeight;
+
+            // Update badge if minimized
+            if (sender === 'bot' && this.isMinimized) {
+                this.unreadCount++;
+                this.updateBadge();
+            }
+
+            // Save message to localStorage for persistence
+            this.saveChatMessage(text, sender);
+        }
+
+        saveChatMessage(text, sender, isHtml = false, metadata = null) {
+            // Save individual message to localStorage (supports both text and HTML content)
+            // NOW SAVES 3D model metadata for persistence
+            try {
+                const messages = JSON.parse(localStorage.getItem('gemini_chat_messages') || '[]');
+                messages.push({
+                    text: text,
+                    sender: sender,
+                    timestamp: new Date().getTime(),
+                    isHtml: isHtml,  // Flag to indicate if content is HTML
+                    metadata: metadata  // Additional data for special content (3D models, carousels, etc)
+                });
+                localStorage.setItem('gemini_chat_messages', JSON.stringify(messages));
+            } catch (e) {
+                console.log('Could not save message:', e);
+            }
+        }
+
+        loadMessagesFromStorage() {
+            // Load and display saved messages from localStorage
+            // NOW RECREATES 3D MODELS AND MULTI-MODEL VIEWERS
+            // Returns: number of messages loaded
+            try {
+                const messages = JSON.parse(localStorage.getItem('gemini_chat_messages') || '[]');
+                let multi3DModelCount = 0; // Track count of multi-3D models
+                
+                if (messages.length > 0) {
+                    for (const msg of messages) {
+                        if (msg.metadata?.type === '3d-model') {
+                            // Recreate single 3D model viewer
+                            this.show3DModelInChat(msg.metadata.modelUrl, msg.metadata.productName);
+                        } else if (msg.metadata?.type === 'multi-3d-model') {
+                            // Only load the LAST multi-3D model to prevent duplicates causing lag
+                            multi3DModelCount++;
+                            // Recreate multi-model 3D viewer
+                            // First, restore selectedComponents from metadata
+                            try {
+                                const savedComponents = JSON.parse(msg.metadata.selectedComponents || '{}');
+                                if (Object.keys(savedComponents).length > 0) {
+                                    this.selectedComponents = savedComponents;
+                                    // Now recreate the multi-model viewer
+                                    // Mark as loading to prevent duplicates
+                                    const viewerId = 'multi-3d-viewer-' + Date.now();
+                                    
+                                    const container = document.getElementById('custom-chat-messages');
+                                    const modelDiv = document.createElement('div');
+                                    modelDiv.className = 'custom-chat-message bot-message';
+                                    
+                                    const multiModelHtml = `
+                                        <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
+                                            <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">Your Build - 3D View</p>
+                                            <div id="${viewerId}" style="width: 100%; height: 350px; background: #1a1a1a; border-radius: 6px; position: relative; margin-bottom: 8px; pointer-events: auto; touch-action: none;"></div>
+                                            <p style="margin: 0 0 8px 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
+                                                🖱️ Left-click + drag to rotate | Scroll to zoom | Right-click & drag to drag models
+                                            </p>
+                                            <div style="display: flex; gap: 8px;">
+                                                <button class="fullscreen-multi-3d-btn" style="flex: 1; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">⛶ Full Screen</button>
+                                                <button class="continue-after-3d-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Continue with Build</button>
+                                            </div>
+                                        </div>
+                                    `;
+                                    modelDiv.innerHTML = multiModelHtml;
+                                    container.appendChild(modelDiv);
+                                    container.scrollTop = container.scrollHeight;
+                                    
+                                    // Add fullscreen button listener
+                                    modelDiv.querySelector('.fullscreen-multi-3d-btn').addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        this.openFullscreenMultiModel3D();
+                                    });
+
+                                    // Add continue button listener
+                                    modelDiv.querySelector('.continue-after-3d-btn').addEventListener('click', (e) => {
+                                        e.stopPropagation();
+                                        this.addMessage('Ready to finalize your build?', 'user');
+                                        setTimeout(() => {
+                                            this.showBuildFinishOptions();
+                                        }, 500);
+                                    });
+                                    
+                                    // Load viewer
+                                    this.waitForThreeExtensions().then(() => {
+                                        this.loadMultiModel3DViewer(viewerId);
+                                    });
+                                } else {
+                                    // No components saved, show placeholder
+                                    this.addMessageDirectly('🗂️ Your Build - 3D View (click "View Build" to reload)', 'bot');
+                                }
+                            } catch (e) {
+                                console.error('Could not parse selectedComponents:', e);
+                                this.addMessageDirectly('🗂️ Your Build - 3D View (click "View Build" to reload)', 'bot');
+                            }
+                        } else if (msg.isHtml) {
+                            // Load HTML content (carousels, etc)
+                            this.addMessageFromHtml(msg.text, msg.sender);
+                        } else {
+                            // Load plain text message
+                            this.addMessageDirectly(msg.text, msg.sender);
+                        }
+                    }
+                }
+                return messages.length;
+            } catch (e) {
+                console.log('Could not load chat messages:', e);
+                return 0;
+            }
+        }
+
+        addMessageFromHtml(htmlContent, sender) {
+            // Add message with HTML content (for carousels, 3D models, etc)
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `custom-chat-message ${sender}-message`;
+            messageDiv.innerHTML = htmlContent;
+            container.appendChild(messageDiv);
+
+            // Auto scroll
+            container.scrollTop = container.scrollHeight;
+        }
+
+        addMessageDirectly(text, sender) {
+            // Add message without saving again (used for loading from localStorage)
+            // IMPORTANT: Apply formatting like addMessage() does
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `custom-chat-message ${sender}-message`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'custom-chat-bubble';
+            
+            const content = document.createElement('div');
+            content.className = 'custom-chat-text';
+            
+            // Format text with proper line breaks and markdown support (SAME AS addMessage)
+            let formattedText = text
+                .split('\n')
+                .map(line => {
+                    // Convert **bold** to <strong>bold</strong>
+                    line = line.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
+                    // Convert __italic__ to <em>italic</em>
+                    line = line.replace(/__([^_]+)__/g, '<em>$1</em>');
+                    return line;
+                })
+                .join('<br>');
+            
+            content.innerHTML = formattedText;
+            bubble.appendChild(content);
+            
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
+
+            // Auto scroll
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async displayProductCarousel(products, queryDescription) {
+            /**
+             * Display products in a carousel/card format
+             * Saves HTML to localStorage so carousel persists on page refresh
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container || !products || products.length === 0) return;
+
+            const carouselDiv = document.createElement('div');
+            carouselDiv.className = 'custom-chat-message bot-message';
+            const carouselHtml = `
+                <div class="custom-chat-bubble product-carousel-bubble">
+                    <p class="carousel-title">${queryDescription || 'Here are some great options for you:'}</p>
+                    <div class="product-carousel">
+                        ${products.map((product, index) => `
+                            <div class="product-card" data-product-id="${product.id}">
+                                <div class="product-image">
+                                    <img src="${product.image_url}" alt="${product.name}" onerror="this.src='/static/images/placeholder.png'">
+                                </div>
+                                <div class="product-info">
+                                    <h4 class="product-name">${product.name}</h4>
+                                    <p class="product-category">${product.category}</p>
+                                    <p class="product-price">₱${parseFloat(product.price).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                                    <p class="product-description">${product.description.substring(0, 60)}${product.description.length > 60 ? '...' : ''}</p>
+                                    <a href="/product_item/${product.id}/" class="product-link" target="_blank">View Details →</a>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p class="carousel-note">Click "View Details" to see full specifications and availability</p>
+                </div>
+            `;
+            carouselDiv.innerHTML = carouselHtml;
+
+            container.appendChild(carouselDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Save carousel HTML to localStorage for persistence on refresh
+            this.saveChatMessage(carouselHtml, 'bot', true);
+
+            // Update badge if minimized
+            if (this.isMinimized) {
+                this.unreadCount++;
+                this.updateBadge();
+            }
+        }
+
+        async searchAndDisplayProducts(paramsString) {
+            /**
+             * Search products using API parameters and automatically display in carousel
+             */
+            try {
+                const url = `/api/products/recommend/?${paramsString}`;
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.products && data.products.length > 0) {
+                        // Extract query from params for display
+                        const params = new URLSearchParams(paramsString);
+                        const query = params.get('query') || 'Products';
+                        const description = `${data.count} ${query}(s) found:`;
+                        
+                        // Display carousel
+                        this.displayProductCarousel(data.products, description);
+                    } else {
+                        this.addMessage('😔 Sorry, no products found matching your criteria. Try different search terms or visit our store!', 'bot');
+                    }
+                } else {
+                    this.addMessage('Unable to search products. Please try again.', 'bot');
+                }
+            } catch (error) {
+                console.error('Error displaying products:', error);
+                this.addMessage('Error loading products. Please try again.', 'bot');
+            }
+        }
+
+        async searchAndRecommendProducts(query, component = null) {
+            /**
+             * Search for products using the recommendation API
+             * Returns matching products from store inventory
+             */
+            try {
+                let url = `/api/products/recommend/?query=${encodeURIComponent(query)}&max_results=6`;
+                
+                if (component) {
+                    url += `&component=${encodeURIComponent(component)}`;
+                }
+
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.products && data.products.length > 0) {
+                        return {
+                            success: true,
+                            products: data.products,
+                            count: data.count
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error('Error searching products:', error);
+            }
+
+            return {
+                success: false,
+                products: [],
+                count: 0
+            };
+        }
+
+        showTypingIndicator() {
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const indicatorDiv = document.createElement('div');
+            indicatorDiv.className = 'custom-chat-message bot-message';
+            indicatorDiv.id = 'typing-indicator';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'custom-chat-bubble typing-bubble';
+            
+            bubble.innerHTML = '<span></span><span></span><span></span>';
+            indicatorDiv.appendChild(bubble);
+            container.appendChild(indicatorDiv);
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        hideTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        updateBadge() {
+            const badge = document.getElementById('custom-chat-badge');
+            if (badge) {
+                if (this.unreadCount > 0) {
+                    badge.textContent = this.unreadCount;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
     }
-    
-    // Call initBotpress when DOM is ready
+
+    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initBotpress);
+        document.addEventListener('DOMContentLoaded', () => {
+            window.customBotpressChat = new GeminiChat();
+        });
     } else {
-        initBotpress();
+        window.customBotpressChat = new GeminiChat();
     }
+</script>
+
+<script>
 
     async function loadAndShow3DModel(productId) {
         try {
@@ -290,7 +2998,12 @@
             },
             body: JSON.stringify({ quantity: 1 })
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             if (typeof window.botpressWebChat !== 'undefined') {
                 window.botpressWebChat.sendMessage('✅ Product added to cart!');
@@ -318,7 +3031,7 @@
         }
         return cookieValue;
     }
-</script>
+</style>
 
 
 <script>
@@ -364,34 +3077,6 @@
             });
         });
 
-        const favButtons = document.querySelectorAll('.favorite_btn');
-        favButtons.forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const productId = this.dataset.productId;
-                const el = this;
-                fetch(`/toggle_favorite/${productId}/`, { 
-                    method: 'POST', 
-                    headers: { 
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRFToken': csrftoken
-                    },
-                    body: JSON.stringify({})
-                })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.status === 'added') el.classList.add('favorited');
-                        else if (data.status === 'removed') el.classList.remove('favorited');
-                        else if (data.status === 'error') {
-                            alert(data.message || 'Please log in to add favorites');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error toggling favorite:', err);
-                        alert('Error updating favorite');
-                    });
-            });
-        });
         // Sidebar / filter panel toggle
         const filterToggle = document.getElementById('filterToggle');
         const filterClose = document.getElementById('filterClose');
@@ -454,221 +3139,729 @@
             });
         });
 
-        // 3D Model Viewer Integration
-        const view3dButtons = document.querySelectorAll('.view-3d-btn');
-        view3dButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const productId = this.dataset.productId;
-                const productName = this.dataset.productName;
-                const modelUrl = this.dataset.modelUrl;
-                openModal3DViewer(productId, productName, modelUrl);
-            });
-        });
-
-        function openModal3DViewer(productId, productName, modelUrl) {
-            // Create modal if it doesn't exist
-            let modal = document.getElementById('modal-3d-viewer');
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = 'modal-3d-viewer';
-                modal.className = 'modal-3d-viewer';
-                document.body.appendChild(modal);
-
-                // Close button handler
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal || e.target.classList.contains('modal-3d-close')) {
-                        modal.classList.remove('active');
-                        // Clean up Three.js scene
-                        const canvas = modal.querySelector('canvas');
-                        if (canvas) {
-                            canvas.remove();
-                        }
-                    }
-                });
-            }
-
-            // Update modal content with the product-specific model
-            modal.innerHTML = `
-                <div class="modal-3d-content">
-                    <div class="modal-3d-header">
-                        <h2>3D Model - ${productName}</h2>
-                        <button class="modal-3d-close">&times;</button>
-                    </div>
-                    <div class="modal-3d-body">
-                        <p><strong>Product:</strong> ${productName}</p>
-                        <div id="three-canvas-container" style="width: 100%; height: 400px; position: relative; background: #f5f5f5; border-radius: 5px;"></div>
-                        <div style="margin-top: 15px; padding: 15px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #667eea;">
-                            <p style="margin: 0; font-size: 13px; color: #555;">
-                                🖱️ <strong>Controls:</strong><br>
-                                • Left-click + drag to rotate<br>
-                                • Scroll to zoom<br>
-                                • Right-click + drag to pan
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            modal.classList.add('active');
-
-            // Load and display the 3D model using Three.js
-            setTimeout(() => {
-                load3DModel(modelUrl);
-            }, 100);
-        }
-
-        function load3DModel(modelUrl) {
-            const container = document.getElementById('three-canvas-container');
-            if (!container) return;
-
-            // Initialize Three.js
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xfafafa);
-
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 5);
-
-            const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
-            container.appendChild(renderer.domElement);
-
-            // Add lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 10, 7);
-            scene.add(directionalLight);
-
-            // Add OrbitControls
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = false;
-            controls.autoRotate = false;
-
-            // Load the GLB/GLTF model
-            const loader = new THREE.GLTFLoader();
-            loader.load(modelUrl, (gltf) => {
-                const model = gltf.scene;
-                scene.add(model);
-
-                // Center and scale the model
-                const box = new THREE.Box3().setFromObject(model);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 3 / maxDim;
-                
-                model.position.sub(center);
-                model.scale.multiplyScalar(scale);
-
-                // Render
-                function animate() {
-                    requestAnimationFrame(animate);
-                    controls.update();
-                    renderer.render(scene, camera);
-                }
-                animate();
-
-            }, undefined, (error) => {
-                console.error('Error loading 3D model:', error);
-                container.innerHTML = '<p style="color: red; padding: 20px;">Error loading 3D model. Please try again.</p>';
-            });
-        }
-
     });
 
 </script>
 
 <style>
-    .view-3d-btn {
-        background: #667eea;
+    /* ===== Custom Chat Widget Styles ===== */
+    .custom-chat-toggle {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #0B76AF;
         color: white;
         border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(11, 118, 175, 0.3);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .custom-chat-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(11, 118, 175, 0.4);
+    }
+
+    .custom-chat-toggle.active {
+        transform: rotate(45deg);
+    }
+
+    .custom-chat-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff4757;
+        color: white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 12px;
-        transition: all 0.3s;
+        font-weight: bold;
+        box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
     }
 
-    .view-3d-btn:hover {
-        background: #5568d3;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-
-    .modal-3d-viewer {
-        display: none;
+    .custom-chat-widget {
         position: fixed;
-        top: 0;
-        left: 0;
+        bottom: 30px;
+        right: 30px;
+        width: 85vw;
+        max-width: 1100px;
+        height: 85vh;
+        max-height: 800px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s ease;
+        z-index: 1001;
+        will-change: transform, opacity;
+    }
+
+    .custom-chat-widget.hidden {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px) scale(0.9);
+        pointer-events: none;
+    }
+
+    .custom-chat-widget.minimized {
+        height: auto;
+        max-height: 60px;
+    }
+
+    .custom-chat-widget.minimized .custom-chat-messages,
+    .custom-chat-widget.minimized .custom-chat-input-area {
+        display: none;
+    }
+
+    .custom-chat-header {
+        padding: 20px 24px;
+        background: #0B76AF;
+        color: white;
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+        gap: 12px;
+        box-shadow: 0 4px 15px rgba(11, 118, 175, 0.3);
+    }
+
+    .custom-chat-header-content {
+        flex: 1;
+    }
+
+    .custom-chat-title {
+        margin: 0 0 4px 0;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .custom-chat-subtitle {
+        margin: 0;
+        font-size: 13px;
+        opacity: 0.85;
+    }
+
+    .custom-chat-header-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .custom-chat-icon-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .custom-chat-icon-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+    }
+
+    .custom-chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 24px;
+        background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .custom-chat-messages::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .custom-chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .custom-chat-messages::-webkit-scrollbar-thumb {
+        background: #c0c0c0;
+        border-radius: 4px;
+    }
+
+    .custom-chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #a0a0a0;
+    }
+
+    .custom-chat-message {
+        display: flex;
+        animation: slideIn 0.3s ease;
+    }
+
+    .user-message {
+        justify-content: flex-end;
+    }
+
+    .bot-message {
+        justify-content: flex-start;
+    }
+
+    .custom-chat-bubble {
+        padding: 12px 16px;
+        border-radius: 14px;
+        max-width: 85%;
+        word-wrap: break-word;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .user-message .custom-chat-bubble {
+        background: #0B76AF;
+        color: white;
+        border-radius: 14px 0 14px 14px;
+    }
+
+    .bot-message .custom-chat-bubble {
+        background: white;
+        color: #333;
+        border-left: 4px solid #0B76AF;
+        border-radius: 0 14px 14px 14px;
+    }
+
+    .custom-chat-text {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* Carousel Styles */
+    .carousel-container {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 4px 0;
+        scroll-behavior: smooth;
+    }
+
+    .carousel-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .carousel-container::-webkit-scrollbar-track {
+        background: #f0f0f0;
+        border-radius: 3px;
+    }
+
+    .carousel-container::-webkit-scrollbar-thumb {
+        background: #d0d0d0;
+        border-radius: 3px;
+    }
+
+    .carousel-container::-webkit-scrollbar-thumb:hover {
+        background: #a0a0a0;
+    }
+
+    .carousel-card {
+        flex: 0 0 280px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .carousel-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+    }
+
+    .carousel-card-image {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        background: #f0f0f0;
+    }
+
+    .carousel-card-image img {
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 9999;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .carousel-card:hover .carousel-card-image img {
+        transform: scale(1.05);
+    }
+
+    .carousel-card-content {
+        padding: 14px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .carousel-card-title {
+        margin: 0 0 6px 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: #333;
+        line-height: 1.3;
+    }
+
+    .carousel-card-subtitle {
+        margin: 0;
+        font-size: 12px;
+        color: #666;
+        line-height: 1.4;
+        flex: 1;
+    }
+
+    .carousel-card-actions {
+        padding: 0 14px 14px 14px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .carousel-card-btn {
+        flex: 1;
+        min-width: 100px;
+        padding: 8px 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .modal-3d-viewer.active {
-        display: flex;
+    .carousel-card-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
-    .modal-3d-content {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        width: 90%;
-        max-width: 600px;
-        max-height: 80vh;
-        overflow-y: auto;
+    .carousel-card-btn:active {
+        transform: translateY(0);
     }
 
-    .modal-3d-header {
+    .typing-bubble {
         display: flex;
-        justify-content: space-between;
+        gap: 4px;
         align-items: center;
-        padding: 20px;
-        border-bottom: 2px solid #eee;
+        padding: 12px 16px;
     }
 
-    .modal-3d-header h2 {
-        margin: 0;
-        color: #333;
-        font-size: 18px;
+    .typing-bubble span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #667eea;
+        animation: typing 1.4s infinite;
     }
 
-    .modal-3d-close {
-        background: none;
-        border: none;
-        font-size: 28px;
-        cursor: pointer;
-        color: #999;
-        transition: color 0.3s;
+    .typing-bubble span:nth-child(2) {
+        animation-delay: 0.2s;
     }
 
-    .modal-3d-close:hover {
-        color: #333;
+    .typing-bubble span:nth-child(3) {
+        animation-delay: 0.4s;
     }
 
-    .modal-3d-body {
-        padding: 20px;
-        color: #555;
+    @keyframes typing {
+        0%, 60%, 100% {
+            opacity: 0.5;
+            transform: translateY(0);
+        }
+        30% {
+            opacity: 1;
+            transform: translateY(-8px);
+        }
     }
 
-    .modal-3d-body a {
-        color: #667eea;
-        text-decoration: none;
+    /* Product Carousel Styles for Chat */
+    .product-carousel-bubble {
+        max-width: 100%;
+        padding: 12px !important;
+        background: #f8f9fa !important;
+        border: 1px solid #e0e0e0 !important;
+    }
+
+    .carousel-title {
+        margin: 0 0 12px 0 !important;
         font-weight: 600;
+        font-size: 14px;
+        color: #333;
     }
 
-    .modal-3d-body a:hover {
-        text-decoration: underline;
+    .product-carousel {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 8px 0;
+        margin: 12px 0;
+        scroll-behavior: smooth;
     }
+
+    .product-carousel::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .product-carousel::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .product-carousel::-webkit-scrollbar-thumb {
+        background: #d0d0d0;
+        border-radius: 3px;
+    }
+
+    .product-carousel::-webkit-scrollbar-thumb:hover {
+        background: #999;
+    }
+
+    .product-card {
+        flex: 0 0 200px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .product-card-build {
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .product-card-build:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .product-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 140px;
+        overflow: hidden;
+        background: #f5f5f5;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
+    }
+
+    .product-info {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .product-name {
+        margin: 0 0 4px 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-category {
+        margin: 0 0 4px 0;
+        font-size: 11px;
+        color: #999;
+        font-weight: 500;
+    }
+
+    .product-price {
+        margin: 0 0 6px 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #667eea;
+    }
+
+    .product-description {
+        margin: 0 0 8px 0;
+        font-size: 11px;
+        color: #666;
+        line-height: 1.3;
+        flex-grow: 1;
+    }
+
+    .product-link {
+        display: inline-block;
+        padding: 6px 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .product-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .carousel-note {
+        margin: 8px 0 0 0 !important;
+        font-size: 11px;
+        color: #999;
+        font-style: italic;
+        text-align: center;
+    }
+
+    .custom-chat-input-area {
+        display: flex;
+        gap: 8px;
+        padding: 12px 20px;
+        background: white;
+        border-top: 1px solid #e0e0e0;
+        border-radius: 0 0 12px 12px;
+        flex-shrink: 0;
+    }
+
+    .custom-chat-input {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-family: inherit;
+        transition: all 0.3s;
+        outline: none;
+    }
+
+    .custom-chat-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .custom-chat-input::placeholder {
+        color: #999;
+    }
+
+    .custom-chat-send-btn {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    }
+
+    .custom-chat-send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .custom-chat-send-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Quick Actions Styles */
+    .custom-chat-quick-actions {
+        padding: 12px 16px;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+        flex-shrink: 0;
+    }
+
+    .custom-chat-quick-btn {
+        background: white;
+        border: 1px solid #ddd;
+        color: #333;
+        padding: 10px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.3s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .custom-chat-quick-btn:hover {
+        background: #0B76AF;
+        color: white;
+        border-color: #0B76AF;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(11, 118, 175, 0.3);
+    }
+
+    .custom-chat-quick-btn:active {
+        transform: translateY(0);
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .custom-chat-widget {
+            width: 75vw;
+            height: 80vh;
+        }
+
+        .carousel-card {
+            flex: 0 0 240px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .custom-chat-widget {
+            width: 90vw;
+            height: 85vh;
+            bottom: 20px;
+            right: 20px;
+            max-width: none;
+            max-height: none;
+        }
+
+        .custom-chat-toggle {
+            bottom: 15px;
+            right: 15px;
+            width: 55px;
+            height: 55px;
+            font-size: 22px;
+        }
+
+        .custom-chat-bubble {
+            max-width: 95%;
+        }
+
+        .carousel-card {
+            flex: 0 0 200px;
+        }
+
+        .custom-chat-header {
+            padding: 16px 18px;
+        }
+
+        .custom-chat-messages {
+            padding: 16px 18px;
+        }
+
+        .custom-chat-input-area {
+            padding: 10px 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .custom-chat-widget {
+            width: calc(100% - 20px);
+            height: calc(100vh - 100px);
+            bottom: 50px;
+            right: 10px;
+            left: 10px;
+            border-radius: 12px;
+        }
+
+        .custom-chat-toggle {
+            bottom: 10px;
+            right: 10px;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        .custom-chat-bubble {
+            max-width: 95%;
+            padding: 10px 14px;
+            font-size: 13px;
+        }
+
+        .carousel-card {
+            flex: 0 0 160px;
+        }
+
+        .carousel-card-title {
+            font-size: 13px;
+        }
+
+        .carousel-card-subtitle {
+            font-size: 11px;
+        }
+
+        .carousel-card-btn {
+            font-size: 11px;
+            padding: 6px 10px;
+        }
+    }
+
 </style>
 
 {% endblock content %}

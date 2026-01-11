@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import HomePage, ProductPage, ProductItemPage, AIBotPage, CheckoutPage, AppointmentCompletePage, SellingPage, SellingCompletePage, SellingInfoPage, MyAppointmentPage, MySellingAppointmentPage, MyCancelledAppointmentPage, MyHistoryAppointmentPage, CartPage, FavoritePage, add_to_cart, AdminDashboard, AdminInventory, AdminProduct, AdminAppointment, AdminSellingAppointment
 from . import views
-from .api_views import api_product_3d_model, api_search_products_with_3d
+from .api_views import api_product_3d_model, api_search_products_with_3d, api_gemini_system_prompt, api_products_recommend, api_available_categories, api_store_info, api_save_chat_conversation, api_load_chat_conversation, api_delete_chat_conversation
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -35,8 +35,13 @@ urlpatterns = [
     path('admin_dashboard/', AdminDashboard.as_view(), name='admin_dashboard'),
     path('admin_inventory/', AdminInventory.as_view(), name='admin_inventory'),
     path('admin_product/', AdminProduct.as_view(), name='admin_product'),
-    path('update_product/', views.update_product, name='update_product'),
-    path('delete_products/', views.delete_products, name='delete_products'),
+    path('add_product/', views.add_product_ajax, name='add_product'),
+    path('update_product/<int:product_id>/', views.update_product_ajax, name='update_product'),
+    path('delete_product/<int:product_id>/', views.delete_product_ajax, name='delete_product'),
+    path('update_category/<int:category_id>/', views.update_category, name='update_category'),
+    path('delete_category/<int:category_id>/', views.delete_category, name='delete_category'),
+    path('update_brand/<int:brand_id>/', views.update_brand, name='update_brand'),
+    path('delete_brand/<int:brand_id>/', views.delete_brand, name='delete_brand'),
     path('admin_appointment/', AdminAppointment.as_view(), name='admin_appointment'),
     path('admin_appointment/<int:appointment_id>/complete/', views.finished_appointment, name='finished_appointment'),
     path('admin_appointment/<int:appointment_id>/cancel/', views.cancel_appointment, name='cancel_appointment'),
@@ -50,11 +55,15 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
     path('resend_otp/', views.resend_otp, name="resend-otp"),
+    path('api/gemini/system-prompt/', api_gemini_system_prompt, name='api_gemini_system_prompt'),
+    path('api/products/recommend/', api_products_recommend, name='api_products_recommend'),
+    path('api/categories/', api_available_categories, name='api_available_categories'),
+    path('api/store-info/', api_store_info, name='api_store_info'),
+    path('api/chat/save/', api_save_chat_conversation, name='api_save_chat'),
+    path('api/chat/load/', api_load_chat_conversation, name='api_load_chat'),
+    path('api/chat/delete/', api_delete_chat_conversation, name='api_delete_chat'),
     path('api/products/<component>/', views.product_list, name='product_list'),
     path('api/products_by_component/', views.products_by_component, name='products_by_component'),
-    path('api/save_appointment/', views.save_appointment, name='save_appointment'),
-    path('api/product/<int:product_id>/3d/', api_product_3d_model, name='api_product_3d'),
-    path('api/search-products-3d/', api_search_products_with_3d, name='api_search_products_3d'),
     path('model_viewer/', views.model_viewer, name="model_viewer"),
     path("api/add-pc-build/", views.add_pc_build_to_cart, name="add_pc_build"),
     path('ai3d-test/', views.ai3d_test, name='ai3d_test'),

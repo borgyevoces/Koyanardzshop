@@ -35,7 +35,30 @@ class LoginForm(AuthenticationForm):
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = CustomUser
-        fields = ['avatar', 'email', 'first_name', 'last_name', 'contact', 'address', 'username']
+        fields = ['avatar', 'first_name', 'last_name', 'contact', 'address']
+        widgets = {
+            'avatar': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'First Name'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Last Name'
+            }),
+            'contact': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Contact Number'
+            }),
+            'address': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Address',
+                'rows': 3
+            }),
+        }
 
 class ProfileUpdateForm(UserChangeForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False)

@@ -4,7 +4,11 @@
 
 {% block content %}
 
-<div class="admin_dashboard">
+<div class="admin_productpage">
+    <div class="product-header">
+        <h2>Dashboard</h2>
+    </div>
+
     <div class="card mt-3" style="background-color: #033f63;">
     <div class="card-content">
         <div class="row row-group m-0">
@@ -88,145 +92,78 @@
 
      <div class="col-12 col-lg-4 col-xl-4">
         <div class="card">
-           <div class="card-header">Top Categories
-             <div class="card-action">
-             </div>
-           </div>
+           <div class="card-header">Top Categories</div>
            <div class="card-body">
 		     <div class="chart-container-2">
             <canvas id="chart2"></canvas>
 			    </div>
            </div>
-           <div class="table-responsive">
-             <table class="table align-items-center">
-               <tbody>
-                 {% for c in category_list %}
-                  <tr>
-                    <td style="font-size: 1.1rem;">{{ c.category_name }}</td>
-                    <td>{{ c.total_sold }}</td>
-                  </tr>
-                 {% endfor %}
-               </tbody>
-             </table>
+           <div class="dashboard-legend">
+             {% for c in category_list %}
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: 
+                        {% if forloop.counter == 1 %}#f79256
+                        {% elif forloop.counter == 2 %}#fbd1a2
+                        {% elif forloop.counter == 3 %}#7dcfb6
+                        {% elif forloop.counter == 4 %}#00b2ca
+                        {% elif forloop.counter == 5 %}#1d4e89
+                        {% else %}#999
+                        {% endif %}"></div>
+                    <span class="legend-label">{{ c.category_name }}: {{ c.total_sold }}</span>
+                </div>
+             {% endfor %}
            </div>
          </div>
      </div>
 	</div>
-  <!--End Row-->
-	
+  
 	<div class="row" id="dashboard_tabledata">
 	 <div class="col-12 col-lg-12">
-	   <div class="card">
-	     <div class="card-header" style="font-size: 1.5rem; text-transform: uppercase;">All Appointments
-		  
-		 </div>
-	       <div class="table-responsive">
-                 <table class="table align-items-center table-flush table-borderless" style="border-radius: 1rem;">
+	   <div class="products-table-container">
+	     <div class="table-wrapper">
+                 <table class="products-table">
     <thead>
         <tr>
-          <th style="font-size: .9rem;">Type</th>
-          <th style="font-size: .9rem;">Photo</th>
-          <th style="font-size: .9rem;">Product</th>
-          <th style="font-size: .9rem;">Amount</th>
-          <th style="font-size: .9rem;">Date</th>
-          <th style="font-size: .9rem;">Reference No.</th>
-          <th style="font-size: .9rem;">Progress</th>
+          <th>Type</th>
+          <th>Photo</th>
+          <th>Product</th>
+          <th>Amount</th>
+          <th>Date</th>
+          <th>Reference No.</th>
+          <th>Progress</th>
         </tr>
     </thead>
     <tbody>
-        {% for order in all_orders %}
-        <tr style="padding: 0 .3rem; font-size: 1rem;">
-            <td>{{ order.type }}</td>
-            <td>
-              {% if order.photo %}
-                <img src="{{ order.photo }}" class="product-img" alt="product img" style="width: 5rem; height: fit-content;">
-              {% endif %}
-            </td>
-            <td style="max-width: 10rem; overflow: hidden;">{{ order.product }}</td>
-            <td>₱{{ order.amount|intcomma }}</td>
-            <td>{{ order.date|date:"d M Y H:i" }}</td>
-            <td>{{ order.product_id }}</td>
-            <td>
-                <div class="progress shadow" style="height: 3px;">
-                    <div class="progress-bar" role="progressbar" style="width: {{ order.shipping_progress }}%"></div>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
+        {% if all_orders %}
+            {% for order in all_orders %}
+            <tr>
+                <td data-label="Type">{{ order.type }}</td>
+                <td data-label="Photo">
+                  {% if order.photo %}
+                    <img src="{{ order.photo }}" alt="product img" class="product-thumbnail" style="width: 50px; height: 50px;">
+                  {% endif %}
+                </td>
+                <td data-label="Product" class="product-name" style="max-width: 10rem; overflow: hidden;">{{ order.product }}</td>
+                <td data-label="Amount" class="price-column">₱{{ order.amount|intcomma }}</td>
+                <td data-label="Date">{{ order.date|date:"M d, Y H:i" }}</td>
+                <td data-label="Reference">{{ order.product_id }}</td>
+                <td data-label="Progress">
+                    <div class="progress shadow" style="height: 3px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ order.shipping_progress }}%"></div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr><td colspan="7" class="no-data">No orders found</td></tr>
+        {% endif %}
     </tbody>
 </table>
-
-               </div>
+	     </div>
 	   </div>
 	 </div>
 	</div>
-
-    <!--
-    <div class="admin_dashboardupper">
-        <div class="dashboardupper_notification">
-            <div class="dashboard_notificationupper">
-                <h4>New</h4>
-            </div>
-            <div class="dashboard_notificationlink">
-                <a href="{% url 'admin_appointment' %}">Appointment <span>{{ appointed }}</span></a>
-                <a href="{% url 'admin_selling' %}">Selling <span>{{ traded }}</span></a>
-            </div>
-        </div>
-        <div class="dashboardupper_appointment">
-            <p>{{ total_appointments }}</p>
-            <h4>Total Appointment</h4>
-        </div>
-        <div class="dashboardupper_selling">
-            <p>{{ total_trades }}</p>
-            <h4>Total Trades</h4>
-        </div>
-    </div>
-    <div class="admin_dashboardbody">
-        <div class="dashboardbody_sales">
-            <canvas id="combinedLineChart" width="400" height="200"></canvas>
-        </div>
-        <div class="dashboardbody_categories">
-            
-        </div>
-    </div>
 </div>
-
-<script>
-    const linegraph = document.getElementById('combinedLineChart').getContext('2d');
-    const chart = new Chart(linegraph, {
-        type: 'line',
-        data: {
-            labels: {{ chart_labels|safe }},
-            datasets: [
-                {
-                label: 'Appointments',
-                data: {{ appointment_chart_data|safe }},
-                borderColor: 'rgba(54, 162, 235, 1)',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                tension: 0.3,
-                fill: true
-                },
-                {
-                label: 'Sellings',
-                data: {{ selling_chart_data|safe }},
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                tension: 0.3,
-                fill: true
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-</script>
--->
 
 <script>
 $(function() {
@@ -329,7 +266,5 @@ $(function() {
 
 });
 </script>
-
-
 
 {% endblock %}

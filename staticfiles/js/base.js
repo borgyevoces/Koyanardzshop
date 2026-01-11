@@ -24,7 +24,7 @@
 
                 const productId = this.dataset.productId;
 
-                fetch(`/add-to-cart/${productId}/`, {
+                fetch(`/add-to-cart/${productId}`, {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': csrftoken,
@@ -34,8 +34,6 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('Product added to cart!');
-
                     const cartCountElement = document.getElementById('cart-count');
                     if (cartCountElement) {
                         cartCountElement.textContent = data.cart_count;
@@ -98,12 +96,38 @@ document.addEventListener('click', function (e) {
         e.stopPropagation();
         const productId = favBtn.getAttribute('data-product-id');
 
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
         fetch(`/toggle_favorite/${productId}/`, {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
+            method: 'POST',
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({})
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
         .then(data => {
             const dropdown = document.getElementById('favoriteDropdown');
             console.debug('toggle_favorite response', data);
@@ -115,6 +139,13 @@ document.addEventListener('click', function (e) {
 
             if (data.status === 'added') {
                 favBtn.classList.add('favorited');
+                
+                // Change heart icon from outline to solid
+                const icon = favBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                }
 
                 // If no full dropdown was provided, try inserting the returned single-item HTML
                 if (!data.dropdown_html && data.html && dropdown) {
@@ -139,6 +170,13 @@ document.addEventListener('click', function (e) {
                 }
             } else if (data.status === 'removed') {
                 favBtn.classList.remove('favorited');
+                
+                // Change heart icon from solid to outline
+                const icon = favBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                }
 
                 // If server didn't return full dropdown HTML, remove the specific item from DOM
                 if (!data.dropdown_html) {
@@ -172,12 +210,38 @@ document.addEventListener('click', function (e) {
         e.stopPropagation();
         const productId = removeBtn.getAttribute('data-product-id');
 
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
         fetch(`/toggle_favorite/${productId}/`, {
-            method: 'GET',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
+            method: 'POST',
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({})
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            return res.json();
+        })
         .then(data => {
             console.debug('remove favorite response', data);
             // If server returned a full dropdown, replace it
@@ -190,7 +254,14 @@ document.addEventListener('click', function (e) {
 
                 // update any product card favorite state
                 const prodBtn = document.querySelector(`.favorite_btn[data-product-id="${productId}"]`);
-                if (prodBtn) prodBtn.classList.remove('favorited');
+                if (prodBtn) {
+                    prodBtn.classList.remove('favorited');
+                    const icon = prodBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                    }
+                }
             }
         })
         .catch(err => console.error('Error removing favorite from dropdown:', err));

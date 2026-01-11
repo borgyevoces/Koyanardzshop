@@ -1,13 +1,19 @@
-# API endpoint for getting product 3D model data
-# Add this to your views.py or create a separate api_views.py file
-
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.db import models
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.db.models import Q
 from .models import Product
+import requests
+import os
+import json
+import logging
+import jwt
+from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 @require_http_methods(["GET"])
 def api_product_3d_model(request, product_id):
@@ -93,3 +99,548 @@ def api_search_products_with_3d(request):
         "products": results,
         "total": len(results)
     })
+
+
+@require_http_methods(["GET"])
+def api_get_all_products(request):
+    """
+    Get all products with full details for chatbot recommendations
+    Query params:
+    - component: filter by component type (cpu, gpu, ram, etc.)
+    - limit: max results (default 100)
+    - search: search by product name
+    """
+    search_query = request.GET.get('search', '')
+    component = request.GET.get('component', '')
+    limit = int(request.GET.get('limit', 100))
+    
+    products = Product.objects.all()
+    
+    if search_query:
+        products = products.filter(
+            Q(product_name__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        )
+    
+    if component:
+        products = products.filter(component_type=component)
+    
+    results = []
+    for p in products[:limit]:
+        results.append({
+            "id": p.id,
+            "product_name": p.product_name,
+            "price": str(p.price),
+            "brand": p.brand.brand if p.brand else "Unknown",
+            "component_type": p.component_type,
+            "description": p.description or "",
+            "stock": p.stock,
+            "category": p.category_name.category_name if p.category_name else "Unknown",
+            "has_3d_model": bool(p.model_3d),
+            "image_url": p.image.url if p.image else None,
+        })
+    
+    return JsonResponse({
+        "success": True,
+        "products": results,
+        "total": len(results)
+    })
+
+
+@api_view(['GET'])
+def botpress_test(request):
+    """
+    Test endpoint - deprecated (Botpress removed)
+    """
+    return Response({'success': False, 'error': 'Botpress integration has been removed'}, status=410)
+
+
+@require_http_methods(["GET"])
+def api_gemini_system_prompt(request):
+    """
+    API endpoint to get the Gemini AI system prompt
+    Returns the system instructions that guide the AI's behavior
+    """
+    try:
+        prompt_path = os.path.join(os.path.dirname(__file__), 'gemini_system_prompt.txt')
+        
+        if os.path.exists(prompt_path):
+            with open(prompt_path, 'r', encoding='utf-8') as f:
+                prompt_content = f.read()
+            
+            return JsonResponse({
+                'success': True,
+                'prompt': prompt_content
+            })
+        else:
+            logger.warning(f"System prompt file not found: {prompt_path}")
+            return JsonResponse({
+                'success': False,
+                'error': 'System prompt file not found'
+            }, status=404)
+    
+    except Exception as e:
+        logger.error(f"Error loading system prompt: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def api_products_recommend(request):
+    """
+    API endpoint for product recommendations
+    Chatbot uses this to search and recommend products from store inventory
+    Supports category parameter for strict category filtering
+    """
+    try:
+        from .models import Product
+        from django.db.models import Q
+        
+        query = request.GET.get('query', '').strip()
+        category = request.GET.get('category', '').strip()
+        max_price = request.GET.get('max_price')
+        max_results = int(request.GET.get('max_results', 6))
+        
+        products_list = []
+        
+        # If category parameter is provided, search by category
+        if category:
+            try:
+                category_lower = category.lower()
+                
+                # Map category names to component_type values (using database choices)
+                category_map = {
+                    'monitor': 'monitor',
+                    'mouse': 'mouse',
+                    'keyboard': 'keyboard',
+                    'headset': 'headset',
+                    'case': 'case',
+                    'storage': 'storage',
+                    'gpu': 'gpu',
+                    'graphics card': 'gpu',
+                    'motherboard': 'motherboard',
+                    'ram': 'ram',
+                    'cpu': 'cpu',
+                    'processor': 'cpu',
+                    'cooling': 'cooling',
+                    'fan': 'cooling',
+                    'psu': 'psu',
+                    'power': 'psu'
+                }
+                
+                component_type = category_map.get(category_lower, category_lower)
+                
+                # Strategy 1: Try case-insensitive component_type match
+                products_list = list(Product.objects.filter(
+                    stock__gt=0,
+                    component_type__iexact=component_type
+                ).select_related('brand', 'category_name')[:max_results])
+                
+                # Strategy 2: If no results, try category_name field (case-insensitive)
+                if not products_list:
+                    products_list = list(Product.objects.filter(
+                        stock__gt=0,
+                        category_name__category_name__icontains=category_lower
+                    ).exclude(
+                        component_type__in=['monitor', 'case']
+                    ).select_related('brand', 'category_name')[:max_results])
+                
+                # Strategy 3: If still no results, try product name (case-insensitive)
+                if not products_list:
+                    products_list = list(Product.objects.filter(
+                        stock__gt=0,
+                        product_name__icontains=category
+                    ).select_related('brand', 'category_name')[:max_results])
+                
+                # Apply price filter if results found
+                if products_list and max_price:
+                    try:
+                        max_price_val = float(max_price)
+                        products_list = [p for p in products_list if p.price <= max_price_val]
+                    except:
+                        pass
+                
+                # Format and return results
+                if products_list:
+                    products_data = []
+                    for product in products_list:
+                        brand_name = 'Unknown'
+                        if product.brand:
+                            brand_name = product.brand.brand if hasattr(product.brand, 'brand') else str(product.brand)
+                        
+                        category_name = 'Unknown'
+                        if product.category_name:
+                            category_name = product.category_name.category_name
+                        
+                        products_data.append({
+                            'id': product.id,
+                            'name': product.product_name,
+                            'brand': brand_name,
+                            'price': float(product.price),
+                            'component_type': product.component_type,
+                            'category': category_name,
+                            'image_url': product.image.url if product.image else '/static/images/placeholder.png',
+                            'description': product.description or '',
+                            'model_3d': product.model_3d.url if product.model_3d else None
+                        })
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'count': len(products_data),
+                        'products': products_data
+                    })
+            except Exception as cat_error:
+                logger.error(f"Category filter error: {str(cat_error)}")
+                pass
+        
+        # Fall back to query parameter search if no category or no results
+        if not query and not products_list:
+            return JsonResponse({
+                'success': True,
+                'count': 0,
+                'products': []
+            })
+        
+        if query:
+            # Try component_type search first (for monitor, cpu, gpu, ram, etc.)
+            try:
+                component_products = Product.objects.filter(
+                    stock__gt=0,
+                    component_type__icontains=query
+                ).select_related('brand', 'category_name')
+                
+                if component_products.exists():
+                    # Apply price filter
+                    if max_price:
+                        try:
+                            max_price_val = float(max_price)
+                            component_products = component_products.filter(price__lte=max_price_val)
+                        except:
+                            pass
+                    
+                    products_list = list(component_products[:max_results])
+            except Exception as comp_error:
+                logger.error(f"Component type search error: {str(comp_error)}")
+                pass
+            
+            # If no component type results, try category search
+            if not products_list:
+                try:
+                    category_products = Product.objects.filter(
+                        stock__gt=0,
+                        category_name__category_name__icontains=query
+                    ).select_related('brand', 'category_name')
+                    
+                    if category_products.exists():
+                        # Apply price filter
+                        if max_price:
+                            try:
+                                max_price_val = float(max_price)
+                                category_products = category_products.filter(price__lte=max_price_val)
+                            except:
+                                pass
+                        
+                        products_list = list(category_products[:max_results])
+                except Exception as cat_error:
+                    logger.error(f"Category search error: {str(cat_error)}")
+                    pass
+            
+            # If still no results, try product name search (but NOT description)
+            if not products_list:
+                try:
+                    name_products = Product.objects.filter(
+                        stock__gt=0,
+                        product_name__icontains=query
+                    ).select_related('brand', 'category_name')
+                    
+                    if name_products.exists():
+                        # Apply price filter
+                        if max_price:
+                            try:
+                                max_price_val = float(max_price)
+                                name_products = name_products.filter(price__lte=max_price_val)
+                            except:
+                                pass
+                        
+                        products_list = list(name_products[:max_results])
+                except Exception as name_error:
+                    logger.error(f"Product name search error: {str(name_error)}")
+                    pass
+        
+        # Format results
+        products_data = []
+        for product in products_list:
+            try:
+                cat_name = 'Unknown'
+                if product.category_name:
+                    cat_name = product.category_name.category_name or 'Unknown'
+                
+                brand_name = 'Unknown'
+                if product.brand:
+                    brand_name = product.brand.brand or 'Unknown'
+                
+                image_url = '/static/images/placeholder.png'
+                if product.image:
+                    image_url = product.image.url
+                
+                model_3d_url = None
+                if product.model_3d:
+                    model_3d_url = product.model_3d.url
+                
+                product_dict = {
+                    'id': product.id,
+                    'name': product.product_name or 'Unnamed',
+                    'category': cat_name,
+                    'price': float(product.price or 0),
+                    'description': product.description or '',
+                    'image_url': image_url,
+                    'brand': brand_name,
+                    'model_3d': model_3d_url
+                }
+                products_data.append(product_dict)
+            except Exception as item_error:
+                logger.error(f"Error formatting product: {str(item_error)}")
+                continue
+        
+        return JsonResponse({
+            'success': True,
+            'count': len(products_data),
+            'products': products_data
+        })
+    
+    except Exception as e:
+        logger.error(f"Error in product recommendations: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JsonResponse({
+            'success': True,
+            'count': 0,
+            'products': []
+        })
+
+
+@require_http_methods(["GET"])
+def api_available_categories(request):
+    """
+    Returns list of all available product categories from database
+    Used by chatbot to know what categories actually exist
+    """
+    try:
+        from .models import Category
+        
+        # Get all categories
+        categories = Category.objects.all().values_list('category_name', flat=True).distinct()
+        categories_list = sorted(list(categories))
+        
+        return JsonResponse({
+            'success': True,
+            'categories': categories_list,
+            'count': len(categories_list)
+        })
+    
+    except Exception as e:
+        logger.error(f"Error fetching categories: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def api_store_info(request):
+    """
+    Returns store information for chatbot to use
+    Includes product categories, component types, and general store info
+    """
+    try:
+        from .models import Category, Product
+        from django.db.models import Min, Max
+        
+        # Get all available categories with stock
+        categories_with_stock = Product.objects.filter(
+            stock__gt=0
+        ).values_list('category_name__category_name', flat=True).distinct()
+        categories_list = sorted(list(set([c for c in categories_with_stock if c])))
+        
+        # Get price range
+        price_data = Product.objects.filter(stock__gt=0).aggregate(
+            min_price=Min('price'),
+            max_price=Max('price')
+        )
+        
+        min_price = float(price_data['min_price'] or 0)
+        max_price = float(price_data['max_price'] or 0)
+        
+        # Count total products in stock
+        total_products = Product.objects.filter(stock__gt=0).count()
+        
+        return JsonResponse({
+            'success': True,
+            'categories': categories_list,
+            'price_range': {
+                'min': min_price,
+                'max': max_price
+            },
+            'total_products_in_stock': total_products
+        })
+    
+    except Exception as e:
+        logger.error(f"Error fetching store info: {str(e)}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+@require_http_methods(["POST"])
+def api_save_chat_conversation(request):
+    """
+    Save chat conversation and build state for logged-in users or anonymous users
+    Each user (logged-in or not) has their own separate conversation
+    POST data: {
+        "session_id": "unique-session-id",
+        "messages": [{"role": "user/model", "content": "..."}],
+        "build_state": { "selectedComponents": {...}, ... }  (optional)
+    }
+    """
+    try:
+        from .models import ChatConversation
+        
+        data = json.loads(request.body)
+        session_id = data.get('session_id', '')
+        messages = data.get('messages', [])
+        build_state = data.get('build_state', {})
+        
+        if not session_id:
+            return JsonResponse({'success': False, 'error': 'session_id required'}, status=400)
+        
+        # Validate session ID format
+        if request.user.is_authenticated:
+            # For logged-in users, session_id should be user-{id}-chat
+            expected_session = f'user-{request.user.id}-chat'
+            if session_id != expected_session:
+                return JsonResponse({'success': False, 'error': 'Invalid session for logged-in user'}, status=403)
+        else:
+            # For anonymous users, session_id should start with 'anon-'
+            if not session_id.startswith('anon-'):
+                return JsonResponse({'success': False, 'error': 'Invalid session for anonymous user'}, status=403)
+        
+        # Get or create conversation - each user gets their own
+        conversation, created = ChatConversation.objects.get_or_create(
+            session_id=session_id,
+            defaults={'user': request.user if request.user.is_authenticated else None}
+        )
+        
+        # Verify user ownership (for logged-in users)
+        if request.user.is_authenticated and conversation.user != request.user:
+            return JsonResponse({'success': False, 'error': 'Unauthorized: Cannot modify another user\'s conversation'}, status=403)
+        
+        # Update messages and build state
+        conversation.messages = messages
+        if build_state:
+            conversation.build_state = build_state
+        conversation.save()
+        
+        return JsonResponse({
+            'success': True,
+            'conversation_id': conversation.id,
+            'message': 'Conversation saved'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error saving chat: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def api_load_chat_conversation(request):
+    """
+    Load chat conversation for logged-in users or by session_id
+    GET params: session_id (required)
+    """
+    try:
+        from .models import ChatConversation
+        
+        session_id = request.GET.get('session_id', '')
+        
+        if not session_id:
+            return JsonResponse({'success': False, 'error': 'session_id required'}, status=400)
+        
+        # Try to get conversation
+        conversation = ChatConversation.objects.filter(session_id=session_id).first()
+        
+        if not conversation:
+            # No conversation found, return empty
+            return JsonResponse({
+                'success': True,
+                'messages': [],
+                'found': False
+            })
+        
+        return JsonResponse({
+            'success': True,
+            'messages': conversation.messages,
+            'found': True,
+            'conversation_id': conversation.id
+        })
+    
+    except Exception as e:
+        logger.error(f"Error loading chat: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@require_http_methods(["POST"])
+def api_delete_chat_conversation(request):
+    """
+    Delete chat conversation
+    Each user can only delete their own conversation
+    POST data: {
+        "session_id": "unique-session-id"
+    }
+    """
+    try:
+        from .models import ChatConversation
+        
+        data = json.loads(request.body)
+        session_id = data.get('session_id', '')
+        
+        if not session_id:
+            return JsonResponse({'success': False, 'error': 'session_id required'}, status=400)
+        
+        # Validate session ID format
+        if request.user.is_authenticated:
+            # For logged-in users, session_id should be user-{id}-chat
+            expected_session = f'user-{request.user.id}-chat'
+            if session_id != expected_session:
+                return JsonResponse({'success': False, 'error': 'Invalid session for logged-in user'}, status=403)
+        else:
+            # For anonymous users, session_id should start with 'anon-'
+            if not session_id.startswith('anon-'):
+                return JsonResponse({'success': False, 'error': 'Invalid session for anonymous user'}, status=403)
+        
+        # Get conversation first to verify ownership
+        conversation = ChatConversation.objects.filter(session_id=session_id).first()
+        
+        if not conversation:
+            return JsonResponse({'success': False, 'error': 'Conversation not found'}, status=404)
+        
+        # Verify user ownership (for logged-in users)
+        if request.user.is_authenticated and conversation.user != request.user:
+            return JsonResponse({'success': False, 'error': 'Unauthorized: Cannot delete another user\'s conversation'}, status=403)
+        
+        # Delete conversation
+        conversation.delete()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Conversation deleted'
+        })
+    
+    except Exception as e:
+        logger.error(f"Error deleting chat: {str(e)}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
