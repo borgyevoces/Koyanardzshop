@@ -87,26 +87,6 @@ def ai3d_test(request):
     """Test page for Botpress AI 3D model generation"""
     return render(request, 'ai3dtest.html')
 
-def products_by_component(request):
-    comp = request.GET.get('component_type', '').strip()
-    qs = Product.objects.all()
-
-    if comp:
-        qs = qs.filter(component_type=comp)
-
-    data = []
-    for p in qs:
-        data.append({
-            "id": p.id,
-            "product_name": p.product_name,
-            "price": float(p.price),
-            "image_url": p.image.url if p.image else None,
-            "component_type": p.component_type,
-            "stock": p.stock,
-        })
-
-    return JsonResponse(data, safe=False)
-
 
 #ADMIN
 
@@ -218,12 +198,11 @@ def add_product_ajax(request):
             product_name = request.POST.get('product_name', '').strip()
             category_id = request.POST.get('category_name')
             brand_id = request.POST.get('brand')
-            component_type = request.POST.get('component_type', '').strip()
             description = request.POST.get('description', '').strip()
             price = request.POST.get('price', '0')
             stock = request.POST.get('stock', '0')
             
-            if not all([product_name, category_id, brand_id, component_type, price, stock]):
+            if not all([product_name, category_id, brand_id, price, stock]):
                 return JsonResponse({'status': 'error', 'message': 'Missing required fields'})
             
             from .models import Category, Brand
@@ -238,7 +217,6 @@ def add_product_ajax(request):
                 product_name=product_name,
                 category_name=category,
                 brand=brand,
-                component_type=component_type,
                 description=description,
                 price=float(price),
                 stock=int(stock)
@@ -286,9 +264,6 @@ def update_product_ajax(request, product_id):
                 from .models import Brand
                 product.brand = get_object_or_404(Brand, id=brand_id)
         
-        if 'component_type' in request.POST:
-            product.component_type = request.POST.get('component_type', '').strip()
-        
         if 'description' in request.POST:
             product.description = request.POST.get('description', '').strip()
         
@@ -312,6 +287,49 @@ def update_product_ajax(request, product_id):
         
         product.save()
         return JsonResponse({'status': 'success', 'message': 'Product updated successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def add_product_variant_ajax(request, product_id):
+    """AJAX endpoint for adding a variant to a product"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        from .models import ProductVariation
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Get variant data from request
+        product_variation = request.POST.get('product_variation', '').strip()
+        description = request.POST.get('description', '').strip()
+        price = request.POST.get('price', '')
+        stock = request.POST.get('stock', '')
+        
+        # Validate required fields
+        if not product_variation:
+            return JsonResponse({'status': 'error', 'message': 'Variant name is required'})
+        if not price:
+            return JsonResponse({'status': 'error', 'message': 'Price is required'})
+        if not stock:
+            return JsonResponse({'status': 'error', 'message': 'Stock is required'})
+        
+        # Create the variant
+        variant = ProductVariation.objects.create(
+            product=product,
+            product_variation=product_variation,
+            description=description,
+            price=float(price),
+            stock=int(stock)
+        )
+        
+        # Handle image upload if provided
+        if 'image' in request.FILES:
+            variant.image = request.FILES['image']
+            variant.save()
+        
+        return JsonResponse({'status': 'success', 'message': 'Variant added successfully'})
     
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
@@ -1239,7 +1257,6 @@ class ProductPage(TemplateView):
         category_filter = self.request.GET.get('category', '').strip()
         brand_filter = self.request.GET.get('brand', '').strip()
         price_order = self.request.GET.get('price_order', '').strip()
-        component_filter = self.request.GET.get('component', '').strip()
 
         products = Product.objects.all()
 
@@ -1284,9 +1301,6 @@ class ProductPage(TemplateView):
             except (ValueError, TypeError):
                 pass
 
-        if component_filter:
-            products = products.filter(component_type=component_filter)
-
         # Always annotate total_bought for all products to show best seller tag
         products = products.annotate(
             total_bought=Sum('appointmentproduct__quantity')
@@ -1310,7 +1324,6 @@ class ProductPage(TemplateView):
             'search_query': search_query,
             'category_filter': category_filter,
             'brand_filter': brand_filter,
-            'component_filter': component_filter,
         })
         context['price_order'] = price_order
         # Add Gemini API key to context

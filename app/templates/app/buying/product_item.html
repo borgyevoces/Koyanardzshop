@@ -246,6 +246,8 @@
         color: #555 !important;
         line-height: 1.8 !important;
         font-size: 15px !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
     }
 
     html .price-section,
@@ -1820,7 +1822,7 @@
 
                     <div>
                         <h4 style="margin-bottom: 15px; color: #333; font-weight: 600;">Description</h4>
-                        <p class="product-description">{{ display_description }}</p>
+                        <p class="product-description">{{ display_description|linebreaks }}</p>
                     </div>
 
                     <div class="action-buttons">

@@ -44,20 +44,7 @@ class Brand(models.Model):
         return self.brand
 
 class Product(models.Model):
-    COMPONENT_CHOICES = [
-        ('cpu', 'Processor'),
-        ('motherboard', 'Motherboard'),
-        ('ram', 'RAM'),
-        ('gpu', 'Graphics Card'),
-        ('psu', 'Power Supply'),
-        ('case', 'PC Case'),
-        ('cooling', 'Cooling'),
-        ('monitor', 'Monitor'),
-        ('storage', 'Storage'),
-    ]
-
     category_name = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
-    component_type = models.CharField(max_length=50, choices=COMPONENT_CHOICES, default="motherboard")
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     product_name = models.CharField(max_length=100)
