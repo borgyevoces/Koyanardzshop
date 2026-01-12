@@ -35,33 +35,55 @@
         </div>
     </div>
 
-    <div class="filter-panel" aria-hidden="true">
+    <div class="filter-panel" aria-hidden="true" id="filterPanel">
+        <div class="filter-panel-overlay"></div>
         <div class="filter-panel-inner">
-            <button id="filterClose" class="btn-sm filter-close">Close</button>
+            <div class="filter-panel-header">
+                <h2 class="filter-panel-title">🔍 Filters</h2>
+                <button id="filterClose" class="filter-close-btn" aria-label="Close filters" title="Close filters">
+                    <span>✕</span>
+                </button>
+            </div>
+            
             <form action="{% url 'product' %}" method="GET" class="filter-form" id="mainFilterForm">
                 <input type="hidden" name="search" value="{{ search_query }}">
-                <input type="hidden" name="brand" value="{{ brand_filter }}">
                 <input type="hidden" name="price_order" value="{{ price_order }}">
                 
-                <div class="filter-row">
-                    <label class="filterrow_label">Category</label>
-                    <select class="categoryitem" name="category" id="categorySelect">
+                <!-- Category Filter -->
+                <div class="filter-section">
+                    <div class="filter-section-header">
+                        <label class="filter-label">📦 Category</label>
+                    </div>
+                    <select class="filter-select" name="category" id="categorySelect">
                         <option value="">All Categories</option>
                         {% for category in categories %}
-                            <option value="{{ category.id }}" {% if category.id|stringformat:'s' == category_filter %} selected {% endif %}>{{ category.category_name }}</option>
+                            <option value="{{ category.id }}" {% if category.id|stringformat:'s' == category_filter %}selected{% endif %}>{{ category.category_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <div class="filter-row">
-                    <label class="filterrow_label">Brand</label>
-                    <div class="brand-list">
-                        <ul id="brand_filter">
+                <!-- Brand Filter -->
+                <div class="filter-section">
+                    <div class="filter-section-header">
+                        <label class="filter-label">🏷️ Brand</label>
+                        <button type="button" class="clear-filter-btn" id="clearBrandFilter" style="display: none;">Clear</button>
+                    </div>
+                    <div class="brand-list-wrapper">
+                        <ul id="brand_filter" class="brand-list">
                             {% for brand in brands %}
-                                <li data-id="{{ brand.id }}" class="brand-item {% if brand_filter|stringformat:'s' == brand.id|stringformat:'s' %}selected{% endif %}">{{ brand.brand|escape }}</li>
+                                <li data-id="{{ brand.id }}" class="brand-item {% if brand_filter|stringformat:'s' == brand.id|stringformat:'s' %}selected{% endif %}" role="option">
+                                    <input type="checkbox" class="brand-checkbox" value="{{ brand.id }}" {% if brand_filter|stringformat:'s' == brand.id|stringformat:'s' %}checked{% endif %} />
+                                    <span class="brand-name">{{ brand.brand|escape }}</span>
+                                </li>
                             {% endfor %}
                         </ul>
                     </div>
+                </div>
+
+                <!-- Apply Filters Button -->
+                <div class="filter-actions">
+                    <button type="submit" class="filter-apply-btn">✓ Apply Filters</button>
+                    <button type="reset" class="filter-reset-btn" id="resetFilters">↻ Reset All</button>
                 </div>
             </form>
         </div>
@@ -3010,27 +3032,9 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         });
     }
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                cookie = cookie.trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-</style>
-
-
-<script>
+    console.log('Script tag loaded');
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('🔍 DOMContentLoaded fired - initializing page');
-        
+        console.log('DOMContentLoaded event fired!');
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -3117,195 +3121,139 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             });
         });
 
-        // Sidebar / filter panel toggle
-        const filterToggle = document.getElementById('filterToggle');
-        const filterClose = document.getElementById('filterClose');
-        const filterPanel = document.querySelector('.filter-panel');
+        try {
+            // FILTER PANEL INITIALIZATION
+            const filterBtn = document.getElementById('filterToggle');
+            const filterPanel = document.getElementById('filterPanel');
+            const closeBtn = document.getElementById('filterClose');
+            const overlayDiv = document.querySelector('.filter-panel-overlay');
+            const mainFilterForm = document.getElementById('mainFilterForm');
+            const categorySelect = document.getElementById('categorySelect');
+            const brandItems = document.querySelectorAll('.brand-item');
+            const clearBrandFilter = document.getElementById('clearBrandFilter');
+            const resetFiltersBtn = document.getElementById('resetFilters');
 
-        console.log('🔍 Filter panel elements:', { filterToggle, filterClose, filterPanel });
-
-        if (filterToggle) {
-            console.log('✅ Attaching filterToggle click listener');
-            filterToggle.addEventListener('click', function (e) {
-                console.log('✅ Filter button clicked!');
-                e.preventDefault();
-                e.stopPropagation();
-                if (filterPanel) {
+            // Open filter panel
+            if (filterBtn && filterPanel) {
+                filterBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     filterPanel.classList.add('open');
-                    filterPanel.setAttribute('aria-hidden', 'false');
-                    console.log('✅ Panel opened, classes:', filterPanel.className);
-                } else {
-                    console.error('❌ filterPanel is null!');
-                }
-            });
-        } else {
-            console.error('❌ filterToggle button not found!');
-        }
-        
-        if (filterClose) {
-            console.log('✅ Attaching filterClose click listener');
-            filterClose.addEventListener('click', function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            // Close filter panel
+            const closeFilterPanel = function() {
                 if (filterPanel) {
                     filterPanel.classList.remove('open');
-                    filterPanel.setAttribute('aria-hidden', 'true');
-                    console.log('✅ Panel closed');
+                    document.body.style.overflow = '';
+                }
+            };
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeFilterPanel);
+            }
+
+            // Close on overlay click
+            if (overlayDiv) {
+                overlayDiv.addEventListener('click', closeFilterPanel);
+            }
+
+            // Close on ESC key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && filterPanel && filterPanel.classList.contains('open')) {
+                    closeFilterPanel();
                 }
             });
-        } else {
-            console.error('filterPanel not found!');
-        }
 
-        // Form & Filter Setup
-        const categorySelect = document.getElementById("categorySelect");
-        const priceSelect = document.getElementById("priceOrder");
-        const brandList = document.getElementById("brand_filter");
-        const mainFilterForm = document.getElementById("mainFilterForm");
-        const searchForm = document.getElementById("searchForm");
-        const brandItems = document.querySelectorAll("#brand_filter li");
-        const COMPUTER_PARTS_CATEGORY_ID = "15";
-
-        console.log('🔍 Form & Filter Setup:', {
-            categorySelect: !!categorySelect,
-            priceSelect: !!priceSelect,
-            brandList: !!brandList,
-            mainFilterForm: !!mainFilterForm,
-            searchForm: !!searchForm,
-            brandItems: brandItems.length
-        });
-
-        // Helper: Get currently selected brand ID
-        function getSelectedBrandId() {
-            const selectedBrand = Array.from(brandItems).find(item => item.classList.contains('selected'));
-            return selectedBrand ? selectedBrand.dataset.id : '';
-        }
-
-        // Helper: Update hidden form inputs before submission
-        function syncFilterFormValues() {
-            if (!mainFilterForm) return;
-            
-            // Sync search value
-            const searchInput = document.querySelector('.search-form input[name="search"]');
-            const searchInForm = mainFilterForm.querySelector('input[name="search"]');
-            if (searchInForm && searchInput) {
-                searchInForm.value = searchInput.value;
-            }
-            
-            // Sync brand value
-            const brandInput = mainFilterForm.querySelector('input[name="brand"]');
-            if (brandInput) {
-                brandInput.value = getSelectedBrandId();
-            }
-            
-            // Sync price order value
-            const priceInput = mainFilterForm.querySelector('input[name="price_order"]');
-            if (priceInput && priceSelect) {
-                priceInput.value = priceSelect.value;
-            }
-        }
-
-        // Helper: Update hidden form inputs in search form before submission
-        function syncSearchFormValues() {
-            if (!searchForm) return;
-            
-            // Sync category
-            const categoryInput = searchForm.querySelector('input[name="category"]');
-            if (categoryInput && categorySelect) {
-                categoryInput.value = categorySelect.value;
-            }
-            
-            // Sync brand
-            const brandInput = searchForm.querySelector('input[name="brand"]');
-            if (brandInput) {
-                brandInput.value = getSelectedBrandId();
-            }
-            
-            // price_order is already in the search form
-        }
-
-        // Hide/show brand list based on category
-        function updateSidebarFilter() {
-            if (!categorySelect || !brandList) return;
-            if (categorySelect.value === COMPUTER_PARTS_CATEGORY_ID) {
-                brandList.style.display = "none";
-            } else {
-                brandList.style.display = "block";
-            }
-        }
-        updateSidebarFilter();
-
-        // Category change handler
-        if (categorySelect) {
-            categorySelect.addEventListener("change", function () {
-                updateSidebarFilter();
-                syncFilterFormValues();
-                if (mainFilterForm) {
-                    mainFilterForm.submit();
-                }
-            });
-        }
-
-        // Sort/Price order change handler
-        if (priceSelect) {
-            console.log('✅ Attaching priceSelect change listener');
-            priceSelect.addEventListener("change", function () {
-                console.log('🔍 Sort changed to:', this.value);
-                // Don't submit if empty value selected
-                if (!this.value) {
-                    console.log('⚠️ Empty value selected, skipping');
-                    return;
-                }
-                
-                console.log('📋 Syncing search form values');
-                syncSearchFormValues();
-                if (searchForm) {
-                    const priceInput = searchForm.querySelector('input[name="price_order"]');
-                    if (priceInput) {
-                        priceInput.value = this.value;
-                        console.log('✅ priceInput updated to:', priceInput.value);
-                    }
-                    console.log('📤 Submitting searchForm');
-                    searchForm.submit();
-                }
-            });
-        } else {
-            console.error('❌ priceSelect not found!');
-        }
-
-        // Brand selection handler
-        if (brandItems.length > 0) {
-            brandItems.forEach(item => {
-                item.addEventListener("click", function (e) {
-                    // Remove selected class from all items
-                    brandItems.forEach(i => i.classList.remove("selected"));
-                    // Add selected class to clicked item
-                    this.classList.add("selected");
-                    
-                    // Sync and submit filter form
-                    syncFilterFormValues();
+            // Category filter change
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
                     if (mainFilterForm) {
                         mainFilterForm.submit();
                     }
                 });
-            });
-        }
+            }
 
-        // Search input handler
-        const searchInput = searchForm ? searchForm.querySelector('input[name="search"]') : null;
-        if (searchInput) {
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
+            // Brand item selection
+            brandItems.forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('brand-checkbox')) {
+                        return;
+                    }
                     e.preventDefault();
-                    syncSearchFormValues();
-                    if (searchForm) {
+                    const checkbox = item.querySelector('.brand-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        const brandId = item.dataset.id;
+                        
+                        if (checkbox.checked) {
+                            item.classList.add('selected');
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'brand';
+                            hiddenInput.value = brandId;
+                            mainFilterForm.appendChild(hiddenInput);
+                            if (clearBrandFilter) clearBrandFilter.style.display = 'inline-block';
+                        } else {
+                            item.classList.remove('selected');
+                            const hiddenInput = mainFilterForm.querySelector('input[name="brand"]');
+                            if (hiddenInput) hiddenInput.remove();
+                            if (clearBrandFilter) clearBrandFilter.style.display = 'none';
+                        }
+                    }
+                });
+            });
+
+            // Clear brand filter
+            if (clearBrandFilter) {
+                clearBrandFilter.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    brandItems.forEach(function(item) {
+                        item.classList.remove('selected');
+                        const checkbox = item.querySelector('.brand-checkbox');
+                        if (checkbox) checkbox.checked = false;
+                    });
+                    const hiddenInput = mainFilterForm.querySelector('input[name="brand"]');
+                    if (hiddenInput) hiddenInput.remove();
+                    clearBrandFilter.style.display = 'none';
+                });
+            }
+
+            // Reset all filters
+            if (resetFiltersBtn) {
+                resetFiltersBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    categorySelect.value = '';
+                    brandItems.forEach(function(item) {
+                        item.classList.remove('selected');
+                        const checkbox = item.querySelector('.brand-checkbox');
+                        if (checkbox) checkbox.checked = false;
+                    });
+                    const hiddenInput = mainFilterForm.querySelector('input[name="brand"]');
+                    if (hiddenInput) hiddenInput.remove();
+                    if (clearBrandFilter) clearBrandFilter.style.display = 'none';
+                });
+            }
+
+            // SORT DROPDOWN
+            var sortSelect = document.getElementById('priceOrder');
+            var searchForm = document.getElementById('searchForm');
+            if (sortSelect && searchForm) {
+                sortSelect.onchange = function() {
+                    if (this.value) {
+                        var input = searchForm.querySelector('input[name="price_order"]');
+                        if (input) input.value = this.value;
                         searchForm.submit();
                     }
-                }
-            });
+                };
+            }
+            
+            console.log('Filter setup complete');
+        } catch(e) {
+            console.error('Filter setup error:', e);
         }
-
-        // Prevent favorite button clicks from navigating to product page
+        
         document.addEventListener('click', function(e) {
             const favBtn = e.target.closest('.favorite_btn');
             if (favBtn && favBtn.dataset.productId) {
@@ -3313,7 +3261,8 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 e.stopPropagation();
             }
         }, true);
-
+        
+        console.log('DOMContentLoaded setup complete!');
     });
 
 </script>
@@ -3487,20 +3436,15 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
     }
 
     /* Filter Panel Improvements */
+    /* Filter Panel Styles */
     .filter-panel {
         position: fixed;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
         z-index: 999;
         display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-start;
-        overflow-y: auto;
-        backdrop-filter: blur(2px);
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
@@ -3513,131 +3457,194 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         pointer-events: auto;
     }
 
-    .filter-panel-inner {
+    .filter-panel-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        max-width: 320px;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(3px);
+        cursor: pointer;
+    }
+
+    .filter-panel-inner {
+        position: relative;
+        width: 100%;
+        max-width: 360px;
         background: white;
         height: 100vh;
         overflow-y: auto;
-        padding: 20px;
-        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+        padding: 0;
+        box-shadow: -4px 0 30px rgba(0, 0, 0, 0.25);
         transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
     }
 
     .filter-panel.open .filter-panel-inner {
         transform: translateX(0);
-        animation: none;
     }
 
-    @keyframes slideInLeft {
-        from {
-            transform: translateX(-100%);
-        }
-        to {
-            transform: translateX(0);
-        }
+    .filter-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 2px solid #f0f2f7;
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        flex-shrink: 0;
     }
 
-    .filter-close {
-        width: 100%;
-        padding: 12px;
-        background: #f0f4ff;
-        color: #667eea;
-        border: 2px solid #667eea;
-        border-radius: 6px;
+    .filter-panel-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #033F63;
+        letter-spacing: -0.5px;
+    }
+
+    .filter-close-btn {
+        background: transparent;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
-        font-weight: 600;
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
-        font-size: 14px;
-        font-family: inherit;
+        font-size: 24px;
+        color: #667eea;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
     }
 
-    .filter-close:hover {
-        background: #667eea;
-        color: white;
-        transform: translateY(-1px);
+    .filter-close-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #033F63;
+        transform: rotate(90deg);
     }
 
-    .filter-close:active {
-        transform: translateY(0);
+    .filter-close-btn:active {
+        transform: rotate(90deg) scale(0.95);
     }
 
     .filter-form {
         display: flex;
         flex-direction: column;
-        gap: 20px;
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 24px;
+        gap: 24px;
     }
 
-    .filter-row {
+    .filter-section {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
     }
 
-    .filterrow_label {
-        font-weight: 600;
-        color: #333;
+    .filter-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .filter-label {
+        font-weight: 700;
+        color: #033F63;
         font-size: 14px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        margin: 0;
     }
 
-    .categoryitem,
-    #brandDropdown {
-        padding: 10px 12px;
-        border: 2px solid #e0e0e0;
-        border-radius: 6px;
+    .clear-filter-btn {
+        background: none;
+        border: none;
+        color: #667eea;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        text-transform: uppercase;
+        padding: 2px 8px;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+    }
+
+    .clear-filter-btn:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #764ba2;
+    }
+
+    .filter-select {
+        padding: 12px 14px;
+        border: 2px solid #e0e6ff;
+        border-radius: 8px;
         background: white;
-        font-size: 13px;
+        font-size: 14px;
         color: #333;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         font-family: inherit;
+        font-weight: 500;
     }
 
-    .categoryitem:hover,
-    #brandDropdown:hover {
+    .filter-select:hover {
         border-color: #667eea;
+        background: #f8f9ff;
     }
 
-    .categoryitem:focus,
-    #brandDropdown:focus {
+    .filter-select:focus {
         outline: none;
         border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    }
+
+    /* Brand List Styles */
+    .brand-list-wrapper {
+        display: flex;
+        flex-direction: column;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 2px solid #e0e6ff;
+        border-radius: 8px;
+        background: #fafbff;
+        padding: 8px;
     }
 
     .brand-list {
-        display: flex;
-        flex-direction: column;
-    }
-
-    #brand_filter {
         list-style: none;
         margin: 0;
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
 
     .brand-item {
-        padding: 12px;
-        border: 2px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 12px;
+        border: 2px solid transparent;
         border-radius: 6px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 13px;
         background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 13px;
         color: #333;
         font-weight: 500;
+        user-select: none;
     }
 
     .brand-item:hover {
         border-color: #667eea;
         background: #f8f9ff;
+        transform: translateX(2px);
     }
 
     .brand-item.selected {
@@ -3645,6 +3652,79 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         color: white;
         border-color: transparent;
         font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .brand-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #667eea;
+        flex-shrink: 0;
+    }
+
+    .brand-name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Filter Actions */
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        padding: 20px 24px;
+        border-top: 2px solid #f0f2f7;
+        background: #f8f9ff;
+        flex-shrink: 0;
+        margin-top: auto;
+    }
+
+    .filter-apply-btn,
+    .filter-reset-btn {
+        flex: 1;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-family: inherit;
+    }
+
+    .filter-apply-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-apply-btn:hover {
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .filter-apply-btn:active {
+        transform: translateY(0);
+    }
+
+    .filter-reset-btn {
+        background: white;
+        color: #667eea;
+        border: 2px solid #e0e6ff;
+    }
+
+    .filter-reset-btn:hover {
+        background: #f8f9ff;
+        border-color: #667eea;
+        color: #764ba2;
+    }
+
+    .filter-reset-btn:active {
+        transform: scale(0.98);
     }
 
     @media (max-width: 768px) {
