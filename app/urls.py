@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import HomePage, ProductPage, ProductItemPage, AIBotPage, CheckoutPage, AppointmentCompletePage, SellingPage, SellingCompletePage, SellingInfoPage, MyAppointmentPage, MySellingAppointmentPage, MyCancelledAppointmentPage, MyHistoryAppointmentPage, CartPage, FavoritePage, add_to_cart, AdminDashboard, AdminInventory, AdminProduct, AdminAppointment, AdminSellingAppointment
 from . import views
+from .api_views import api_product_3d_model, api_search_products_with_3d
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -52,6 +53,9 @@ urlpatterns = [
     path('api/products/<component>/', views.product_list, name='product_list'),
     path('api/products_by_component/', views.products_by_component, name='products_by_component'),
     path('api/save_appointment/', views.save_appointment, name='save_appointment'),
+    path('api/product/<int:product_id>/3d/', api_product_3d_model, name='api_product_3d'),
+    path('api/search-products-3d/', api_search_products_with_3d, name='api_search_products_3d'),
     path('model_viewer/', views.model_viewer, name="model_viewer"),
     path("api/add-pc-build/", views.add_pc_build_to_cart, name="add_pc_build"),
+    path('ai3d-test/', views.ai3d_test, name='ai3d_test'),
 ]

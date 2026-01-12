@@ -64,11 +64,15 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     model_file = models.CharField(max_length=255, blank=True, null=True)
+    model_3d = models.FileField(upload_to='3d_models/', null=True, blank=True, help_text="Upload a GLB or GLTF 3D model file")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return self.product_name
 
+    def has_3d_model(self):
+        """Check if product has a 3D model file"""
+        return bool(self.model_3d and self.model_3d.name)
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
     product_image = models.ImageField(upload_to="product_images/")

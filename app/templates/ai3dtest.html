@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Botpress AI 3D Model Generator Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .botpress-section {
+            padding: 20px;
+            border-right: 2px solid #eee;
+            overflow-y: auto;
+            height: 700px;
+            background: #f9f9f9;
+        }
+
+        .model-section {
+            padding: 0;
+            background: #000;
+            position: relative;
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        #canvas-3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .product-selector {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+
+        .product-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .product-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .product-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .chat-messages {
+            min-height: 300px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            text-align: right;
+            margin-left: 20px;
+        }
+
+        .message.bot {
+            background: #e8f0ff;
+            color: #333;
+            margin-right: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .message.system {
+            background: #fff3cd;
+            color: #856404;
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid #ffc107;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status.loading {
+            background: #cfe2ff;
+            color: #084298;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .status.success {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .model-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 250px;
+            z-index: 10;
+        }
+
+        .model-info h4 {
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .controls-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #aaa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 10;
+        }
+
+        .selected-product {
+            padding: 10px;
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .botpress-section {
+                border-right: none;
+                border-bottom: 2px solid #eee;
+            }
+        }
+
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .console-tab {
+            padding: 10px;
+            margin-top: 15px;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .console-tab p {
+            margin: 2px 0;
+            padding: 0;
+        }
+
+        .console-log {
+            color: #00ff00;
+        }
+
+        .console-error {
+            color: #ff4444;
+        }
+
+        .console-warn {
+            color: #ffaa00;
+        }
+
+        .console-clear-btn {
+            padding: 5px 10px;
+            margin: 10px 0;
+            background: #444;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .console-clear-btn:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Botpress AI Chat Section -->
+        <div class="botpress-section">
+            <div class="header">
+                <h1>🎨 3D Product Viewer</h1>
+                <p>Select and view 3D models of products</p>
+            </div>
+
+            <div id="status" class="status" style="display: none;"></div>
+
+            <div class="product-selector">
+                <label for="product-select">📦 Select a Product:</label>
+                <select id="product-select" onchange="onProductSelected()">
+                    <option value="">Loading products...</option>
+                </select>
+            </div>
+
+            <div id="selected-product-info" class="selected-product" style="display: none;">
+                <p id="product-name" style="margin: 0; font-weight: 600;"></p>
+                <p id="product-details" style="margin: 5px 0 0 0; font-size: 13px; color: #0c5460;"></p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="loadSelectedModel()">Load 3D Model</button>
+                <button class="btn-secondary" onclick="resetScene()">Reset View</button>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="message system">
+                    Select a product from the dropdown above to view its 3D model!
+                </div>
+            </div>
+
+            <button class="console-clear-btn" onclick="clearConsoleTab()">Clear Console</button>
+            <div class="console-tab" id="console-output">
+                <p class="console-log">[Console started]</p>
+            </div>
+        </div>
+
+        <!-- 3D Model Display Section -->
+        <div class="model-section">
+            <canvas id="canvas-3d"></canvas>
+            <div class="model-info" id="model-info" style="display: none;">
+                <h4>3D Model</h4>
+                <p id="current-model-name">Gaming Setup</p>
+            </div>
+            <div class="controls-info">
+                <strong>Controls:</strong><br>
+                🖱️ Left-click + drag: Rotate<br>
+                🖱️ Scroll: Zoom<br>
+                🖱️ Right-click + drag: Pan
+            </div>
+        </div>
+    </div>
+
+    <!-- Botpress Web Chat Widget -->
+    <script>
+        window.botpressWebChat = {
+            composerPlaceholder: 'Tell me about products...',
+            botName: 'KoynardzShop AI',
+        };
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.botpress.cloud/webchat/latest/inject.js';
+            document.body.appendChild(script);
+        })();
+    </script>
+
+    <!-- Load Three.js Libraries - Locally Served -->
+    <script>
+        // Load THREE.js first and wait for it
+        const threeScript = document.createElement('script');
+        threeScript.src = '/static/libs/three/three.min.js';
+        threeScript.onload = function() {
+            console.log('✓ THREE.js loaded');
+            // Now load dependent scripts
+            loadDependentScripts();
+        };
+        threeScript.onerror = function() {
+            console.error('✗ Failed to load THREE.js');
+        };
+        document.head.appendChild(threeScript);
+
+        function loadDependentScripts() {
+            // Load GLTFLoader
+            const gltfScript = document.createElement('script');
+            gltfScript.src = '/static/libs/three/GLTFLoader.js';
+            gltfScript.onload = function() {
+                console.log('✓ GLTFLoader loaded');
+                // Load wrapper to expose GLTFLoader
+                const gltfWrapperScript = document.createElement('script');
+                gltfWrapperScript.src = '/static/libs/three/GLTFLoader-wrapper.js';
+                gltfWrapperScript.onload = loadOrbitControls;
+                document.head.appendChild(gltfWrapperScript);
+            };
+            gltfScript.onerror = function() {
+                console.error('✗ Failed to load GLTFLoader');
+            };
+            document.head.appendChild(gltfScript);
+        }
+
+        function loadOrbitControls() {
+            // Load OrbitControls
+            const orbitScript = document.createElement('script');
+            orbitScript.src = '/static/libs/three/OrbitControls.js';
+            orbitScript.onload = function() {
+                console.log('✓ OrbitControls loaded');
+                // Load wrapper to expose OrbitControls
+                const orbitWrapperScript = document.createElement('script');
+                orbitWrapperScript.src = '/static/libs/three/OrbitControls-wrapper.js';
+                orbitWrapperScript.onload = function() {
+                    console.log('Wrappers loaded, waiting for initialization...');
+                    setTimeout(initializeApp, 200);
+                };
+                document.head.appendChild(orbitWrapperScript);
+            };
+            orbitScript.onerror = function() {
+                console.error('✗ Failed to load OrbitControls');
+            };
+            document.head.appendChild(orbitScript);
+        }
+    </script>
+
+    <!-- Three.js Scene Setup -->
+    <script>
+        // ===== CONSOLE CAPTURE =====
+        function initConsoleCapture() {
+            const consoleOutput = document.getElementById('console-output');
+            
+            const originalLog = console.log;
+            const originalError = console.error;
+            const originalWarn = console.warn;
+
+            console.log = function(...args) {
+                originalLog.apply(console, args);
+                const message = args.join(' ');
+                addConsoleOutput(message, 'log');
+            };
+
+            console.error = function(...args) {
+                originalError.apply(console, args);
+                const message = args.join(' ');
+                addConsoleOutput(message, 'error');
+            };
+
+            console.warn = function(...args) {
+                originalWarn.apply(console, args);
+                const message = args.join(' ');
+                addConsoleOutput(message, 'warn');
+            };
+        }
+
+        function addConsoleOutput(message, type = 'log') {
+            const consoleOutput = document.getElementById('console-output');
+            const p = document.createElement('p');
+            
+            if (type === 'error') {
+                p.className = 'console-error';
+                p.textContent = '❌ ' + message;
+            } else if (type === 'warn') {
+                p.className = 'console-warn';
+                p.textContent = '⚠️ ' + message;
+            } else {
+                p.className = 'console-log';
+                p.textContent = '✓ ' + message;
+            }
+            
+            consoleOutput.appendChild(p);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function clearConsoleTab() {
+            const consoleOutput = document.getElementById('console-output');
+            consoleOutput.innerHTML = '<p class="console-log">[Console cleared]</p>';
+        }
+
+        // ===== THREE.JS SETUP =====
+        let scene, camera, renderer, controls, currentModel = null;
+
+        function initThreeJS() {
+            console.log('=== Starting THREE.JS Initialization ===');
+            
+            const canvas = document.getElementById('canvas-3d');
+            if (!canvas) {
+                console.error('FATAL: Canvas element not found!');
+                return false;
+            }
+            console.log('Canvas found');
+
+            const container = document.querySelector('.model-section');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            console.log('Container size:', width, 'x', height);
+
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+            scene.fog = new THREE.Fog(0x1a1a1a, 100, 1000);
+            console.log('Scene created');
+
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            console.log('Camera created');
+
+            // Create renderer with performance optimizations
+            try {
+                renderer = new THREE.WebGLRenderer({ 
+                    canvas: canvas, 
+                    antialias: false,  // Disable antialiasing for performance
+                    alpha: false,
+                    powerPreference: 'high-performance',
+                    precision: 'lowp'  // Use low precision
+                });
+                console.log('WebGLRenderer created');
+            } catch (error) {
+                console.error('WebGL creation failed:', error);
+                return false;
+            }
+
+            // Lower pixel ratio for better performance
+            const pixelRatio = Math.min(window.devicePixelRatio, 1);
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(pixelRatio);
+            renderer.shadowMap.enabled = false;  // Disable shadows
+            renderer.setClearColor(0x1a1a1a, 1);
+            console.log('Renderer configured:', width, 'x', height, '| Pixel Ratio:', pixelRatio);
+
+            // Add lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+            console.log('Ambient light added');
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = false;  // Disable shadow casting for performance
+            scene.add(directionalLight);
+            console.log('Directional light added');
+
+            // Setup controls with performance optimizations
+            try {
+                controls = new OrbitControls(camera, renderer.domElement);
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 4;
+                controls.enableDamping = false;  // Disable damping for better performance
+                console.log('OrbitControls initialized');
+            } catch (e) {
+                console.error('OrbitControls init failed:', e);
+                return false;
+            }
+
+            window.addEventListener('resize', onWindowResize);
+            animate();
+            console.log('Animation loop started');
+            return true;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.querySelector('.model-section');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        // ===== PRODUCT SELECTION =====
+        let products = [];
+        let selectedProduct = null;
+
+        async function loadProducts() {
+            try {
+                console.log('Fetching products with 3D models...');
+                showStatus('Loading products...', 'loading');
+                
+                const response = await fetch('/api/search-products-3d/');
+                const data = await response.json();
+                
+                if (data.success && data.products) {
+                    products = data.products;
+                    console.log('Loaded', products.length, 'products with 3D models');
+                    populateProductSelector();
+                    showStatus('Products loaded!', 'success');
+                    addMessage('System', `✅ Found ${products.length} products with 3D models!`);
+                } else {
+                    console.error('No products found');
+                    showStatus('No products with 3D models found', 'error');
+                    addMessage('System', '❌ No products with 3D models available');
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showStatus('Error loading products', 'error');
+                addMessage('System', '❌ Error loading products. Please refresh the page.');
+            }
+        }
+
+        function populateProductSelector() {
+            const select = document.getElementById('product-select');
+            select.innerHTML = '<option value="">-- Select a Product --</option>';
+            
+            products.forEach((product, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${product.product_name} (${product.component_type})`;
+                select.appendChild(option);
+            });
+            
+            console.log('Product selector populated');
+        }
+
+        function onProductSelected() {
+            const select = document.getElementById('product-select');
+            const selectedIndex = select.value;
+            
+            if (selectedIndex === '') {
+                selectedProduct = null;
+                document.getElementById('selected-product-info').style.display = 'none';
+                return;
+            }
+            
+            selectedProduct = products[parseInt(selectedIndex)];
+            
+            // Display product info
+            document.getElementById('product-name').textContent = selectedProduct.product_name;
+            document.getElementById('product-details').textContent = `Type: ${selectedProduct.component_type} | Brand: ${selectedProduct.brand} | Price: ₱${parseFloat(selectedProduct.price).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            document.getElementById('selected-product-info').style.display = 'block';
+            
+            console.log('Selected product:', selectedProduct.product_name);
+            addMessage('System', `📦 Selected: ${selectedProduct.product_name}`);
+        }
+
+        function loadSelectedModel() {
+            if (!selectedProduct) {
+                addMessage('System', '⚠️ Please select a product first');
+                return;
+            }
+            
+            if (!selectedProduct.model_url) {
+                addMessage('System', '❌ This product does not have a 3D model');
+                return;
+            }
+            
+            console.log('Loading model for:', selectedProduct.product_name);
+            addMessage('System', `Loading 3D model for ${selectedProduct.product_name}...`);
+            loadModel(selectedProduct.model_url, selectedProduct.product_name);
+        }
+
+        function resetScene() {
+            if (currentModel) {
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+            
+            if (camera && controls) {
+                camera.position.set(0, 5, 10);
+                controls.target.set(0, 0, 0);
+                controls.update();
+            }
+            
+            addMessage('System', '🔄 Scene reset');
+            console.log('Scene reset');
+        }
+
+        function loadModel(modelUrl, modelName) {
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            showStatus('Loading 3D model...', 'loading');
+            console.log('=== Starting model load ===');
+            console.log('Model URL:', modelUrl);
+            console.log('Model Name:', modelName);
+
+            const loader = new THREE.GLTFLoader();
+            
+            loader.load(
+                modelUrl,
+                function(gltf) {
+                    console.log('✅ Model loaded successfully!');
+                    currentModel = gltf.scene;
+                    scene.add(currentModel);
+
+                    // Center and scale model
+                    const box = new THREE.Box3().setFromObject(currentModel);
+                    const center = box.getCenter(new THREE.Vector3());
+                    currentModel.position.sub(center);
+
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 10 / maxDim;
+                    currentModel.scale.multiplyScalar(scale);
+
+                    // Optimize materials and disable shadow casting for performance
+                    currentModel.traverse(function(node) {
+                        if (node.isMesh) {
+                            // Disable shadow casting to improve performance
+                            node.castShadow = false;
+                            node.receiveShadow = false;
+                            
+                            // Simplify materials
+                            if (node.material) {
+                                if (Array.isArray(node.material)) {
+                                    node.material.forEach(mat => optimizeMaterial(mat));
+                                } else {
+                                    optimizeMaterial(node.material);
+                                }
+                            }
+                        }
+                    });
+
+                    updateModelInfo(modelName || 'Product Model');
+                    addMessage('System', `✅ 3D model loaded! Drag to rotate, scroll to zoom.`);
+                    showStatus('Model loaded successfully!', 'success');
+
+                    // Reset camera
+                    if (controls) {
+                        camera.position.set(0, 5, 10);
+                        controls.target.set(0, 0, 0);
+                        controls.update();
+                    }
+                },
+                function(progress) {
+                    const percent = Math.round((progress.loaded / progress.total) * 100);
+                    console.log('Loading progress:', percent + '%');
+                },
+                function(error) {
+                    console.error('❌ Error loading model:', error);
+                    showStatus('Error loading model', 'error');
+                }
+            );
+        }
+
+        function updateModelInfo(name) {
+            document.getElementById('current-model-name').textContent = name;
+            document.getElementById('model-info').style.display = 'block';
+        }
+
+        // Optimize materials for better performance
+        function optimizeMaterial(material) {
+            if (!material) return;
+            
+            // Reduce texture resolution hints
+            material.fog = false;  // Disable fog calculation per pixel
+            material.flatShading = false;
+            
+            // Disable expensive material features
+            if (material.map) material.map.magFilter = THREE.LinearFilter;
+            if (material.normalMap) material.normalMap.magFilter = THREE.LinearFilter;
+            if (material.aoMap) material.aoMap.magFilter = THREE.LinearFilter;
+        }
+
+        function addMessage(sender, message) {
+            const messagesDiv = document.getElementById('chat-messages');
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${sender.toLowerCase()}`;
+            messageEl.textContent = message;
+            messagesDiv.appendChild(messageEl);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            statusDiv.style.display = 'block';
+
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 4000);
+            }
+        }
+
+        // Initialize - runs when all libraries are loaded
+        function initializeApp() {
+            console.log('=== Initializing Application ===');
+            
+            // Check if THREE.js loaded
+            if (typeof THREE === 'undefined') {
+                console.error('❌ THREE.js not loaded!');
+                showStatus('Error: THREE.js library failed to load', 'error');
+                return;
+            }
+            
+            if (typeof OrbitControls === 'undefined') {
+                console.error('❌ OrbitControls not loaded!');
+                console.log('Available globals:', Object.keys(window).filter(k => k.includes('Orbit') || k.includes('orbit')));
+                showStatus('Error: OrbitControls library failed to load', 'error');
+                return;
+            }
+
+            console.log('✅ All libraries loaded successfully');
+            
+            initConsoleCapture();
+            const success = initThreeJS();
+            
+            if (success) {
+                console.log('✅ THREE.js initialization successful');
+                addMessage('System', '✅ 3D viewer initialized!');
+                setTimeout(() => loadProducts(), 500);
+            } else {
+                console.error('❌ THREE.js initialization failed');
+                showStatus('Error initializing viewer', 'error');
+            }
+        }
+
+        // Prevent double initialization from DOM ready
+        let appInitialized = false;
+        
+        function safeInitialize() {
+            if (!appInitialized && typeof THREE !== 'undefined' && typeof OrbitControls !== 'undefined') {
+                appInitialized = true;
+                initializeApp();
+            }
+        }
+
+        // Also try to initialize when DOM is ready as backup
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOMContentLoaded event fired');
+                setTimeout(safeInitialize, 500);
+            });
+        }
+    </script>
+</body>
+</html>

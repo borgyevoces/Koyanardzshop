@@ -20,5 +20,21 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('product_name', 'brand', 'category_name', 'price')
+    list_display = ('product_name', 'brand', 'category_name', 'price', 'has_3d_model')
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('product_name', 'description', 'brand', 'category_name', 'component_type')
+        }),
+        ('Pricing & Stock', {
+            'fields': ('price', 'stock')
+        }),
+        ('Images & Media', {
+            'fields': ('image', 'model_3d')
+        }),
+    )
     inlines = [ProductImageInline]
+    
+    def has_3d_model(self, obj):
+        return bool(obj.model_3d)
+    has_3d_model.boolean = True
+    has_3d_model.short_description = 'Has 3D Model'

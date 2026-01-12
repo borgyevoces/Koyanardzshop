@@ -4,125 +4,775 @@
 
 {% block content %}
 
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html .product_itempage,
+    .product_itempage {
+        background: #f8f9fa !important;
+        min-height: 100vh !important;
+        padding: 40px 20px !important;
+        display: block !important;
+    }
+
+    html .product_itempage > div,
+    .product_itempage > div {
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+
+    html .product-hero,
+    .product-hero {
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+        background: white !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+        margin-bottom: 60px !important;
+        display: grid !important;
+    }
+
+    html .hero-container,
+    .hero-container {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 50px !important;
+        padding: 50px !important;
+        align-items: start !important;
+    }
+
+    html .product-images,
+    .product-images {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+    }
+
+    html .main-image-wrapper,
+    .main-image-wrapper {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        aspect-ratio: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    html #main_image,
+    #main_image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        padding: 20px !important;
+        transition: transform 0.3s ease !important;
+    }
+
+    html #main_image:hover,
+    #main_image:hover {
+        transform: scale(1.05) !important;
+    }
+
+    html .thumbnail-container,
+    .thumbnail-container {
+        display: flex !important;
+        gap: 10px !important;
+        overflow-x: auto !important;
+        padding-bottom: 5px !important;
+    }
+
+    html .thumbnail,
+    .thumbnail {
+        width: 80px !important;
+        height: 80px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        object-fit: cover !important;
+        border: 2px solid #e0e0e0 !important;
+        transition: all 0.3s ease !important;
+        flex-shrink: 0 !important;
+    }
+
+    html .thumbnail:hover,
+    .thumbnail:hover,
+    html .thumbnail.active-thumb,
+    .thumbnail.active-thumb {
+        border-color: #667eea !important;
+        transform: scale(1.05) !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    html .product-info,
+    .product-info {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 25px !important;
+    }
+
+    html .product-header,
+    .product-header {
+        border-bottom: 2px solid #f0f0f0 !important;
+        padding-bottom: 20px !important;
+    }
+
+    html .product-header h1,
+    .product-header h1 {
+        font-size: 32px !important;
+        color: #1a1a1a !important;
+        margin-bottom: 12px !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+    }
+
+    html .rating-section,
+    .rating-section {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        font-size: 14px !important;
+    }
+
+    html .rating-stars,
+    .rating-stars {
+        color: #ffc107 !important;
+        font-size: 18px !important;
+        letter-spacing: 2px !important;
+    }
+
+    html .rating-text,
+    .rating-text {
+        color: #666 !important;
+    }
+
+    html .product-badge,
+    .product-badge {
+        display: inline-block !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        padding: 6px 14px !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        margin-top: 10px !important;
+    }
+
+    html .product-description,
+    .product-description {
+        color: #555 !important;
+        line-height: 1.8 !important;
+        font-size: 15px !important;
+    }
+
+    html .price-section,
+    .price-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        padding: 25px !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+
+    html .price-text,
+    .price-text {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 5px !important;
+    }
+
+    html .price-label,
+    .price-label {
+        font-size: 13px !important;
+        color: #999 !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+    }
+
+    html .price-value,
+    .price-value {
+        font-size: 36px !important;
+        font-weight: 700 !important;
+        color: #667eea !important;
+    }
+
+    html .stock-text,
+    .stock-text {
+        font-size: 14px !important;
+        color: #28a745 !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    html .stock-text::before,
+    .stock-text::before {
+        content: '✓' !important;
+        font-size: 18px !important;
+    }
+
+    html .variants-section,
+    .variants-section {
+        padding: 20px !important;
+        background: #f9f9f9 !important;
+        border-radius: 12px !important;
+    }
+
+    html .variants-section h4,
+    .variants-section h4 {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        color: #333 !important;
+        margin-bottom: 12px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    html .variant-list,
+    .variant-list {
+        display: flex !important;
+        gap: 10px !important;
+        flex-wrap: wrap !important;
+    }
+
+    html .variant_btn,
+    .variant_btn {
+        padding: 8px 16px !important;
+        background: white !important;
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+        text-decoration: none !important;
+        color: #333 !important;
+    }
+
+    html .variant_btn:hover,
+    .variant_btn:hover {
+        border-color: #667eea !important;
+        background: #f0f4ff !important;
+        color: #667eea !important;
+    }
+
+    html .action-buttons,
+    .action-buttons {
+        display: flex !important;
+        gap: 12px !important;
+    }
+
+    html .action-buttons button,
+    .action-buttons button,
+    html .action-buttons form button,
+    .action-buttons form button {
+        flex: 1 !important;
+        padding: 14px 24px !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+    }
+
+    html .action-buttons form:first-child button,
+    .action-buttons form:first-child button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+    }
+
+    html .action-buttons form:first-child button:hover,
+    .action-buttons form:first-child button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4) !important;
+    }
+
+    html .action-buttons form:last-child button,
+    .action-buttons form:last-child button {
+        background: white !important;
+        color: #667eea !important;
+        border: 2px solid #667eea !important;
+    }
+
+    html .action-buttons form:last-child button:hover,
+    .action-buttons form:last-child button:hover {
+        background: #667eea !important;
+        color: white !important;
+        transform: translateY(-2px) !important;
+    }
+
+    html .favorite_btn,
+    .favorite_btn {
+        position: absolute !important;
+        top: 20px !important;
+        right: 20px !important;
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 50% !important;
+        background: white !important;
+        border: none !important;
+        cursor: pointer !important;
+        font-size: 24px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        z-index: 10 !important;
+    }
+
+    html .favorite_btn:hover,
+    .favorite_btn:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    html .favorite_btn.favorited,
+    .favorite_btn.favorited {
+        color: #e74c3c !important;
+    }
+
+    html .back-button,
+    .back-button {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        color: #667eea !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        margin-bottom: 20px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    html .back-button:hover,
+    .back-button:hover {
+        gap: 12px !important;
+    }
+
+    html .content-section,
+    .content-section {
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+
+    html .reviews-section,
+    .reviews-section,
+    html .suggestions-section,
+    .suggestions-section {
+        background: white !important;
+        border-radius: 16px !important;
+        padding: 40px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+        margin-bottom: 40px !important;
+    }
+
+    html .section-title,
+    .section-title {
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        color: #1a1a1a !important;
+        margin-bottom: 30px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    html .ratings-container,
+    .ratings-container {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 40px !important;
+        margin-bottom: 40px !important;
+    }
+
+    html .rating-display,
+    .rating-display {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
+    html .rating-large,
+    .rating-large {
+        font-size: 48px !important;
+        color: #ffc107 !important;
+        margin-bottom: 10px !important;
+    }
+
+    html .rating-info,
+    .rating-info {
+        font-size: 14px !important;
+        color: #666 !important;
+    }
+
+    html .stars,
+    .stars {
+        display: flex !important;
+        gap: 8px !important;
+        font-size: 28px !important;
+        cursor: pointer !important;
+    }
+
+    html .stars span,
+    .stars span {
+        color: #ddd !important;
+        transition: all 0.2s ease !important;
+        text-shadow: none !important;
+    }
+
+    html .stars span:hover,
+    .stars span:hover,
+    html .stars span.selected,
+    .stars span.selected {
+        color: #ffc107 !important;
+        text-shadow: 0 0 8px rgba(255, 193, 7, 0.5) !important;
+    }
+
+    html .comments-section,
+    .comments-section {
+        border-top: 2px solid #f0f0f0 !important;
+        padding-top: 30px !important;
+    }
+
+    html .comment-form,
+    .comment-form {
+        background: #f9f9f9 !important;
+        padding: 20px !important;
+        border-radius: 10px !important;
+        margin-bottom: 25px !important;
+    }
+
+    html .comment-form textarea,
+    .comment-form textarea {
+        width: 100% !important;
+        padding: 12px !important;
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        font-size: 14px !important;
+        font-family: inherit !important;
+        resize: vertical !important;
+        min-height: 100px !important;
+        transition: border-color 0.3s ease !important;
+    }
+
+    html .comment-form textarea:focus,
+    .comment-form textarea:focus {
+        outline: none !important;
+        border-color: #667eea !important;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    }
+
+    html .comment-form button,
+    .comment-form button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 10px 20px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        font-weight: 600 !important;
+        margin-top: 10px !important;
+        transition: all 0.3s ease !important;
+    }
+
+    html .comment-form button:hover,
+    .comment-form button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    html .review-item,
+    .review-item {
+        background: #f9f9f9 !important;
+        padding: 20px !important;
+        border-radius: 10px !important;
+        margin-bottom: 15px !important;
+        border-left: 4px solid #667eea !important;
+    }
+
+    html .review-header,
+    .review-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 10px !important;
+    }
+
+    html .review-username,
+    .review-username {
+        font-weight: 600 !important;
+        color: #333 !important;
+    }
+
+    html .review-date,
+    .review-date {
+        font-size: 13px !important;
+        color: #999 !important;
+    }
+
+    html .review-rating,
+    .review-rating {
+        color: #ffc107 !important;
+        font-size: 14px !important;
+        margin-bottom: 10px !important;
+    }
+
+    html .review-comment,
+    .review-comment {
+        color: #555 !important;
+        line-height: 1.6 !important;
+        font-size: 14px !important;
+    }
+
+    html .product-cards,
+    .product-cards {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+        gap: 25px !important;
+    }
+
+    html .product-card,
+    .product-card {
+        background: white !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+    }
+
+    html .product-card:hover,
+    .product-card:hover {
+        transform: translateY(-8px) !important;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    html .product-card-image,
+    .product-card-image {
+        width: 100% !important;
+        height: 200px !important;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        overflow: hidden !important;
+    }
+
+    html .product-card-image img,
+    .product-card-image img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain !important;
+        padding: 15px !important;
+        transition: transform 0.3s ease !important;
+    }
+
+    html .product-card:hover .product-card-image img,
+    .product-card:hover .product-card-image img {
+        transform: scale(1.1) !important;
+    }
+
+    html .product-card-content,
+    .product-card-content {
+        padding: 20px !important;
+    }
+
+    html .product-card h4,
+    .product-card h4 {
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        color: #1a1a1a !important;
+        margin-bottom: 10px !important;
+        line-height: 1.4 !important;
+    }
+
+    html .product-card p,
+    .product-card p {
+        font-size: 18px !important;
+        color: #667eea !important;
+        font-weight: 700 !important;
+        margin-bottom: 15px !important;
+    }
+
+    html .product-card button,
+    .product-card button {
+        width: 100% !important;
+        padding: 10px !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    html .product-card button:hover,
+    .product-card button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+
+    html .product-tag,
+    .product-tag {
+        position: absolute !important;
+        top: 10px !important;
+        left: 10px !important;
+        padding: 6px 12px !important;
+        border-radius: 20px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: white !important;
+    }
+
+    html .tag-new,
+    .tag-new {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    html .tag-secondhand,
+    .tag-secondhand {
+        background: #ff6b6b !important;
+    }
+
+    @media (max-width: 768px) {
+        .hero-container {
+            grid-template-columns: 1fr !important;
+            gap: 30px !important;
+            padding: 25px !important;
+        }
+
+        .product-header h1 {
+            font-size: 24px !important;
+        }
+
+        .price-value {
+            font-size: 28px !important;
+        }
+
+        .action-buttons {
+            flex-direction: column !important;
+        }
+
+        .ratings-container {
+            grid-template-columns: 1fr !important;
+        }
+
+        .product-cards {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+        }
+    }
+</style>
+
 <div class="product_itempage">
-    <div class="upperitem">
-        <a href="{% url 'product' %}"><img src="{% static 'images/icon/black-back.png' %}" alt=""></a>
-    {% if produkto %}
-        <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
-    </div>
-    <div class="product_itembody">
-        <div class="product_itemleft">
-            <div class="productleft_upper">
-                {% if main_image %}
-                    <img id="main_image" src="{{ main_image }}" alt="Product image">
-                {% elif produkto.image %}
-                    <img id="main_image" src="{{ produkto.image.url }}" alt="Product image">
-                {% endif %}
-            </div>
-            <div class="productleft_bottom">
-                <div class="leftbottom_image">
-                    {% for img_url in thumbnails %}
-                        <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img_url }}" data-image="{{ img_url }}" alt="Thumbnail {{ forloop.counter }}">
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="product_itemright">
-            <h3>{{ display_name }}</h3>
-            <div class="productitem_rating">
-                <p id="average_rating_text">⭐ {{ average_rating }} / 5 ({{ reviews.count }} reviews)</p>
-            </div>
-            {% if variations %}
-            <div class="variant_section">
-                <h4>Specification:</h4>
-                <div class="variant_list">
-                {% for variant in variations %}
-                    <a class="variant_btn" href="{% url 'product_item' variant.product.id %}?variant={{ variant.id }}">{{ variant.product_variation }}</a>
-                {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            <div class="bodyitem">
-                <h4>Description: </h4>
-                <p>{{ display_description }}</p>
-            </div>
-            <div class="itemright_bottom">
-                <div class="itemright_total">
-                    <p id="itemright_total">Stock(s): {{ stock }}</p>
-                    <h4>₱{{ price|intcomma }}</h4>
-                </div>
-                <div class="itemright_button">
-                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
-                        {% csrf_token %}
-                        {% if selected_variant %}
-                            <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
+    <div class="content-section">
+        <a href="{% url 'product' %}" class="back-button">
+            ← Back to Products
+        </a>
+
+        {% if produkto %}
+        <div class="product-hero">
+            <div class="hero-container">
+                <!-- Product Images -->
+                <div class="product-images">
+                    <div class="main-image-wrapper">
+                        {% if main_image %}
+                            <img id="main_image" src="{{ main_image }}" alt="Product image">
+                        {% elif produkto.image %}
+                            <img id="main_image" src="{{ produkto.image.url }}" alt="Product image">
                         {% endif %}
-                        <button>Add to Cart</button>
-                    </form>
-                    <form action="{% url 'direct_checkout' %}" method="POST" style="display:inline-block; margin-left:8px;">
-                        {% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ produkto.id }}">
-                        <input type="hidden" name="quantity" value="1">
-                        {% if selected_variant %}
-                            <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
-                        {% endif %}
-                        <button type="submit" class="btn-sm">Buy Now</button>
-                    </form>
+                    </div>
+                    <div class="thumbnail-container">
+                        {% for img_url in thumbnails %}
+                            <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img_url }}" data-image="{{ img_url }}" alt="Thumbnail {{ forloop.counter }}">
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
-        </div>
-    {% endif %}
-    </div>
-    <div class="productitem_bottom">
-        <div class="productitem_suggest">
-            <h4>You might also like</h4>
-            <div class="product-container">
-                {% if products %}
-                    {% for produkto in products %}
-                        <div class="product-card">
-                            {% if produkto.category_name.category_name == 'Others' %}
-                                <span class="product-tag tag-secondhand">2nd Hand</span>
-                            {% elif produkto.created_at %}
-                                {% now "U" as current_timestamp %}
-                                {% with created_timestamp=produkto.created_at|date:"U" %}
-                                    {% if current_timestamp|add:"-604800"|add:"0" < created_timestamp|add:"0" %}
-                                        <span class="product-tag tag-new">New</span>
-                                    {% endif %}
-                                {% endwith %}
-                            {% endif %}
-                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
-                                <i class="fa fa-heart"></i>
-                            </button>
-                            {% if produkto.image %}
-                                <a href="{% url 'product_item' produkto.id %}">
-                                <img src="{{ produkto.image.url }}" alt="Product Image">
-                                </a>
-                            {% endif %}
-                            <div class="product-name">
-                                <h4>{{ produkto.product_name }}</h4>
-                                <p>₱{{ produkto.price|intcomma }}</p>
-                                <div class="productcard-button">
-                                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
-                                        {% csrf_token %}
-                                        {% if selected_variant %}
-                                            <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
-                                        {% endif %}
-                                        <button>Add to Cart</button>
-                                    </form>
-                                </div>
-                            </div>
+
+                <!-- Product Info -->
+                <div class="product-info">
+                    <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
+
+                    <div class="product-header">
+                        <h1>{{ display_name }}</h1>
+                        <div class="rating-section">
+                            <div class="rating-stars">★★★★★</div>
+                            <div class="rating-text">{{ average_rating|default:"No reviews" }} / 5 ({{ reviews.count }} reviews)</div>
                         </div>
-                    {% endfor %}
-                {% endif %}
+                        <span class="product-badge">Premium Quality</span>
+                    </div>
+
+                    <div class="price-section">
+                        <div class="price-text">
+                            <span class="price-label">Price</span>
+                            <span class="price-value">₱{{ price|intcomma }}</span>
+                        </div>
+                        <div class="stock-text">
+                            {{ stock }} in stock
+                        </div>
+                    </div>
+
+                    {% if variations %}
+                    <div class="variants-section">
+                        <h4>Choose Specification:</h4>
+                        <div class="variant-list">
+                        {% for variant in variations %}
+                            <a class="variant_btn" href="{% url 'product_item' variant.product.id %}?variant={{ variant.id }}">{{ variant.product_variation }}</a>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <h4 style="margin-bottom: 15px; color: #333; font-weight: 600;">Description</h4>
+                        <p class="product-description">{{ display_description }}</p>
+                    </div>
+
+                    <div class="action-buttons">
+                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                            {% csrf_token %}
+                            {% if selected_variant %}
+                                <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
+                            {% endif %}
+                            <button>🛒 Add to Cart</button>
+                        </form>
+                        <form action="{% url 'direct_checkout' %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="product_id" value="{{ produkto.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            {% if selected_variant %}
+                                <input type="hidden" name="variant_id" value="{{ selected_variant.id }}">
+                            {% endif %}
+                            <button type="submit">💳 Buy Now</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="productitem_bottomreview">
-            <div class="item_bottomreview">
-                <h4>Ratings:</h4>
+
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <h2 class="section-title">⭐ Customer Reviews</h2>
+
+            <div class="ratings-container">
+                <div class="rating-display">
+                    <div class="rating-large">{{ average_rating|default:"N/A" }}</div>
+                    <div class="rating-info">out of 5 stars</div>
+                    <div class="rating-info" style="margin-top: 10px;">{{ reviews.count }} reviews</div>
+                </div>
+
                 {% if user.is_authenticated %}
-                    <div class="star-rating" id="star_container" data-current-rating="{{ user_review.rating|default:0 }}">
-                        <input type="hidden" name="rating" id="ratingValue">
-                        <div class="stars">
+                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px;">
+                    <div style="text-align: center;">
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Rate this product:</p>
+                        <div class="stars" id="star_container" data-current-rating="{{ user_review.rating|default:0 }}">
+                            <input type="hidden" name="rating" id="ratingValue">
                             <span data-star="1">★</span>
                             <span data-star="2">★</span>
                             <span data-star="3">★</span>
@@ -130,166 +780,84 @@
                             <span data-star="5">★</span>
                         </div>
                     </div>
-                {% endif %}
-                {% if average_rating %}
-                    <p>⭐ {{ average_rating }} / 5 ({{ reviews.count }} reviews)</p>
+                </div>
                 {% else %}
-                    <p>No reviews yet</p>
+                <div style="display: flex; align-items: center; justify-content: center; text-align: center;">
+                    <p><a href="{% url 'login' %}" style="color: #667eea; font-weight: 600; text-decoration: none;">Login to leave a review</a></p>
+                </div>
                 {% endif %}
             </div>
-            <div class="item_bottomcomment">
-                <h4>Comments</h4>
-                <div class="item_bottomcomms">
+
+            <div class="comments-section">
+                <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #333;">Comments</h3>
+
                 {% if user.is_authenticated %}
-                    <form method="POST" id="comment_form">
+                <form method="POST" id="comment_form" class="comment-form">
                     {% csrf_token %}
-                        <textarea name="comment" rows="3" placeholder="Write a comment...">{{ user_review.comment }}</textarea>
-                        <button type="submit"><img src="{% static 'images/icon/paper-plane-top.png' %}" alt=""></button>
-                    </form>
-                {% else %}
-                    <p><a href="{% url 'login' %}">Login to leave a review</a></p>
+                    <textarea name="comment" placeholder="Share your experience with this product...">{{ user_review.comment }}</textarea>
+                    <button type="submit">Post Review</button>
+                </form>
                 {% endif %}
 
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% for review in reviews %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <span class="review-username">{{ review.user.username }}</span>
+                            <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="review-rating">{{ review.rating }} ★</div>
+                        <p class="review-comment">{{ review.comment }}</p>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 40px 20px; color: #999;">
+                        <p>No reviews yet. Be the first to review this product!</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% for review in reviews %}
-                <div class="review_box">
-                    <p><strong>{{ review.user.username }} </strong><span>{{ review.rating }} ★</span>({{ review.created_at|date:"M d, Y" }})</p>
-                    <p>{{ review.comment }}</p>
+            </div>
+        </div>
+
+        <!-- Suggestions Section -->
+        {% if products %}
+        <div class="suggestions-section">
+            <h2 class="section-title">🎯 You Might Also Like</h2>
+            <div class="product-cards">
+                {% for produkto in products %}
+                <div class="product-card">
+                    {% if produkto.category_name.category_name == 'Others' %}
+                        <span class="product-tag tag-secondhand">2nd Hand</span>
+                    {% elif produkto.created_at %}
+                        {% now "U" as current_timestamp %}
+                        {% with created_timestamp=produkto.created_at|date:"U" %}
+                            {% if current_timestamp|add:"-604800"|add:"0" < created_timestamp|add:"0" %}
+                                <span class="product-tag tag-new">New</span>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+
+                    <div class="product-card-image">
+                        {% if produkto.image %}
+                            <img src="{{ produkto.image.url }}" alt="Product Image">
+                        {% endif %}
+                    </div>
+
+                    <div class="product-card-content">
+                        <h4>{{ produkto.product_name }}</h4>
+                        <p>₱{{ produkto.price|intcomma }}</p>
+                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
+                            {% csrf_token %}
+                            <button>Add to Cart</button>
+                        </form>
+                    </div>
                 </div>
-                {% empty %}
-                    <p>No reviews yet.</p>
                 {% endfor %}
             </div>
         </div>
+        {% endif %}
+
+        {% endif %}
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const thumbnails = document.querySelectorAll('.thumbnail');
-        const mainImage = document.getElementById('main_image');
-        const variantButtons = document.querySelectorAll('.variant_btn');
-        const priceText = document.querySelector('.itemright_total h4');
-        const stockText = document.querySelector('.bodyitem p:nth-of-type(2)');
-        let currentIndex = 0;
-        let timer;
-
-        const showImage = (index) => {
-            const selected = thumbnails[index];
-            if (!selected) return;
-            mainImage.src = selected.dataset.image;
-            thumbnails.forEach(t => t.classList.remove('active-thumb'));
-            selected.classList.add('active-thumb');
-            currentIndex = index;
-        };
-
-        const nextImage = () => {
-            currentIndex = (currentIndex + 1) % thumbnails.length;
-            showImage(currentIndex);
-        };
-
-        const startAutoSlide = () => {
-            timer = setInterval(nextImage, 5000); 
-        };
-
-        const stopAutoSlide = () => clearInterval(timer);
-        thumbnails.forEach((thumbnail, index) => {
-            thumbnail.addEventListener('click', () => {
-                stopAutoSlide();
-                showImage(index);
-                thumbnail.addEventListener('click', () => {
-                    stopAutoSlide();
-                    showImage(index);
-                });
- 
-            });
-        });
-        if (thumbnails.length > 1) startAutoSlide();
-    });
-
-    const stars = document.querySelectorAll(".stars span");
-const starContainer = document.getElementById("star_container");
-const currentRating = parseInt(starContainer.dataset.currentRating);
-
-if (currentRating > 0) {
-    for (let i = 0; i < currentRating; i++) {
-        stars[i].classList.add("selected");
-        stars[i].classList.add("glow");
-
-        // Remove glow after animation
-        setTimeout(() => {
-            stars[i].classList.remove("glow");
-        }, 500);
-    }
-}
-
-// CLICK event
-stars.forEach(star => {
-    star.addEventListener("click", () => {
-        const val = star.dataset.star;
-
-        // Remove previous
-        stars.forEach(s => s.classList.remove("selected"));
-
-        // Reapply selected + animation
-        for (let i = 0; i < val; i++) {
-            stars[i].classList.add("selected");
-
-            // Trigger animation
-            stars[i].classList.add("animate-pop");
-            stars[i].classList.add("glow");
-
-            // Remove animation classes
-            setTimeout(() => {
-                stars[i].classList.remove("animate-pop");
-                stars[i].classList.remove("glow");
-            }, 300);
-        }
-
-        // Save rating
-        fetch("{% url 'submit_rating_ajax' produkto.id %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": "{{ csrf_token }}",
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: `rating=${val}`,
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log("Rating saved:", data.rating);
-        });
-    });
-});
-
-    const commentForm = document.getElementById("comment_form");
-    commentForm.addEventListener("submit", function(e){
-        e.preventDefault();
-        const formData = new FormData(commentForm);
-
-        fetch("{% url 'submit_comment_ajax' produkto.id %}", {
-            method: "POST",
-            headers: { "X-CSRFToken": "{{ csrf_token }}" },
-            body: formData,
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                const reviewBox = document.createElement("div");
-                reviewBox.classList.add("review_box");
-                reviewBox.innerHTML = `
-                    <p><strong>${data.username}</strong> - ${data.created}</p>
-                    <p>${data.rating ?? ''} ★</p>
-                    <p>${data.comment}</p>
-                `;
-                const container = document.querySelector(".item_bottomcomment");
-                container.insertBefore(reviewBox, container.children[container.children.length - 1]);
-
-                commentForm.querySelector("textarea").value = "";
-            }
-        });
-    });
-
-</script>
-
-{% endblock content %}

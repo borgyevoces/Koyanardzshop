@@ -83,6 +83,10 @@ def model_viewer(request):
     models = [f"/static/images/3D/{m}" for m in models]
     return render(request, 'app/buying/model_viewer.html', {'models': models})
 
+def ai3d_test(request):
+    """Test page for Botpress AI 3D model generation"""
+    return render(request, 'ai3dtest.html')
+
 def products_by_component(request):
     comp = request.GET.get('component_type', '').strip()
     qs = Product.objects.all()
@@ -186,6 +190,11 @@ def update_product(request):
         product.product_name = data['product_name']
         product.stock = data['stock']
         product.price = data['price']
+        
+        # Handle model_3d file upload
+        if 'model_3d' in request.FILES:
+            product.model_3d = request.FILES['model_3d']
+        
         product.save()
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
