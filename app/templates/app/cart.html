@@ -1688,6 +1688,23 @@
                     <div class="product-name">
                         <h4>{{ produkto.product_name }}</h4>
                         <p>₱{{ produkto.price|intcomma }}</p>
+                        {% if produkto.reviews.all %}
+                            {% with total_reviews=produkto.reviews.count %}
+                                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                                    <span style="color: #ffc107; font-size: 12px;">
+                                        {% for i in "12345" %}
+                                            {% if i|add:"0" <= produkto.reviews.all|length %}★{% else %}☆{% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span style="font-size: 11px; color: #666;">({{ total_reviews }})</span>
+                                </div>
+                            {% endwith %}
+                        {% else %}
+                            <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                                <span style="color: #ddd; font-size: 12px;">☆☆☆☆☆</span>
+                                <span style="font-size: 11px; color: #999;">No reviews</span>
+                            </div>
+                        {% endif %}
                     </div>
                 </a>
                 <div style="padding: 0 20px 20px 20px;">

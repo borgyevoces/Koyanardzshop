@@ -109,7 +109,7 @@
                         {% if p.total_bought and p.total_bought > 0 %}
                             <span class="product-tag tag-bestseller">Best Seller</span>
                         {% endif %}
-                        <button class="favorite_btn {% if p.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites">
+                        <button class="favorite_btn {% if p.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites" type="button" style="position: absolute; top: 10px; right: 10px; z-index: 20 !important; pointer-events: auto;">
                             <i class="{% if p.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
                         </button>
                         <a href="{% url 'product_item' p.id %}" class="product-thumb" id="product-thumbs">
@@ -124,6 +124,23 @@
                             <div class="card-meta">
                                 <span class="price">₱{{ p.price|intcomma }}</span>
                             </div>
+                            {% if p.reviews.all %}
+                                {% with total_reviews=p.reviews.count %}
+                                    <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0;">
+                                        <span style="color: #ffc107; font-size: 12px;">
+                                            {% for i in "12345" %}
+                                                {% if i|add:"0" <= p.reviews.all|length %}★{% else %}☆{% endif %}
+                                            {% endfor %}
+                                        </span>
+                                        <span style="font-size: 11px; color: #666;">({{ total_reviews }})</span>
+                                    </div>
+                                {% endwith %}
+                            {% else %}
+                                <div style="display: flex; align-items: center; gap: 6px; margin: 8px 0;">
+                                    <span style="color: #ddd; font-size: 12px;">☆☆☆☆☆</span>
+                                    <span style="font-size: 11px; color: #999;">No reviews</span>
+                                </div>
+                            {% endif %}
                             <div class="card-actions">
                                 <form class="add-cart-form" method="post" action="{% url 'direct_checkout' %}">
                                     {% csrf_token %}
@@ -195,7 +212,7 @@
 
 <!-- Chat Toggle Button -->
 <button id="custom-chat-toggle" class="custom-chat-toggle" aria-label="Open chat">
-    <i class="fa fa-comments"></i>
+    🤖
     <span class="custom-chat-badge" id="custom-chat-badge" style="display: none;">1</span>
 </button>
 
@@ -1813,7 +1830,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                         ${cartButtonHTML}
                         <button class="modify-build-btn" style="flex: 1; padding: 8px 12px; background: #ff9800; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">✏️ Modify Build</button>
                         <button class="start-over-btn" style="flex: 1; padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">🔄 Start Over</button>
-                        <button class="continue-chat-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">💬 Continue Chat</button>
+                        <button class="continue-chat-btn" style="flex: 1; padding: 8px 12px; background: #033F63; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">💬 Continue Chat</button>
                     </div>
                 </div>
             `;
@@ -3139,6 +3156,14 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             });
         });
 
+        // Prevent favorite button clicks from navigating to product page
+        document.addEventListener('click', function(e) {
+            const favBtn = e.target.closest('.favorite_btn');
+            if (favBtn && favBtn.dataset.productId) {
+                e.stopPropagation();
+            }
+        }, true);
+
     });
 
 </script>
@@ -3152,7 +3177,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         width: 60px;
         height: 60px;
         border-radius: 50%;
-        background: #0B76AF;
+        background: #033F63;
         color: white;
         border: none;
         cursor: pointer;
@@ -3160,18 +3185,18 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         align-items: center;
         justify-content: center;
         font-size: 24px;
-        box-shadow: 0 4px 12px rgba(11, 118, 175, 0.3);
+        box-shadow: 0 4px 12px rgba(3, 63, 99, 0.3);
         transition: all 0.3s ease;
         z-index: 1000;
     }
 
     .custom-chat-toggle:hover {
         transform: scale(1.1);
-        box-shadow: 0 6px 16px rgba(11, 118, 175, 0.4);
+        box-shadow: 0 6px 16px rgba(3, 63, 99, 0.4);
     }
 
     .custom-chat-toggle.active {
-        transform: rotate(45deg);
+        transform: scale(1.1);
     }
 
     .custom-chat-badge {
@@ -3228,7 +3253,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
 
     .custom-chat-header {
         padding: 20px 24px;
-        background: #0B76AF;
+        background: #033F63;
         color: white;
         border-radius: 16px 16px 0 0;
         display: flex;
@@ -3236,7 +3261,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         align-items: center;
         flex-shrink: 0;
         gap: 12px;
-        box-shadow: 0 4px 15px rgba(11, 118, 175, 0.3);
+        box-shadow: 0 4px 15px rgba(3, 63, 99, 0.3);
     }
 
     .custom-chat-header-content {
@@ -3747,11 +3772,11 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
     }
 
     .custom-chat-quick-btn:hover {
-        background: #0B76AF;
+        background: #033F63;
         color: white;
-        border-color: #0B76AF;
+        border-color: #033F63;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(11, 118, 175, 0.3);
+        box-shadow: 0 4px 12px rgba(3, 63, 99, 0.3);
     }
 
     .custom-chat-quick-btn:active {

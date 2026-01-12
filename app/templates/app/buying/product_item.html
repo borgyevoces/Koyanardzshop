@@ -195,13 +195,16 @@
     .product-header {
         border-bottom: 2px solid #f0f0f0 !important;
         padding-bottom: 20px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
     }
 
     html .product-header h1,
     .product-header h1 {
         font-size: 32px !important;
         color: #1a1a1a !important;
-        margin-bottom: 12px !important;
+        margin-bottom: 0 !important;
         font-weight: 700 !important;
         line-height: 1.2 !important;
     }
@@ -502,7 +505,7 @@
 
     html .stars span,
     .stars span {
-        color: #ddd !important;
+        color: #e0e0e0 !important;
         transition: all 0.2s ease !important;
         text-shadow: none !important;
     }
@@ -511,7 +514,6 @@
     .stars span:hover,
     html .stars span.selected,
     .stars span.selected {
-        color: #ffc107 !important;
         text-shadow: 0 0 8px rgba(255, 193, 7, 0.5) !important;
     }
 
@@ -1779,7 +1781,17 @@
                     <div class="product-header">
                         <h1>{{ display_name }}</h1>
                         <div class="rating-section">
-                            <div class="rating-stars">★★★★★</div>
+                            <div class="rating-stars">
+                                {% if reviews %}
+                                    {% with avg=average_rating|floatformat:0 %}
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= avg %}★{% else %}☆{% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                {% else %}
+                                    ☆☆☆☆☆
+                                {% endif %}
+                            </div>
                             <div class="rating-text">{{ average_rating|default:"No reviews" }} / 5 ({{ reviews.count }} reviews)</div>
                         </div>
                         <span class="product-badge">Premium Quality</span>
@@ -1844,29 +1856,6 @@
                     <div class="rating-info">out of 5 stars</div>
                     <div class="rating-info" style="margin-top: 10px;">{{ reviews.count }} reviews</div>
                 </div>
-
-                {% if user.is_authenticated %}
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px;">
-                    <div style="text-align: center;">
-                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Rate this product:</p>
-                        <div class="stars" id="star_container" data-current-rating="{{ user_review.rating|default:0 }}">
-                            <input type="hidden" name="rating" id="ratingValue">
-                            <span data-star="1">★</span>
-                            <span data-star="2">★</span>
-                            <span data-star="3">★</span>
-                            <span data-star="4">★</span>
-                            <span data-star="5">★</span>
-                        </div>
-                    </div>
-                </div>
-                {% else %}
-                <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; text-align: center;">
-                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Want to share your experience?</p>
-                    <a href="{% url 'login' %}" style="display: inline-block; background: #0b7aa3; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(11, 122, 163, 0.3);">
-                        Login to Leave a Review
-                    </a>
-                </div>
-                {% endif %}
             </div>
 
             <div class="comments-section">
@@ -1970,14 +1959,19 @@
                     <form method="POST" class="comment-form" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%); border: 2px solid #667eea; border-radius: 12px; padding: 24px; margin-bottom: 28px;">
                         {% csrf_token %}
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px;">Rate this product</label>
-                            <div class="stars" id="star_container" data-current-rating="0">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label style="font-size: 14px; font-weight: 600; color: #1a1a1a;">Rate this product</label>
+                                <span id="ratingDisplay" style="font-size: 13px; color: #667eea; font-weight: 600; display: none;">
+                                    <span id="selectedRating">0</span>/5 stars selected
+                                </span>
+                            </div>
+                            <div class="stars" id="star_container" data-current-rating="0" style="display: flex; gap: 8px;">
                                 <input type="hidden" name="rating" id="ratingValue" value="">
-                                <span data-star="1" style="cursor: pointer; font-size: 28px; transition: all 0.2s;">★</span>
-                                <span data-star="2" style="cursor: pointer; font-size: 28px; transition: all 0.2s;">★</span>
-                                <span data-star="3" style="cursor: pointer; font-size: 28px; transition: all 0.2s;">★</span>
-                                <span data-star="4" style="cursor: pointer; font-size: 28px; transition: all 0.2s;">★</span>
-                                <span data-star="5" style="cursor: pointer; font-size: 28px; transition: all 0.2s;">★</span>
+                                <span data-star="1" style="cursor: pointer; font-size: 28px; transition: all 0.2s; color: #e0e0e0;">★</span>
+                                <span data-star="2" style="cursor: pointer; font-size: 28px; transition: all 0.2s; color: #e0e0e0;">★</span>
+                                <span data-star="3" style="cursor: pointer; font-size: 28px; transition: all 0.2s; color: #e0e0e0;">★</span>
+                                <span data-star="4" style="cursor: pointer; font-size: 28px; transition: all 0.2s; color: #e0e0e0;">★</span>
+                                <span data-star="5" style="cursor: pointer; font-size: 28px; transition: all 0.2s; color: #e0e0e0;">★</span>
                             </div>
                         </div>
                         <div style="margin-bottom: 16px;">
@@ -1985,6 +1979,62 @@
                         </div>
                         <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 14px 32px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">Submit Review</button>
                     </form>
+                    
+                    <script>
+                        // Handle star rating display - Initialize immediately
+                        const starContainer = document.getElementById('star_container');
+                        const ratingValue = document.getElementById('ratingValue');
+                        const ratingDisplay = document.getElementById('ratingDisplay');
+                        const selectedRating = document.getElementById('selectedRating');
+                        const stars = starContainer ? starContainer.querySelectorAll('span[data-star]') : [];
+                        
+                        // Initialize stars to gray
+                        stars.forEach(s => {
+                            s.style.color = '#e0e0e0';
+                        });
+                        
+                        function updateStarDisplay(rating) {
+                            stars.forEach(s => {
+                                const starNum = parseInt(s.getAttribute('data-star'));
+                                if (starNum <= rating) {
+                                    s.style.color = '#ffc107';
+                                } else {
+                                    s.style.color = '#e0e0e0';
+                                }
+                            });
+                        }
+                        
+                        function updateStarHover(rating) {
+                            stars.forEach(s => {
+                                const starNum = parseInt(s.getAttribute('data-star'));
+                                if (starNum <= rating) {
+                                    s.style.color = '#667eea';
+                                } else {
+                                    s.style.color = '#e0e0e0';
+                                }
+                            });
+                        }
+                        
+                        stars.forEach(star => {
+                            star.addEventListener('click', function() {
+                                const rating = parseInt(this.getAttribute('data-star'));
+                                ratingValue.value = rating;
+                                selectedRating.textContent = rating;
+                                ratingDisplay.style.display = 'inline';
+                                updateStarDisplay(rating);
+                            });
+                            
+                            star.addEventListener('mouseover', function() {
+                                const hoverRating = parseInt(this.getAttribute('data-star'));
+                                updateStarHover(hoverRating);
+                            });
+                        });
+                        
+                        starContainer.addEventListener('mouseleave', function() {
+                            const currentRating = parseInt(ratingValue.value) || 0;
+                            updateStarDisplay(currentRating);
+                        });
+                    </script>
                     {% endif %}
                 {% else %}
                 <div style="background: #f8f9fa; border-radius: 12px; padding: 32px; text-align: center; margin-bottom: 28px;">
@@ -2063,6 +2113,23 @@
                         <div class="product-name">
                             <h4>{{ produkto.product_name }}</h4>
                             <p>₱{{ produkto.price|intcomma }}</p>
+                            {% if produkto.reviews.all %}
+                                {% with avg_rating=produkto.reviews.all|dictsort:"rating"|last %}
+                                    {% with total_reviews=produkto.reviews.count %}
+                                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                                            <span style="color: #ffc107; font-size: 12px;">
+                                                {% for i in "12345" %}{% if forloop.counter <= avg_rating.rating %}★{% else %}☆{% endif %}{% endfor %}
+                                            </span>
+                                            <span style="font-size: 11px; color: #666;">({{ total_reviews }})</span>
+                                        </div>
+                                    {% endwith %}
+                                {% endwith %}
+                            {% else %}
+                                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                                    <span style="color: #ddd; font-size: 12px;">☆☆☆☆☆</span>
+                                    <span style="font-size: 11px; color: #999;">No reviews</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </a>
                     
