@@ -181,7 +181,223 @@ def addproduct(request):
         'brand_filter': brand_filter,
         'search_query': search_query
     })
+
+# AJAX API Endpoints for Admin Modals
+
+@csrf_exempt
+def add_product_ajax(request):
+    """AJAX endpoint for adding category, brand, or product"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
     
+    try:
+        form_type = request.POST.get('form_type', '')
+        
+        if form_type == 'category':
+            # Add new category
+            category_name = request.POST.get('category_name', '').strip()
+            if not category_name:
+                return JsonResponse({'status': 'error', 'message': 'Category name is required'})
+            
+            from .models import Category
+            Category.objects.get_or_create(category_name=category_name)
+            return JsonResponse({'status': 'success', 'message': 'Category added successfully'})
+        
+        elif form_type == 'brand':
+            # Add new brand
+            brand_name = request.POST.get('brand', '').strip()
+            if not brand_name:
+                return JsonResponse({'status': 'error', 'message': 'Brand name is required'})
+            
+            from .models import Brand
+            Brand.objects.get_or_create(brand=brand_name)
+            return JsonResponse({'status': 'success', 'message': 'Brand added successfully'})
+        
+        elif form_type == 'product':
+            # Add new product
+            product_name = request.POST.get('product_name', '').strip()
+            category_id = request.POST.get('category_name')
+            brand_id = request.POST.get('brand')
+            component_type = request.POST.get('component_type', '').strip()
+            description = request.POST.get('description', '').strip()
+            price = request.POST.get('price', '0')
+            stock = request.POST.get('stock', '0')
+            
+            if not all([product_name, category_id, brand_id, component_type, price, stock]):
+                return JsonResponse({'status': 'error', 'message': 'Missing required fields'})
+            
+            from .models import Category, Brand
+            
+            try:
+                category = Category.objects.get(id=category_id)
+                brand = Brand.objects.get(id=brand_id)
+            except (Category.DoesNotExist, Brand.DoesNotExist):
+                return JsonResponse({'status': 'error', 'message': 'Invalid category or brand'})
+            
+            product = Product(
+                product_name=product_name,
+                category_name=category,
+                brand=brand,
+                component_type=component_type,
+                description=description,
+                price=float(price),
+                stock=int(stock)
+            )
+            
+            # Handle image upload
+            if 'image' in request.FILES:
+                product.image = request.FILES['image']
+            
+            # Handle 3D model upload
+            if 'model_3d' in request.FILES:
+                product.model_3d = request.FILES['model_3d']
+            
+            product.save()
+            return JsonResponse({'status': 'success', 'message': 'Product added successfully'})
+        
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid form type'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def update_product_ajax(request, product_id):
+    """AJAX endpoint for updating a product"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Update fields
+        if 'product_name' in request.POST:
+            product.product_name = request.POST.get('product_name', '').strip()
+        
+        if 'category_name' in request.POST:
+            category_id = request.POST.get('category_name')
+            if category_id:
+                from .models import Category
+                product.category_name = get_object_or_404(Category, id=category_id)
+        
+        if 'brand' in request.POST:
+            brand_id = request.POST.get('brand')
+            if brand_id:
+                from .models import Brand
+                product.brand = get_object_or_404(Brand, id=brand_id)
+        
+        if 'component_type' in request.POST:
+            product.component_type = request.POST.get('component_type', '').strip()
+        
+        if 'description' in request.POST:
+            product.description = request.POST.get('description', '').strip()
+        
+        if 'price' in request.POST:
+            price = request.POST.get('price', '')
+            if price:
+                product.price = float(price)
+        
+        if 'stock' in request.POST:
+            stock = request.POST.get('stock', '')
+            if stock:
+                product.stock = int(stock)
+        
+        # Handle image upload
+        if 'image' in request.FILES:
+            product.image = request.FILES['image']
+        
+        # Handle 3D model upload
+        if 'model_3d' in request.FILES:
+            product.model_3d = request.FILES['model_3d']
+        
+        product.save()
+        return JsonResponse({'status': 'success', 'message': 'Product updated successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def delete_product_ajax(request, product_id):
+    """AJAX endpoint for deleting a product"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        product.delete()
+        return JsonResponse({'status': 'success', 'message': 'Product deleted successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def update_category(request, category_id):
+    """AJAX endpoint for updating a category"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        category = get_object_or_404(Category, id=category_id)
+        
+        category_name = request.POST.get('category_name', '').strip()
+        if not category_name:
+            return JsonResponse({'status': 'error', 'message': 'Category name is required'})
+        
+        category.category_name = category_name
+        category.save()
+        return JsonResponse({'status': 'success', 'message': 'Category updated successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def delete_category(request, category_id):
+    """AJAX endpoint for deleting a category"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        category = get_object_or_404(Category, id=category_id)
+        category.delete()
+        return JsonResponse({'status': 'success', 'message': 'Category deleted successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def update_brand(request, brand_id):
+    """AJAX endpoint for updating a brand"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        brand = get_object_or_404(Brand, id=brand_id)
+        
+        brand_name = request.POST.get('brand', '').strip()
+        if not brand_name:
+            return JsonResponse({'status': 'error', 'message': 'Brand name is required'})
+        
+        brand.brand = brand_name
+        brand.save()
+        return JsonResponse({'status': 'success', 'message': 'Brand updated successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def delete_brand(request, brand_id):
+    """AJAX endpoint for deleting a brand"""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        brand = get_object_or_404(Brand, id=brand_id)
+        brand.delete()
+        return JsonResponse({'status': 'success', 'message': 'Brand deleted successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
 @csrf_exempt
 def update_product(request):
     if request.method == 'POST':
@@ -379,38 +595,87 @@ def user_profile(request):
     profile_form = ProfileForm(instance=request.user)
     password_form = PasswordChangeForm(request.user)
 
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    # Handle avatar-only update
+    if request.method == 'POST' and 'avatar' in request.FILES and 'save_profile' not in request.POST and 'change_password' not in request.POST:
+        avatar_form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        if avatar_form.is_valid():
+            user = avatar_form.save()
+            
+            # Check if this is an AJAX request
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Profile picture updated successfully!',
+                    'avatar_url': user.avatar.url if user.avatar else '',
+                })
+            else:
+                messages.success(request, 'Profile picture updated successfully!')
+                return redirect('profile')
+        else:
+            # Check if this is an AJAX request
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Error updating profile picture',
+                    'errors': avatar_form.errors
+                })
+            else:
+                messages.error(request, 'Error updating profile picture. Please check the image.')
+
+    elif request.method == 'POST' and 'save_profile' in request.POST:
         profile_form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if profile_form.is_valid():
-            profile_form.save()
-            return JsonResponse({
-                'success': True,
-                'first_name': request.user.first_name,
-                'last_name': request.user.last_name,
-                'contact': request.user.contact,
-                'address': request.user.address,
-            })
-        else:
-            return JsonResponse({'success': False})
-
-    if request.method == 'POST':
-        if 'save_profile' in request.POST:
-            profile_form = ProfileForm(request.POST, request.FILES, instance=request.user)
-            if profile_form.is_valid():
-                profile_form.save()
+            user = profile_form.save()
+            
+            # Check if this is an AJAX request
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Profile updated successfully!',
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'contact': user.contact,
+                    'address': user.address,
+                })
+            else:
                 messages.success(request, 'Profile updated successfully!')
                 return redirect('profile')
+        else:
+            # Check if this is an AJAX request
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Error updating profile',
+                    'errors': profile_form.errors
+                })
             else:
-                messages.error(request, 'Error Update')
-        elif 'change_password' in request.POST:
-            password_form = PasswordChangeForm(request.user, request.POST)
-            if password_form.is_valid():
-                user = password_form.save()
-                update_session_auth_hash(request, user)
+                messages.error(request, 'Error updating profile. Please check your inputs.')
+                
+    elif request.method == 'POST' and 'change_password' in request.POST:
+        password_form = PasswordChangeForm(request.user, request.POST)
+        if password_form.is_valid():
+            user = password_form.save()
+            update_session_auth_hash(request, user)
+            
+            # Check if this is an AJAX request
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Password updated successfully!'
+                })
+            else:
                 messages.success(request, 'Password updated successfully!')
                 return redirect('profile')
+        else:
+            # Check if this is an AJAX request
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Error updating password',
+                    'errors': password_form.errors
+                })
             else:
-                messages.error(request, 'Error Update')
+                messages.error(request, 'Error updating password. Please check your inputs.')
 
     return render(request, 'app/account/profile.html', {
         'profile_form': profile_form,
@@ -640,42 +905,81 @@ def update_direct_checkout(request):
 
     return redirect(request.META.get('HTTP_REFERER', 'checkout'))
 
-@csrf_exempt
+@csrf_protect
+@require_POST
 def toggle_favorite(request, product_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"status": "error", "message": "Login required"}, status=401)
-    
-    product = get_object_or_404(Product, id=product_id)
-    # Keep a session-based list of favorites so the UI can persist per-user session
-    favs = request.session.get('favorites', [])
-    prod_id_str = str(product.id)
-
-    # Toggle
-    removed = False
-    if prod_id_str in favs:
-        favs.remove(prod_id_str)
-        removed = True
-        # Also remove any global Favorite record if exists
-        Favorite.objects.filter(favorite_product=product).delete()
-    else:
-        favs.append(prod_id_str)
-        # create or ensure global Favorite exists for admin views (optional)
-        Favorite.objects.get_or_create(favorite_product=product)
-
-    request.session['favorites'] = favs
-
-    # Return simple JSON payload: status and minimal product info for client-side DOM updates
-    if removed:
-        return JsonResponse({"status": "removed", "product": {"id": product.id}})
-    else:
-        return JsonResponse({
-            "status": "added",
+    """Toggle favorite - uses DB for authenticated users, session for anonymous"""
+    try:
+        # Verify product exists
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return JsonResponse({"error": "Product not found"}, status=404)
+        
+        removed = False
+        
+        # Handle authenticated users with database
+        if request.user.is_authenticated:
+            fav = Favorite.objects.filter(user=request.user, favorite_product=product).first()
+            if fav:
+                fav.delete()
+                removed = True
+            else:
+                Favorite.objects.create(user=request.user, favorite_product=product)
+            
+            # Get all user's favorites from database
+            favorites = Favorite.objects.filter(user=request.user).values_list('favorite_product_id', flat=True)
+            favorite_ids = list(favorites)
+        else:
+            # Handle anonymous users with session
+            session_favs = request.session.get('favorites', [])
+            prod_id_str = str(product_id)
+            
+            if prod_id_str in session_favs:
+                session_favs.remove(prod_id_str)
+                removed = True
+            else:
+                session_favs.append(prod_id_str)
+            
+            request.session['favorites'] = session_favs
+            request.session.modified = True
+            
+            # Convert session favorites to integers
+            favorite_ids = []
+            for fav_id in session_favs:
+                try:
+                    favorite_ids.append(int(fav_id))
+                except (ValueError, TypeError):
+                    pass
+        
+        # Build response
+        response_data = {
+            "status": "removed" if removed else "added",
             "product": {
                 "id": product.id,
                 "name": product.product_name,
                 "img": product.image.url if product.image else ""
             }
-        })
+        }
+        
+        # Generate dropdown HTML with all favorited products
+        favorite_products = Product.objects.filter(id__in=favorite_ids) if favorite_ids else []
+        
+        dropdown_html = ""
+        if favorite_products:
+            for fav in favorite_products:
+                img_url = fav.image.url if fav.image else ""
+                dropdown_html += f'<div class="fav-item" data-product-id="{fav.id}"><div class="fav-left"><a href="/product_item/{fav.id}/"><img src="{img_url}" alt="{fav.product_name}" style="width:40px;height:40px;object-fit:cover;"></a><div class="fav-meta">{fav.product_name}</div></div><div class="fav-actions"><button type="button" class="fav-remove-btn" data-product-id="{fav.id}" aria-label="Remove"><i class="fa-solid fa-trash-alt"></i></button></div></div>'
+        else:
+            dropdown_html = '<p class="no-fav">No favorites yet</p>'
+        
+        response_data['dropdown_html'] = dropdown_html
+        return JsonResponse(response_data)
+    
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 
@@ -1009,6 +1313,8 @@ class ProductPage(TemplateView):
             'component_filter': component_filter,
         })
         context['price_order'] = price_order
+        # Add Gemini API key to context
+        context['gemini_api_key'] = os.getenv('GEMINI_API_KEY', '')
         return context
 
 class ProductItemPage(TemplateView):
@@ -1052,6 +1358,14 @@ class ProductItemPage(TemplateView):
         else:
             context["average_rating"] = 0
         
+        # Get user's existing review if authenticated
+        if self.request.user.is_authenticated:
+            try:
+                user_review = reviews.get(user=self.request.user)
+                context["user_review"] = user_review
+            except:
+                context["user_review"] = None
+        
         context["review_form"] = ProductReviewForm()
         context["produkto"] = produkto
         # build display fields for template: name, description, main image and thumbnails
@@ -1080,10 +1394,19 @@ class ProductItemPage(TemplateView):
 
         form = ProductReviewForm(request.POST)
         if form.is_valid():
-            review = form.save(commit=False)
-            review.product = produkto
-            review.user = request.user
-            review.save()
+            # Check if user already has a review for this product
+            try:
+                existing_review = produkto.reviews.get(user=request.user)
+                # Update existing review
+                existing_review.rating = form.cleaned_data['rating']
+                existing_review.comment = form.cleaned_data['comment']
+                existing_review.save()
+            except produkto.reviews.model.DoesNotExist:
+                # Create new review if none exists
+                review = form.save(commit=False)
+                review.product = produkto
+                review.user = request.user
+                review.save()
 
         return redirect("product_item", product_id=product_id)
 
@@ -1464,15 +1787,19 @@ class MyCancelledAppointmentPage(TemplateView):
             c1 = Appointment.objects.filter(email=user.email, status="Cancelled")
             c2 = Selling.objects.filter(email=user.email, status="Cancelled")
 
-            cancellation = sorted(
+            appointments = sorted(
                 list(c1) + list(c2),
                 key=lambda x: getattr(x, "created_at", getattr(x, "selling_at", None)),
                 reverse=True
             )
 
-            context['cancellation'] = cancellation
+            context['appointments'] = appointments
+            context['count_viewing'] = c1.count()
+            context['count_selling'] = c2.count()
         else:
-            context['cancellation'] = []
+            context['appointments'] = []
+            context['count_viewing'] = 0
+            context['count_selling'] = 0
 
         return context
 
@@ -1522,11 +1849,20 @@ class CartPage(TemplateView):
         context = super().get_context_data(**kwargs)
         cart = self.request.session.get('cart', {})
 
+        # Enhance cart data with product category information
         for product_id, produkto in cart.items():
             produkto['sub_total'] = produkto['price'] * produkto['quantity']
             if 'product_id' not in produkto:
                 produkto['product_id'] = product_id
             produkto['cart_key'] = product_id
+            
+            # Add category information if not already present
+            if 'category_name' not in produkto and 'product_id' in produkto:
+                try:
+                    product = Product.objects.get(id=produkto['product_id'])
+                    produkto['category_name'] = product.category_name.category_name if product.category_name else 'Unknown'
+                except Product.DoesNotExist:
+                    produkto['category_name'] = 'Unknown'
 
         context['cart_products'] = cart
         context['total_price'] = sum(produkto['price'] * produkto['quantity'] for produkto in cart.values())
@@ -1647,24 +1983,18 @@ class AdminInventory(TemplateView):
         context = super().get_context_data(**kwargs)
         products = Product.objects.all()
         categories = Category.objects.all()
-        brands = Brand.objects.all()
         
         category_filter = self.request.GET.get('category')
-        brand_filter = self.request.GET.get('brand')
         search_query = self.request.GET.get('search')
 
         if category_filter:
             products = products.filter(category_name__id=category_filter)
-        if brand_filter:
-            products = products.filter(brand__id=brand_filter)
         if search_query:
             products = products.filter(product_name__icontains=search_query)
 
         context['products'] = products
         context['categories'] = categories
-        context['brands'] = brands
         context['category_filter'] = category_filter
-        context['brand_filter'] = brand_filter
         context['search_query'] = search_query
         return context
 
@@ -1718,7 +2048,7 @@ class AdminAppointment(TemplateView):
         context = super().get_context_data(**kwargs)
         search_query = self.request.GET.get('search', '')
         status_filter = self.request.GET.get('status', '')
-        appointments = Appointment.objects.all()
+        appointments = Appointment.objects.all().order_by('-created_at')
 
         if search_query:
             appointments = appointments.filter(
@@ -1743,7 +2073,7 @@ class AdminSellingAppointment(TemplateView):
         context = super().get_context_data(**kwargs)
         search_query = self.request.GET.get('search', '')
         status_filter = self.request.GET.get('status', '')
-        sellings = Selling.objects.all()
+        sellings = Selling.objects.all().order_by('-selling_at')
 
         if search_query:
             sellings = sellings.filter(

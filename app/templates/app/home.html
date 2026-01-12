@@ -41,8 +41,8 @@
                                     {% endif %}
                                 {% endwith %}
                             {% endif %}
-                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
-                                <i class="fa fa-heart"></i>
+                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
+                                <i class="fa-regular fa-heart"></i>
                             </button>
                             <a class="product-thumb" href="{% url 'product_item' produkto.id %}">
                                 {% if produkto.image %}
@@ -120,33 +120,7 @@
     }
     const csrftoken = getCookie('csrftoken');
 
-    const favButtons = document.querySelectorAll('.favorite_btn');
-    favButtons.forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const productId = this.dataset.productId;
-            const el = this;
-            fetch(`/toggle_favorite/${productId}/`, { 
-                method: 'POST', 
-                headers: { 
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrftoken
-                },
-                body: JSON.stringify({})
-            })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.status === 'added') el.classList.add('favorited');
-                        else if (data.status === 'removed') el.classList.remove('favorited');
-                        else if (data.status === 'error') {
-                            alert(data.message || 'Please log in to add favorites');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error toggling favorite:', err);
-                        alert('Error updating favorite');
-                    });
-            });
+    // Favorite button handlers are managed globally by base.js
 
     // Carousel functionality
     const track = document.querySelector('.carousel-track');

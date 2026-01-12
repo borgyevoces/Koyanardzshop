@@ -5,433 +5,752 @@
 {% block content %}
 
 <div class="admin_productpage">
+    <div class="product-header">
+        <h2>Products Management</h2>
+    </div>
+    
     <div class="upperproduct">
-        <div class="adminproduct_left">
-            <div class="product_filter">
-                <form action="" method="GET">
-                    <select name="category" onchange="this.form.submit()">
-                        <option value="">Categories</option>
+        <div class="product-filters">
+            <form action="" method="GET" class="filter-form">
+                <div class="filter-group">
+                    <select name="category" class="filter-select">
+                        <option value="">All Categories</option>
                         {% for category in categories %}
                             <option value="{{ category.id }}" {% if category_filter == category.id|stringformat:"s" %}selected{% endif %}>{{ category.category_name }}</option>
                         {% endfor %}
                     </select>
-                    <select name="brand" onchange="this.form.submit()">
-                        <option value="">Brands</option>
+                </div>
+                <div class="filter-group">
+                    <select name="brand" class="filter-select">
+                        <option value="">All Brands</option>
                         {% for brand in brands %}
                             <option value="{{ brand.id }}" {% if brand_filter == brand.id|stringformat:"s" %}selected{% endif %}>{{ brand.brand }}</option>
                         {% endfor %}
                     </select>
-                    {% if search_query and search_query != '' %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
-                    <button type="submit" style="display: none;">Filter</button>
+                </div>
+                <button type="submit" class="filter-btn">Filter</button>
+            </form>
+        </div>
+        
+        <div class="product-search">
+            <form action="" method="GET" class="search-form">
+                <input type="text" name="search" placeholder="Search products..." value="{{ search_query }}" class="search-input">
+                {% if category_filter and category_filter != '' %}<input type="hidden" name="category" value="{{ category_filter }}">{% endif %}
+                {% if brand_filter and brand_filter != '' %}<input type="hidden" name="brand" value="{{ brand_filter }}">{% endif %}
+                <button type="submit" class="search-btn">🔍</button>
+            </form>
+        </div>
+        
+        <div class="product-actions">
+            <button class="action-btn add-btn" onclick="openAddCategory()">+ Add Category</button>
+            <button class="action-btn add-btn" onclick="openAddBrand()">+ Add Brand</button>
+            <button class="action-btn add-btn primary" onclick="openAddProduct()">+ Add Product</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modals -->
+    <div class="modal-overlay" id="add_category_popup">
+        <div class="modal-dialog">
+            <button type="button" class="modal-close" onclick="closeAddCategory()">✕</button>
+            <div class="modal-content">
+                <h3>Add New Category</h3>
+                <form id="category_form" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" name="category_name" placeholder="Enter category name" required>
+                    </div>
+                    <button type="submit" class="modal-btn">Add Category</button>
                 </form>
             </div>
-            <div class="product_editdelete">
-                <div class="action-buttons">
-                    <button id="edit_btn">Edit</button>
-                    <button id="delete_btn">Delete</button>
-                </div>
-                <div class="popup" id="edit_product_popup">
-                    <button onclick="closeEditProduct()">X</button>
-                    <div class="pop_wrapper">
-                        <div class="pop_content">
-                            <h3>Edit Product</h3>
-                            <form id="edit_form" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <input type="hidden" id="edit_id" name="id">
-                                <p>
-                                    <label>Product Name</label>
-                                    <input type="text" id="edit_name" name="product_name" required>
-                                </p>
-                                <p>
-                                    <label>Category</label>
-                                    <select id="edit_category" name="category_name" required>
-                                        <option value="">Select Category</option>
-                                        {% for category in categories %}
-                                            <option value="{{ category.id }}">{{ category.category_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </p>
-                                <p>
-                                    <label>Brand</label>
-                                    <select id="edit_brand" name="brand" required>
-                                        <option value="">Select Brand</option>
-                                        {% for brand in brands %}
-                                            <option value="{{ brand.id }}">{{ brand.brand }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </p>
-                                <p>
-                                    <label>Component Type</label>
-                                    <select id="edit_component" name="component_type" required>
-                                        <option value="motherboard">Motherboard</option>
-                                        <option value="cpu">Processor</option>
-                                        <option value="ram">RAM</option>
-                                        <option value="gpu">Graphics Card</option>
-                                        <option value="psu">Power Supply</option>
-                                        <option value="case">PC Case</option>
-                                        <option value="cooling">Cooling</option>
-                                        <option value="monitor">Monitor</option>
-                                        <option value="storage">Storage</option>
-                                    </select>
-                                </p>
-                                <p>
-                                    <label>Description</label>
-                                    <textarea id="edit_description" name="description"></textarea>
-                                </p>
-                                <p>
-                                    <label>Price</label>
-                                    <input type="number" step="0.01" id="edit_price" name="price" required>
-                                </p>
-                                <p>
-                                    <label>Stock</label>
-                                    <input type="number" id="edit_stock" name="stock" required>
-                                </p>
-                                <p>
-                                    <label>Product Image</label>
-                                    <input type="file" id="edit_image" name="image" accept="image/*">
-                                </p>
-                                <p>
-                                    <label>3D Model File</label>
-                                    <input type="file" id="edit_model_3d" name="model_3d" accept=".glb,.gltf">
-                                </p>
-                                <button type="submit">Update</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
-        <div class="adminproduct_right">
-            <div class="adminproduct_search">
-                <form action="" method="GET">
-                    <input type="text" name="search" placeholder="Search..." value="{{ search_query }}" >
-                    {% if category_filter and category_filter != '' %}<input type="hidden" name="category" value="{{ category_filter }}">{% endif %}
-                    {% if brand_filter and brand_filter != '' %}<input type="hidden" name="brand" value="{{ brand_filter }}">{% endif %}
+    </div>
+
+    <div class="modal-overlay" id="add_brand_popup">
+        <div class="modal-dialog">
+            <button type="button" class="modal-close" onclick="closeAddBrand()">✕</button>
+            <div class="modal-content">
+                <h3>Add New Brand</h3>
+                <form id="brand_form" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Brand Name</label>
+                        <input type="text" name="brand" placeholder="Enter brand name" required>
+                    </div>
+                    <button type="submit" class="modal-btn">Add Brand</button>
                 </form>
             </div>
-            <div class="adminproduct_adding">
-                <div class="adminproduct_addcategory">
-                    <a href="#" onclick="openAddCategory()">Category</a>
-                    <div class="popup" id="add_category_popup">
-                        <button onclick="closeAddCategory()">X</button>
-                        <div class="pop_wrapper">
-                            <div class="pop_content">
-                                <h3>New Category</h3>
-                                <form action="{% url 'add_product' %}" method="POST">
-                                    {% csrf_token %}
-                                    {{ category_form.as_p }}
-                                    <button type="submit" name="add_category">Submit</button>
-                                </form>
-                            </div>
-                        </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="add_product_popup">
+        <div class="modal-dialog">
+            <button type="button" class="modal-close" onclick="closeAddProduct()">✕</button>
+            <div class="modal-content">
+                <h3>Add New Product</h3>
+                <form id="add_product_form" enctype="multipart/form-data" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" name="product_name" placeholder="Enter product name" required>
                     </div>
-                </div>
-                <div class="adminproduct_addbrand">
-                    <a href="#" onclick="openAddBrand()">Brand</a>
-                    <div class="popup" id="add_brand_popup">
-                        <button onclick="closeAddBrand()">X</button>
-                        <div class="pop_wrapper">
-                            <div class="pop_content">
-                                <h3>New Brand</h3>
-                                <form action="{% url 'add_product' %}" method="POST">
-                                    {% csrf_token %}
-                                    {{ brand_form.as_p }}
-                                    <button type="submit" name="add_brand">Submit</button>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category_name" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                </div>
-                <div class="adminproduct_addproduct">
-                    <a href="#" onclick="openAddProduct()" class="add_products">Product</a>
-                    <div class="popup" id="add_product_popup">
-                        <button onclick="closeAddProduct()">X</button>
-                        <div class="pop_wrapper">
-                            <div class="pop_content">
-                                <h3>New Product</h3>
-                                <form action="{% url 'add_product' %}" method="POST" enctype="multipart/form-data" id="add_form">
-                                    {% csrf_token %}
-                                    {{ form.as_p }}
-                                    <label for="id_images" class="pabebe">Product Image(s):</label>
-                                    <input type="file" name="images" id="id_images" accept="image/*" multiple>
-                                    <button type="submit" name="add_product">Submit</button>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <select name="brand" required>
+                            <option value="">Select Brand</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}">{{ brand.brand }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
-                </div>
-                <div class="adminproduct_addvariant">
-                    <a href="#" onclick="openAddVariant()">Product Variant</a>
-                    <div class="popup" id="add_variant_popup">
-                        <button onclick="closeAddVariant()">X</button>
-                        <div class="pop_wrapper">
-                            <div class="pop_content">
-                                <h3>New Variant</h3>
-                                <form action="{% url 'add_product' %}" method="POST" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {{ variant_form.as_p }}
-                                    <input type="hidden" name="product_id">
-                                    <label for="id_images">More Image(s):</label>
-                                    <input type="file" name="images" id="id_images" accept="image/*" multiple>
-                                    <button type="submit" name="add_variant">Submit</button>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label>Component Type</label>
+                        <select name="component_type" required>
+                            <option value="">Select Type</option>
+                            <option value="motherboard">Motherboard</option>
+                            <option value="cpu">Processor</option>
+                            <option value="ram">RAM</option>
+                            <option value="gpu">Graphics Card</option>
+                            <option value="psu">Power Supply</option>
+                            <option value="case">PC Case</option>
+                            <option value="cooling">Cooling</option>
+                            <option value="monitor">Monitor</option>
+                            <option value="storage">Storage</option>
+                        </select>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" placeholder="Enter description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" name="price" step="0.01" placeholder="0.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <input type="number" name="stock" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <input type="file" name="image" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label>3D Model File (Optional)</label>
+                        <input type="file" name="model_3d" accept=".glb,.gltf">
+                    </div>
+                    <button type="submit" class="modal-btn">Add Product</button>
+                </form>
             </div>
         </div>
-    </div>    
-    <div class="producttable inventorytable">
-        <table>
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="select_all"></th>
-                    <th>ID</th>
-                    <th>Image</th>
-                    <th>Product Name</th>
-                    <th>Category</th>
-                    <th>Brand</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if products %}
-                    {% for produkto in products %}
-                    <tr data-id="{{ produkto.id }}">
-                        <td data-label="Select"><input type="checkbox" class="row_checkbox"></td>
-                        <td data-label="ID">{{ produkto.id }}</td>
-                        <td data-label="Image">
-                            {% if produkto.image %}
-                                <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}" class="prod_img">
-                            {% endif %}
-                        </td>
-                        <td data-label="Product Name" class="prod_name">{{ produkto.product_name }}</td>
-                        <td data-label="Category">{{ produkto.category_name }}</td>
-                        <td data-label="Brand">{{ produkto.brand }}</td>
-                        <td data-label="Quantity" class="prod_stock">{{ produkto.stock }}</td>
-                        <td data-label="Price" class="prod_price">₱{{ produkto.price|intcomma }}</td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
+    </div>
+
+    <div class="modal-overlay" id="edit_product_popup">
+        <div class="modal-dialog">
+            <button type="button" class="modal-close" onclick="closeEditProduct()">✕</button>
+            <div class="modal-content">
+                <h3>Edit Product</h3>
+                <form id="edit_form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="edit_name" name="product_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="edit_category" name="category_name" required>
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Brand</label>
+                        <select id="edit_brand" name="brand" required>
+                            <option value="">Select Brand</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}">{{ brand.brand }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Component Type</label>
+                        <select id="edit_component" name="component_type" required>
+                            <option value="motherboard">Motherboard</option>
+                            <option value="cpu">Processor</option>
+                            <option value="ram">RAM</option>
+                            <option value="gpu">Graphics Card</option>
+                            <option value="psu">Power Supply</option>
+                            <option value="case">PC Case</option>
+                            <option value="cooling">Cooling</option>
+                            <option value="monitor">Monitor</option>
+                            <option value="storage">Storage</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="edit_description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" step="0.01" id="edit_price" name="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock</label>
+                        <input type="number" id="edit_stock" name="stock" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Product Image</label>
+                        <input type="file" id="edit_image" name="image" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label>3D Model File</label>
+                        <input type="file" id="edit_model_3d" name="model_3d" accept=".glb,.gltf">
+                    </div>
+                    <button type="submit" class="modal-btn">Update Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="modal-overlay" id="edit_category_popup">
+        <div class="modal-dialog">
+            <button type="button" class="modal-close" onclick="closeEditCategory()">✕</button>
+            <div class="modal-content">
+                <h3>Edit Category</h3>
+                <form id="edit_category_form" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_category_id" name="id">
+                    <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" id="edit_category_name" name="category_name" placeholder="Enter category name" required>
+                    </div>
+                    <button type="submit" class="modal-btn">Update Category</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Brand Modal -->
+    <div class="modal-overlay" id="edit_brand_popup">
+        <div class="modal-dialog">
+            <button type="button" class="modal-close" onclick="closeEditBrand()">✕</button>
+            <div class="modal-content">
+                <h3>Edit Brand</h3>
+                <form id="edit_brand_form" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_brand_id" name="id">
+                    <div class="form-group">
+                        <label>Brand Name</label>
+                        <input type="text" id="edit_brand_name" name="brand" placeholder="Enter brand name" required>
+                    </div>
+                    <button type="submit" class="modal-btn">Update Brand</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="products-table-container">
+        <div class="table-wrapper">
+            <table class="products-table">
+                <thead>
                     <tr>
-                        <td colspan="8">No products found.</td>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th>Stock</th>
+                        <th>Price</th>
+                        <th>Actions</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-    <div class="bottominventory">
-        <div class="left_inventory">
-
+                </thead>
+                <tbody>
+                    {% if products %}
+                        {% for produkto in products %}
+                        <tr data-id="{{ produkto.id }}">
+                            <td data-label="ID">{{ produkto.id }}</td>
+                            <td data-label="Image">
+                                {% if produkto.image %}
+                                    <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}" class="product-thumbnail">
+                                {% else %}
+                                    <img src="{% static 'images/placeholder.png' %}" alt="No image" class="product-thumbnail">
+                                {% endif %}
+                            </td>
+                            <td data-label="Product Name" class="product-name">{{ produkto.product_name }}</td>
+                            <td data-label="Category">{{ produkto.category_name }}</td>
+                            <td data-label="Brand">{{ produkto.brand }}</td>
+                            <td data-label="Stock" class="stock-column">
+                                <span class="stock-badge {% if produkto.stock > 20 %}stock-high{% elif produkto.stock > 5 %}stock-medium{% else %}stock-low{% endif %}">
+                                    {{ produkto.stock }}
+                                </span>
+                            </td>
+                            <td data-label="Price" class="price-column">₱{{ produkto.price|intcomma }}</td>
+                            <td data-label="Actions" class="actions-column">
+                                <button class="action-icon edit-icon" onclick="openEditProduct({{ produkto.id }}, '{{ produkto.product_name|escapejs }}', {{ produkto.category_name.id }}, {{ produkto.brand.id }}, '{{ produkto.component_type }}', '{{ produkto.description|escapejs }}', {{ produkto.price }}, {{ produkto.stock }})" title="Edit">✎</button>
+                                <button class="action-icon delete-icon" onclick="deleteProduct({{ produkto.id }})" title="Delete">🗑</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="8" class="no-data">No products found</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
-        <div class="right_inventory">
+    </div>
 
+    <!-- Categories and Brands Management Section -->
+    <div class="management-tables-container">
+        <div class="small-table-section">
+            <h3 class="section-title">Manage Categories</h3>
+            <div class="small-table-wrapper">
+                <table class="small-management-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if categories %}
+                            {% for category in categories %}
+                            <tr>
+                                <td data-label="ID">{{ category.id }}</td>
+                                <td data-label="Category Name">{{ category.category_name }}</td>
+                                <td data-label="Actions" class="actions-column">
+                                    <button class="action-icon edit-icon" onclick="openEditCategory({{ category.id }}, '{{ category.category_name|escapejs }}')" title="Edit">✎</button>
+                                    <button class="action-icon delete-icon" onclick="deleteCategory({{ category.id }})" title="Delete">🗑</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="3" class="no-data">No categories found</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="small-table-section">
+            <h3 class="section-title">Manage Brands</h3>
+            <div class="small-table-wrapper">
+                <table class="small-management-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Brand Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if brands %}
+                            {% for brand in brands %}
+                            <tr>
+                                <td data-label="ID">{{ brand.id }}</td>
+                                <td data-label="Brand Name">{{ brand.brand }}</td>
+                                <td data-label="Actions" class="actions-column">
+                                    <button class="action-icon edit-icon" onclick="openEditBrand({{ brand.id }}, '{{ brand.brand|escapejs }}')" title="Edit">✎</button>
+                                    <button class="action-icon delete-icon" onclick="deleteBrand({{ brand.id }})" title="Delete">🗑</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="3" class="no-data">No brands found</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+
 <script>
-    // Toggle component type visibility based on category selection in add form
-    function toggleComponentTypeAddForm() {
-        const addForm = document.getElementById('add_form');
-        if (!addForm) return;
-        
-        const categorySelect = addForm.querySelector('[name="category_name"]');
-        const componentTypeField = addForm.querySelector('[name="component_type"]').closest('p');
-        
-        if (categorySelect) {
-            const updateVisibility = () => {
-                const selectedOption = categorySelect.options[categorySelect.selectedIndex];
-                const selectedText = selectedOption.textContent.toLowerCase();
-                
-                if (selectedText.includes('computer') || selectedText.includes('parts')) {
-                    componentTypeField.style.display = 'block';
-                } else {
-                    componentTypeField.style.display = 'none';
-                }
-            };
-            
-            // Initial check
-            updateVisibility();
-            
-            // Listen for changes
-            categorySelect.addEventListener('change', updateVisibility);
-        }
+    // Modal Functions
+    function openAddCategory() {
+        document.getElementById('add_category_popup').classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAddCategory() {
+        document.getElementById('add_category_popup').classList.remove('modal-show');
+        document.body.style.overflow = 'auto';
+        document.getElementById('category_form').reset();
+    }
+    
+    function openAddBrand() {
+        document.getElementById('add_brand_popup').classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAddBrand() {
+        document.getElementById('add_brand_popup').classList.remove('modal-show');
+        document.body.style.overflow = 'auto';
+        document.getElementById('brand_form').reset();
+    }
+    
+    function openAddProduct() {
+        document.getElementById('add_product_popup').classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeAddProduct() {
+        document.getElementById('add_product_popup').classList.remove('modal-show');
+        document.body.style.overflow = 'auto';
+        document.getElementById('add_product_form').reset();
+    }
+    
+    function openEditProduct(id, name, categoryId, brandId, componentType, description, price, stock) {
+        document.getElementById('edit_id').value = id;
+        document.getElementById('edit_name').value = name;
+        document.getElementById('edit_category').value = categoryId;
+        document.getElementById('edit_brand').value = brandId;
+        document.getElementById('edit_component').value = componentType;
+        document.getElementById('edit_description').value = description;
+        document.getElementById('edit_price').value = price;
+        document.getElementById('edit_stock').value = stock;
+        document.getElementById('edit_product_popup').classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeEditProduct() {
+        document.getElementById('edit_product_popup').classList.remove('modal-show');
+        document.body.style.overflow = 'auto';
     }
 
-    // Same for edit form
-    function toggleComponentTypeEditForm() {
-        const editForm = document.getElementById('edit_form');
-        if (!editForm) return;
-        
-        const categorySelect = editForm.querySelector('[name="category_name"]');
-        const componentTypeField = editForm.querySelector('[name="component_type"]').closest('p');
-        
-        if (categorySelect) {
-            const updateVisibility = () => {
-                const selectedOption = categorySelect.options[categorySelect.selectedIndex];
-                const selectedText = selectedOption.textContent.toLowerCase();
-                
-                if (selectedText.includes('computer') || selectedText.includes('parts')) {
-                    componentTypeField.style.display = 'block';
-                } else {
-                    componentTypeField.style.display = 'none';
-                }
-            };
-            
-            // Initial check
-            updateVisibility();
-            
-            // Listen for changes
-            categorySelect.addEventListener('change', updateVisibility);
-        }
+    function openEditCategory(id, name) {
+        document.getElementById('edit_category_id').value = id;
+        document.getElementById('edit_category_name').value = name;
+        document.getElementById('edit_category_popup').classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeEditCategory() {
+        document.getElementById('edit_category_popup').classList.remove('modal-show');
+        document.body.style.overflow = 'auto';
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const selectAll = document.getElementById('select_all');
-        const checkboxes = document.querySelectorAll('.row_checkbox');
+    function openEditBrand(id, name) {
+        document.getElementById('edit_brand_id').value = id;
+        document.getElementById('edit_brand_name').value = name;
+        document.getElementById('edit_brand_popup').classList.add('modal-show');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeEditBrand() {
+        document.getElementById('edit_brand_popup').classList.remove('modal-show');
+        document.body.style.overflow = 'auto';
+    }
 
-        selectAll.addEventListener('change', function () {
-            checkboxes.forEach(cb => cb.checked = this.checked);
-        });
-
-        function getSelectedIds() {
-            return [...document.querySelectorAll('.row_checkbox:checked')]
-                .map(cb => cb.closest('tr').getAttribute('data-id'));
-        }
-
-        // POPUP FUNCTIONS
-        function openPopup(popupId) {
-            document.getElementById(popupId).classList.add('active');
-        }
-
-        function closePopup(popupId) {
-            document.getElementById(popupId).classList.remove('active');
-        }
-
-        window.openAddCategory = () => openPopup('add_category_popup');
-        window.closeAddCategory = () => closePopup('add_category_popup');
-        window.openAddBrand = () => openPopup('add_brand_popup');
-        window.closeAddBrand = () => closePopup('add_brand_popup');
-        window.openAddProduct = () => {
-            openPopup('add_product_popup');
-            setTimeout(toggleComponentTypeAddForm, 100);
-        };
-        window.closeAddProduct = () => closePopup('add_product_popup');
-        window.openAddVariant = () => {
-            const selected = getSelectedIds();
-            if (selected.length !== 1) {
-                alert("Please select one product to add a variant.");
-                return;
-            }
-            document.querySelector('#add_variant_popup input[name="product_id"]').value = selected[0];
-            openPopup('add_variant_popup');
-        };
-        window.closeAddVariant = () => closePopup('add_variant_popup');
-        window.closeEditProduct = () => closePopup('edit_product_popup');
-
-        // EDIT BUTTON
-        document.getElementById('edit_btn').addEventListener('click', function () {
-            const selected = getSelectedIds();
-            if (selected.length !== 1) {
-                alert('Please select only one product to edit.');
-                return;
-            }
-
-            const row = document.querySelector(`tr[data-id="${selected[0]}"]`);
-            const id = selected[0];
-            const name = row.querySelector('.prod_name').textContent;
-            const stock = row.querySelector('.prod_stock').textContent;
-            const price = row.querySelector('.prod_price').textContent.replace('₱', '').replace(/,/g, '');
-            const category = row.querySelector('td:nth-child(5)').textContent.trim();
-            const brand = row.querySelector('td:nth-child(6)').textContent.trim();
-
-            document.getElementById('edit_id').value = id;
-            document.getElementById('edit_name').value = name;
-            document.getElementById('edit_stock').value = stock;
-            document.getElementById('edit_price').value = price;
-            
-            // Set category and brand dropdowns
-            const categoryOptions = document.querySelectorAll('#edit_category option');
-            categoryOptions.forEach(opt => {
-                if (opt.textContent.trim() === category) {
-                    document.getElementById('edit_category').value = opt.value;
-                }
-            });
-            
-            const brandOptions = document.querySelectorAll('#edit_brand option');
-            brandOptions.forEach(opt => {
-                if (opt.textContent.trim() === brand) {
-                    document.getElementById('edit_brand').value = opt.value;
-                }
-            });
-
-            openPopup('edit_product_popup');
-            setTimeout(toggleComponentTypeEditForm, 100);
-        });
-
-        // DELETE BUTTON
-        document.getElementById('delete_btn').addEventListener('click', function () {
-            const selected = getSelectedIds();
-            if (selected.length === 0) {
-                alert('No product selected.');
-                return;
-            }
-        
-            if (confirm(`Are you sure you want to delete ${selected.length} product(s)?`)) {
-                fetch('/delete_products/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken'),
-                    },
-                    body: JSON.stringify({ ids: selected }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        location.reload(); 
-                    } else {
-                        alert('Something went wrong.');
-                    }
-                });
-            }    
-        });
-
-        // EDIT FORM SUBMIT
-        document.getElementById('edit_form').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const form = e.target;
-            const formData = new FormData(form);
-
-            fetch('/update_product/', {
+    function deleteCategory(id) {
+        if (confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+            fetch(`/delete_category/${id}/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: formData
+                    'Content-Type': 'application/json'
+                }
             })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert('Product updated!');
+                    alert('Category deleted successfully!');
                     location.reload();
                 } else {
-                    alert('Failed to update.');
+                    alert('Error deleting category: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error deleting category');
+            });
+        }
+    }
+
+    function deleteBrand(id) {
+        if (confirm('Are you sure you want to delete this brand? This action cannot be undone.')) {
+            fetch(`/delete_brand/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Brand deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error deleting brand: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error deleting brand');
+            });
+        }
+    }
+    
+    function deleteProduct(id) {
+        if (confirm('Are you sure you want to delete this product?')) {
+            fetch(`/delete_product/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Product deleted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error deleting product: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error deleting product');
+            });
+        }
+    }
+
+    // Form Handlers
+    document.addEventListener('DOMContentLoaded', function() {
+        // Close modal when clicking on overlay backdrop
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('modal-show');
+                    document.body.style.overflow = 'auto';
                 }
             });
         });
 
-        // Close popup when clicking outside
-        document.querySelectorAll('.popup').forEach(popup => {
-            popup.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
+        // Prevent close when clicking inside modal dialog
+        document.querySelectorAll('.modal-dialog').forEach(dialog => {
+            dialog.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Close button functionality
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const overlay = this.closest('.modal-overlay');
+                if (overlay) {
+                    overlay.classList.remove('modal-show');
+                    document.body.style.overflow = 'auto';
                 }
             });
         });
+
+        // Add Category Form
+        const categoryForm = document.getElementById('category_form');
+        if (categoryForm) {
+            categoryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('form_type', 'category');
+                
+                fetch('{% url "add_product" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Category added successfully!');
+                        closeAddCategory();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error adding category');
+                });
+            });
+        }
+
+        // Add Brand Form
+        const brandForm = document.getElementById('brand_form');
+        if (brandForm) {
+            brandForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('form_type', 'brand');
+                
+                fetch('{% url "add_product" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Brand added successfully!');
+                        closeAddBrand();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error adding brand');
+                });
+            });
+        }
+
+        // Add Product Form
+        const addProductForm = document.getElementById('add_product_form');
+        if (addProductForm) {
+            addProductForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('form_type', 'product');
+                
+                fetch('{% url "add_product" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Product added successfully!');
+                        closeAddProduct();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error adding product');
+                });
+            });
+        }
+
+        // Edit Product Form
+        const editForm = document.getElementById('edit_form');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const productId = document.getElementById('edit_id').value;
+                
+                fetch(`/update_product/${productId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Product updated successfully!');
+                        closeEditProduct();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error updating product');
+                });
+            });
+        }
+
+        // Edit Category Form
+        const editCategoryForm = document.getElementById('edit_category_form');
+        if (editCategoryForm) {
+            editCategoryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const categoryId = document.getElementById('edit_category_id').value;
+                
+                fetch(`/update_category/${categoryId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Category updated successfully!');
+                        closeEditCategory();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error updating category');
+                });
+            });
+        }
+
+        // Edit Brand Form
+        const editBrandForm = document.getElementById('edit_brand_form');
+        if (editBrandForm) {
+            editBrandForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const brandId = document.getElementById('edit_brand_id').value;
+                
+                fetch(`/update_brand/${brandId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Brand updated successfully!');
+                        closeEditBrand();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('Error updating brand');
+                });
+            });
+        }
     });
 
     function getCookie(name) {

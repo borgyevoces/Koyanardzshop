@@ -10,6 +10,7 @@ class CustomUser(AbstractUser):
     address = models.TextField(null=True, blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, default='avatars/user_default.png')
     is_oauth_pending = models.BooleanField(default=False, help_text="True if account created via OAuth but profile not completed")
+    botpress_user_key = models.TextField(null=True, blank=True, help_text="Cached Botpress chat API user key")
 
     USERNAME_FIELD = ("email")
     REQUIRED_FIELDS = ["username"]
@@ -116,10 +117,15 @@ class Cart(models.Model):
         return f"{self.quantity} x {self.produkto.product_name}"
 
 class Favorite(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     favorite_product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'favorite_product')
 
     def __str__(self):
-        return self.favorite_product.product_name
+        return f"{self.user} - {self.favorite_product.product_name}" if self.user else self.favorite_product.product_name
 
 class Appointment(models.Model):
     STATUS_CHOICES = [
@@ -199,3 +205,25 @@ class Selling(models.Model):
         
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.product_name}"
+
+
+class ChatConversation(models.Model):
+    """Store AI chat conversations per user (logged-in or anonymous)"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='chat_conversations', null=True, blank=True)
+    session_id = models.CharField(max_length=100, unique=True, db_index=True)  # For non-logged-in users or alternative lookup
+    messages = models.JSONField(default=list)  # List of message objects
+    build_state = models.JSONField(default=dict, blank=True)  # Store PC build state (selected components, etc)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        indexes = [
+            models.Index(fields=['user', '-updated_at']),
+            models.Index(fields=['session_id']),
+        ]
+
+    def __str__(self):
+        if self.user:
+            return f"Chat - {self.user.email}"
+        return f"Chat - Anonymous ({self.session_id[:8]})"

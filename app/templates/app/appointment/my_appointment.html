@@ -3,130 +3,553 @@
 {% load humanize %}
 
 {% block content %}
-<div class="myappointmentpage">
-    <div class="myappointmentbody">
-        <div class="myappointment_left">
-            <div class="myappointment_leftbody">
-                <h3>My Appointments</h3>
-                <div class="myappointment_nav">
-                    <ul>
-                        <li><a href="{% url 'my_appointment' %}"><img src="{% static 'images/icon/pending.png' %}" alt="">Product Viewing Appointment</a></li>
-                        <li><a href="{% url 'my_sellingappointment' %}"><img src="{% static 'images/icon/trading.png' %}" alt="">Selling Device Appointment</a></li>
-                        <li><a href="{% url 'my_cancelledappointment' %}"><img src="{% static 'images/icon/cancel.png' %}" alt="">Cancelled Appointment</a></li>
-                        <li><a href="{% url 'my_historyappointment' %}"><img src="{% static 'images/icon/history.png' %}" alt="">History</a></li>
-                    </ul>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .appointment-page {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 30px 20px;
+    }
+
+    .appointment-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+    }
+
+    .appointment-sidebar {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        height: fit-content;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        position: sticky;
+        top: 20px;
+    }
+
+    .appointment-sidebar h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .appointment-nav ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .appointment-nav li a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        color: #666;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .appointment-nav li a:hover,
+    .appointment-nav li a.active {
+        background: #0b7aa3;
+        color: white;
+    }
+
+    .appointment-nav img {
+        width: 18px;
+        height: 18px;
+        opacity: 0.8;
+    }
+
+    .appointment-main {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .appointment-header {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .appointment-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+    }
+
+    .stat-card label {
+        display: block;
+        font-size: 13px;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .stat-card p {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0b7aa3;
+    }
+
+    .appointments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .appointments-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .appointments-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .appointments-list::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+
+    .appointments-list::-webkit-scrollbar-thumb:hover {
+        background: #999;
+    }
+
+    .appointment-card {
+        background: white;
+        border-radius: 0;
+        padding: 10px 15px;
+        box-shadow: none;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        transition: all 0.2s ease;
+        min-height: 70px;
+        border: none !important;
+    }
+
+    .appointment-card:hover {
+        background: #fafafa;
+    }
+
+    .appointment-image {
+        width: 55px;
+        height: 55px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .appointment-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 8px;
+    }
+
+    .appointment-details {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex: 1;
+    }
+
+    .appointment-product {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a1a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 180px;
+        flex-shrink: 1;
+    }
+
+    .appointment-info {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .info-item {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        font-size: 12px;
+        color: #666;
+        white-space: nowrap;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #333;
+        min-width: 80px;
+    }
+
+    .appointment-status {
+        background: #ffd700;
+        color: #333;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 11px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .appointment-ref {
+        font-size: 12px;
+        color: #999;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .empty-state {
+        background: white;
+        border-radius: 12px;
+        padding: 60px 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        color: #999;
+        margin-bottom: 20px;
+    }
+
+    .empty-state a {
+        display: inline-block;
+        background: #0b7aa3;
+        color: white;
+        padding: 12px 28px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .empty-state a:hover {
+        background: #095a85;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 1024px) {
+        .appointment-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .appointment-sidebar {
+            position: static;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .appointment-page {
+            padding: 20px 15px;
+        }
+
+        .appointment-header h2 {
+            font-size: 22px;
+        }
+
+        .appointments-list {
+            max-height: 50vh;
+        }
+
+        .appointment-card {
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 12px;
+        }
+
+        .appointment-image {
+            width: 50px;
+            height: 50px;
+        }
+
+        .appointment-product {
+            font-size: 13px;
+        }
+
+        .info-item {
+            font-size: 11px;
+        }
+
+        .info-label {
+            min-width: 60px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-card {
+            padding: 15px;
+        }
+
+        .stat-card p {
+            font-size: 20px;
+        }
+
+        .appointment-nav ul {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .appointment-nav li {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .appointment-nav li a {
+            padding: 10px 12px;
+            font-size: 13px;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .appointment-nav img {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .appointment-page {
+            padding: 15px 10px;
+        }
+
+        .appointment-sidebar {
+            display: none;
+        }
+
+        .appointment-container {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .appointment-header {
+            padding: 15px;
+        }
+
+        .appointment-header h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .appointment-card {
+            flex-wrap: wrap;
+            padding: 10px;
+            gap: 8px;
+            min-height: auto;
+        }
+
+        .appointment-image {
+            width: 50px;
+            height: 50px;
+            order: 1;
+        }
+
+        .appointment-product {
+            font-size: 13px;
+            order: 2;
+            width: 100%;
+        }
+
+        .appointment-details {
+            flex-basis: 100%;
+            order: 3;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .appointment-info {
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .info-item {
+            font-size: 11px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-label {
+            min-width: auto;
+            font-size: 11px;
+        }
+
+        .appointment-status {
+            order: 4;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .stat-card {
+            padding: 12px;
+        }
+
+        .stat-card label {
+            font-size: 12px;
+        }
+
+        .stat-card p {
+            font-size: 18px;
+        }
+    }
+</style>
+
+<div class="appointment-page">
+    <div class="appointment-container">
+        <!-- Sidebar Navigation -->
+        <aside class="appointment-sidebar">
+            <h3>My Appointments</h3>
+            <nav class="appointment-nav">
+                <ul>
+                    <li><a href="{% url 'my_appointment' %}" class="active"><img src="{% static 'images/icon/pending.png' %}" alt="">Product Viewing</a></li>
+                    <li><a href="{% url 'my_sellingappointment' %}"><img src="{% static 'images/icon/trading.png' %}" alt="">Selling Device</a></li>
+                    <li><a href="{% url 'my_cancelledappointment' %}"><img src="{% static 'images/icon/cancel.png' %}" alt="">Cancelled</a></li>
+                    <li><a href="{% url 'my_historyappointment' %}"><img src="{% static 'images/icon/history.png' %}" alt="">History</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="appointment-main">
+            <!-- Header with Stats -->
+            <div class="appointment-header">
+                <h2>📅 Product Viewing Appointments</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <label>All Appointments</label>
+                        <p>{{ count_all }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <label>Pending</label>
+                        <p>{{ count_pending }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <label>Completed</label>
+                        <p>{{ count_completed }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <label>Cancelled</label>
+                        <p>{{ count_cancelled }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="myappointment_right">
-            <h3>Product Viewing Appointment</h3>
-            <div class="myappointment_rightsearch">
-            </div>
-            <div class="myappoinment_rightup">
-                <label>All appointments<p>( {{ count_all }} )</p></label>
-                <label>Pending<p>( {{ count_pending }} )</p></label>
-                <label>Completed<p>( {{ count_completed }} )</p></label>
-                <label>Cancelled<p>( {{ count_cancelled }} )</p></label>
-            </div>
-            <div class="myappointment_righttable">
-                <table>
-                {% if user.is_authenticated %}
-                    {% if appointments %}
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Date & Time</th>
-                                <th>Status</th>
-                                <th>Reference No.</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for appointment in appointments %}
-                            {% for produkto in appointment.products.all %}
-                                <tr>
-                                    <td>
-                                        <img src="{{ produkto.product.image.url }}" alt="{{ produkto.product.product_name }}">
-                                        {{ produkto.product.product_name }}{% if produkto.variation %} — {{ produkto.variation }}{% endif %} </br> ₱{{ produkto.price|intcomma }}
-                                    </td>
-                                    <td>{{ appointment.date|date:"M d, Y" }} </br> {{ appointment.time|time:"h:i A" }}</td>
-                                    <td style="font-weight: 600; color: #DECB00;">{{ appointment.status }}</td>
-                                    <td>{{ appointment.reference_number }}</td>
-                                </tr>   
-                            {% endfor %}
-                        {% endfor %}
-                        </tbody>
-                        {% else %}
-                            <p></p>
-                    {% endif %}
-                    {% else %}
-                        <p></p>
-                {% endif %}
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-<!--
-<div class="myappointmentpage">
-    <div class="myappointmentbody">
-        <div class="myappointment_left">
-            <div class="myappointment_navbar">
-                <table>
-                    <thead>
-                        <tr>
-                            <th><a href="{% url 'my_appointment' %}">Product Viewing Appointment</a></th>
-                            <th><a href="{% url 'my_sellingappointment' %}">Selling Device Appointment</a></th>
-                            <th><a href="{% url 'my_cancelledappointment' %}">Cancelled Appointment</a></th>
-                            <th><a href="{% url 'my_historyappointment' %}">History</a></th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        </div>
-        <div class="myappointment_body">
-            <section class="myappointment_section">
-                <div class="appointment-container">
-                {% if user.is_authenticated %}
-                    {% if appointments %}
-                        {% for appointment in appointments %}
-                            {% for produkto in appointment.products.all %}
-                            <div class="appointment-card">
-                                <p><span class="month">{{ appointment.date|date:"F" }}</span>
-                                    <span class="day">{{ appointment.date|date:"d" }}</span>
-                                    <span class="year">{{ appointment.date|date:"Y" }} <span>{{ appointment.time|time:"h:i A" }}</span></span>
-                                </p>
-                                <div class="appointmentcard-hover">
-                                    <div class="appointmenthover_content">
-                                        <div class="appoinmenthover_image">
-                                            {% if produkto.product.image %}
-                                                <img src="{{ produkto.product.image.url }}" alt="Product">
-                                            {% endif %}
-                                                <p>{{ produkto.product.product_name }}</p>
-                                        </div>
-                                        <div class="appointmenthover_contentitem">
-                                            <h4>My Contact: </h4>
-                                            <p>{{ appointment.contact }}</p>
-                                            <h4>Price:</h4>
-                                            <p>₱{{ produkto.price|intcomma }}</p>
-                                            <p id="appointmenthover_ref">{{ appointment.reference_number }}</p>
-                                        </div>
+
+            <!-- Appointments List -->
+            {% if user.is_authenticated %}
+                {% if appointments %}
+                <div class="appointments-list">
+                    {% for appointment in appointments %}
+                        {% for produkto in appointment.products.all %}
+                        <div class="appointment-card">
+                            <div class="appointment-image">
+                                {% if produkto.product.image %}
+                                    <img src="{{ produkto.product.image.url }}" alt="{{ produkto.product.product_name }}">
+                                {% endif %}
+                            </div>
+                            <div class="appointment-details">
+                                <div class="appointment-product">
+                                    {{ produkto.product.product_name }}{% if produkto.variation %} — {{ produkto.variation }}{% endif %}
+                                </div>
+                                <div class="appointment-info">
+                                    <div class="info-item">
+                                        <span class="info-label">Date:</span>
+                                        <span>{{ appointment.date|date:"M d, Y" }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Time:</span>
+                                        <span>{{ appointment.time|time:"h:i A" }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Price:</span>
+                                        <span style="color: #0b7aa3; font-weight: 600;">₱{{ produkto.price|intcomma }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Ref No:</span>
+                                        <span class="appointment-ref">{{ appointment.reference_number }}</span>
                                     </div>
                                 </div>
                             </div>
-                            {% endfor %}
-                        {% endfor %}
-                    {% elif no_appointments %}
-                        <p>No Appointments Found</p>
-                    {% endif %}
-                    {% else %}
-                        <div class="myappointment_login">
-                            <p>You need to <a href="{% url 'login' %}">log in</a> first.</p>
+                            <div class="appointment-status">
+                                <span>⏳</span>
+                                {{ appointment.status }}
+                            </div>
                         </div>
-                {% endif %}
+                        {% endfor %}
+                    {% endfor %}
                 </div>
-            </section>
+                {% else %}
+                <div class="empty-state">
+                    <p>📭 No appointments found</p>
+                    <a href="{% url 'product' %}">Browse Products</a>
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="empty-state">
+                <p>You need to log in to view your appointments</p>
+                <a href="{% url 'login' %}">Login Now</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
--->
 {% endblock content %}

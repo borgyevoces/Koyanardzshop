@@ -14,7 +14,7 @@
                 <div class="favorites">
                     <div class="favoritesbody">
                         <div class="favorites_upper">
-                            <button type="button" class="favorite_btn {% if produkto.id|stringformat:'s' in request.session.favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Remove from favorites">
+                            <button type="button" class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Remove from favorites">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -49,30 +49,5 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.favorite_btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const productId = this.getAttribute('data-product-id');
-
-            fetch(`/toggle_favorite/${productId}/`, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'added') {
-                    this.classList.add('favorited');
-                } else if (data.status === 'removed') {
-                    this.classList.remove('favorited');
-
-                    const card = this.closest('.favorites');
-                    if (card) card.remove(); 
-                }
-            })
-            .catch(err => console.error('Error toggling favorite:', err));
-        });
-    });
-});
-</script>
+<!-- Favorite button handlers are managed globally by base.js -->
 {% endblock content %}
