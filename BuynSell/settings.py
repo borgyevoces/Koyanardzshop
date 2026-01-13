@@ -74,6 +74,11 @@ default_csrf = [
 csrf_env = os.getenv('CSRF_TRUSTED_ORIGINS')
 CSRF_TRUSTED_ORIGINS = [c.strip() for c in csrf_env.split(',')] if csrf_env else default_csrf
 
+# CSRF Cookie Settings
+CSRF_COOKIE_HTTPONLY = False  # Allow template tag to work
+CSRF_COOKIE_AGE = 31449600  # One year
+CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF
+
 ROOT_URLCONF = 'BuynSell.urls'
 
 TEMPLATES = [

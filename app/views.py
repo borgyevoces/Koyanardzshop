@@ -449,6 +449,7 @@ def delete_products(request):
 
 #REGISTER & LOGIN
 
+@csrf_protect
 def register(request):
     form = RegisterForm()
     otp_code = None 
