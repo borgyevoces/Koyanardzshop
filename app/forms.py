@@ -60,6 +60,18 @@ class ProfileForm(forms.ModelForm):
             }),
         }
 
+class AvatarForm(forms.ModelForm):
+    """Form for updating avatar only - prevents clearing other profile fields"""
+    class Meta:
+        model = CustomUser
+        fields = ['avatar']
+        widgets = {
+            'avatar': forms.ClearableFileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+        }
+
 class ProfileUpdateForm(UserChangeForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False)
     class Meta:

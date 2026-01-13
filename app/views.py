@@ -615,7 +615,8 @@ def user_profile(request):
 
     # Handle avatar-only update
     if request.method == 'POST' and 'avatar' in request.FILES and 'save_profile' not in request.POST and 'change_password' not in request.POST:
-        avatar_form = ProfileForm(request.POST, request.FILES, instance=request.user)
+        from app.forms import AvatarForm
+        avatar_form = AvatarForm(request.POST, request.FILES, instance=request.user)
         if avatar_form.is_valid():
             user = avatar_form.save()
             

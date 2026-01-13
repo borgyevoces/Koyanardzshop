@@ -389,6 +389,12 @@
       </div>
     </div>
 
+    <!-- Separate Avatar Upload Form (OUTSIDE profile form) -->
+    <form method="POST" enctype="multipart/form-data" id="avatarForm" style="display: none;">
+      {% csrf_token %}
+      <input type="file" id="headerAvatarInput" name="avatar" accept="image/*">
+    </form>
+
     <!-- Profile Sections (Two Column) -->
     <div class="profile-sections">
       <!-- Edit Profile Section -->
@@ -397,8 +403,6 @@
         
         <form method="POST" enctype="multipart/form-data" id="profileForm">
           {% csrf_token %}
-          <!-- Hidden avatar input inside form for proper submission -->
-          <input type="file" id="headerAvatarInput" name="avatar" accept="image/*" style="display: none;">
           <div class="form-grid">
             <div class="form-row">
               <div class="form-group">
@@ -470,6 +474,7 @@
   const profileHeaderAvatar = document.getElementById('profileHeaderAvatar');
   const headerAvatarInput = document.getElementById('headerAvatarInput');
   const editAvatarText = document.getElementById('editAvatarText');
+  const avatarForm = document.getElementById('avatarForm');
   const profileForm = document.getElementById('profileForm');
 
   // Click handlers to open file picker
@@ -506,12 +511,12 @@
       };
       reader.readAsDataURL(file);
 
-      // Auto-submit the form with just the avatar
-      const formData = new FormData(profileForm);
+      // Create FormData from the separate avatar form
+      const avatarFormData = new FormData(avatarForm);
       
       fetch("{% url 'profile' %}", {
         method: 'POST',
-        body: formData,
+        body: avatarFormData,
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
         }
