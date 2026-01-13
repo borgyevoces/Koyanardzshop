@@ -613,9 +613,12 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                                 this.showQuickActions();
                             }, 300);
                         } else if (savedMessages > 0) {
-                            // Hide quick actions if there are already messages
-                            this.hideQuickActions();
+                            // Always show quick actions when reopening chat (user hasn't used them yet if they're still there)
+                            this.showQuickActions();
                         }
+                    } else {
+                        // Re-opened chat - show quick actions again
+                        this.showQuickActions();
                     }
                     
                     document.getElementById('custom-chat-input')?.focus();
