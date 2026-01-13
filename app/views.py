@@ -449,41 +449,107 @@ def delete_products(request):
 def register(request):
     form = RegisterForm()
     otp_code = None 
+    temp_email = None
+    temp_username = None
 
     if request.method == 'POST':
         if 'otp_code' in request.POST: 
-            username = request.POST['username']
-            otp_code = request.POST['otp_code']
-            user = get_user_model().objects.get(username=username)
+            # OTP Verification - only now create the account
+            username = request.POST.get('username', '')
+            otp_code_input = request.POST.get('otp_code', '')
+            
+            try:
+                user = get_user_model().objects.get(username=username)
+                user_otp = OtpToken.objects.filter(user=user).last()
 
-            user_otp = OtpToken.objects.filter(user=user).last()
-
-            if user_otp and user_otp.otp_code == otp_code:
-                if user_otp.otp_expires_at > timezone.now():
-                    user.is_active = True
-                    user.save()
-                    # Auto-login the user after OTP verification
-                    try:
-                        auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                    except Exception:
-                        pass
-                    messages.success(request, "")
-                    return redirect("home")
+                if user_otp and user_otp.otp_code == otp_code_input:
+                    if user_otp.otp_expires_at > timezone.now():
+                        # OTP verified! Activate the user
+                        user.is_active = True
+                        user.save()
+                        
+                        # Auto-login the user after OTP verification
+                        try:
+                            auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                        except Exception:
+                            pass
+                        messages.success(request, "✓ Email verified successfully!")
+                        return redirect("home")
+                    else:
+                        messages.error(request, "⏱ OTP expired. Please request a new code.")
+                        otp = OtpToken.objects.filter(user=user).last()
+                        if otp:
+                            otp_code = otp.otp_code
                 else:
-                    messages.warning(request, "")
-            else:
-                messages.warning(request, "Invalid OTP entered. Please try again.")
+                    messages.error(request, "❌ Invalid OTP code. Please check and try again.")
+                    otp = OtpToken.objects.filter(user=user).last()
+                    if otp:
+                        otp_code = otp.otp_code
+            except get_user_model().DoesNotExist:
+                messages.error(request, "❌ User not found. Please sign up again.")
+                return redirect("register")
 
         else: 
+            # Initial signup - just send OTP, don't create account yet
             form = RegisterForm(request.POST)
             if form.is_valid():
-                user = form.save()
-                # Do NOT auto-login until OTP is verified
-                otp = OtpToken.objects.filter(user=user).last()
-                if otp:
-                    otp_code = otp.otp_code
+                email = form.cleaned_data.get('email')
+                username = form.cleaned_data.get('username')
+                password = form.cleaned_data.get('password1')
+                
+                # Check if user already exists
+                if get_user_model().objects.filter(username=username).exists():
+                    messages.error(request, "❌ Username already exists.")
+                    return redirect("register")
+                
+                if get_user_model().objects.filter(email=email).exists():
+                    messages.error(request, "❌ Email already registered.")
+                    return redirect("register")
+                
+                # Create user but mark as INACTIVE until OTP is verified
+                user = form.save(commit=False)
+                user.is_active = False  # NOT ACTIVE UNTIL OTP VERIFIED
+                user.set_password(password)
+                user.save()
+                
+                # Generate and send OTP
+                otp = OtpToken.objects.create(
+                    user=user,
+                    otp_expires_at=timezone.now() + timezone.timedelta(minutes=5)
+                )
+                
+                # Send OTP email
+                subject = "Email Verification Code - Koya Nardz Shop"
+                message = f"""
+Dear {username},
 
-                messages.success(request, "")
+Your OTP verification code is:
+{otp.otp_code}
+
+This code expires in 5 minutes.
+
+If you didn't create this account, please ignore this email.
+
+Best regards,
+Koya Nardz Shop Team
+                """
+                
+                try:
+                    send_mail(
+                        subject,
+                        message,
+                        settings.DEFAULT_FROM_EMAIL,
+                        [email],
+                        fail_silently=False,
+                    )
+                    otp_code = otp.otp_code
+                    messages.success(request, "✉ Verification code sent! Check your email.")
+                except Exception as e:
+                    logger.exception(f"Failed to send OTP email to {email}")
+                    # Delete the user if email fails
+                    user.delete()
+                    messages.error(request, "❌ Failed to send verification email. Please try again.")
+                    return redirect("register")
 
     context = {
         "form": form,
@@ -491,37 +557,63 @@ def register(request):
     }
     return render(request, "app/account/signup.html", context)
 
+
+@csrf_protect
 def resend_otp(request):
     if request.method == 'POST':
-        user_email = request.POST["otp_email"]
+        user_email = request.POST.get("otp_email", "")
 
-        if get_user_model().objects.filter(email=user_email).exists():
-            user = get_user_model().objects.get(email=user_email)
-            otp = OtpToken.objects.create(user=user, otp_expires_at=timezone.now() + timezone.timedelta(minutes=5))
+        if not get_user_model().objects.filter(email=user_email).exists():
+            messages.error(request, "❌ This email doesn't exist in our system.")
+            return redirect("register")
+        
+        user = get_user_model().objects.get(email=user_email)
+        last_otp = OtpToken.objects.filter(user=user).order_by('-tp_created_at').first()
+        
+        # Check 1-minute cooldown
+        if last_otp and last_otp.last_resend_at:
+            time_since_resend = timezone.now() - last_otp.last_resend_at
+            if time_since_resend.total_seconds() < 60:
+                seconds_remaining = int(60 - time_since_resend.total_seconds())
+                messages.warning(request, f"⏱ Please wait {seconds_remaining} seconds before resending OTP")
+                return redirect("register")
+        
+        # Create new OTP
+        otp = OtpToken.objects.create(
+            user=user, 
+            otp_expires_at=timezone.now() + timezone.timedelta(minutes=5),
+            last_resend_at=timezone.now()
+        )
 
-            subject="Email Verification"
-            message = f"""  
-                                Hi {user.username}, here is your OTP {otp.otp_code}
-                                it expires in 5 minute, use the url below to redirect back to the website
-                                http://127.0.0.1:8000/verify-email/{user.username}
+        subject = "Email Verification Code - Koya Nardz Shop"
+        message = f"""
+Dear {user.username},
 
-                                """
-            sender = settings.EMAIL_HOST_USER
-            receiver = [user.email]
+Your OTP verification code is:
+{otp.otp_code}
 
+This code expires in 5 minutes.
+
+If you didn't request this, please ignore this email.
+
+Best regards,
+Koya Nardz Shop Team
+        """
+        
+        try:
             send_mail(
-                    subject,
-                    message,
-                    sender,
-                    receiver,
-                    fail_silently=False,
-                )
-
-            messages.success(request, "A new OTP has been sent to your email")
-            return redirect("verify-email", username=user.username)
-        else:
-            messages.warning(request, "This email doesn't exist")
-            return redirect("resend-otp")
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            messages.success(request, "✉ New code sent! Check your email.")
+        except Exception as e:
+            logger.exception(f"Failed to send OTP email to {user.email}")
+            messages.error(request, "❌ Failed to send email. Please try again.")
+        
+        return redirect("register")
 
     context = {}
     return render(request, "app/account/resend_otp.html", context)

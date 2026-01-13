@@ -1760,9 +1760,9 @@
                     <div class="image-canvas-container">
                         <div class="main-image-wrapper">
                             {% if main_image %}
-                                <img id="main_image" src="{{ main_image }}" alt="Product image">
+                                <img id="main_image" src="{{ main_image }}" alt="Product image" loading="lazy">
                             {% elif produkto.image %}
-                                <img id="main_image" src="{{ produkto.image.url }}" alt="Product image">
+                                <img id="main_image" src="{{ produkto.image.url }}" alt="Product image" loading="lazy">
                             {% endif %}
                         </div>
                         <div id="canvas-3d-wrapper" class="canvas-3d-wrapper">
@@ -1771,7 +1771,7 @@
                     </div>
                     <div class="thumbnail-container">
                         {% for img_url in thumbnails %}
-                            <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img_url }}" data-image="{{ img_url }}" alt="Thumbnail {{ forloop.counter }}">
+                            <img class="thumbnail {% if forloop.first %}active-thumb{% endif %}" src="{{ img_url }}" data-image="{{ img_url }}" alt="Thumbnail {{ forloop.counter }}" loading="lazy">
                         {% endfor %}
                     </div>
                     {% if produkto.model_3d %}
@@ -2159,7 +2159,7 @@
                     </button>
                     <a href="{% url 'product_item' produkto.id %}" style="text-decoration: none; color: inherit; display: block;">
                         {% if produkto.image %}
-                        <img src="{{ produkto.image.url }}" alt="Product Image">
+                        <img src="{{ produkto.image.url }}" alt="Product Image" loading="lazy">
                         {% endif %}
                         <div class="product-name">
                             <h4>{{ produkto.product_name }}</h4>

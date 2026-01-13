@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class="hero-media">
-            <img src="{% static 'images/system1drop.png' %}" alt="Featured build">
+            <img src="{% static 'images/system1drop.png' %}" alt="Featured build" loading="lazy">
         </div>
     </div>
 </section>
@@ -46,9 +46,9 @@
                             </button>
                             <a class="product-thumb" href="{% url 'product_item' produkto.id %}">
                                 {% if produkto.image %}
-                                    <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}">
+                                    <img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}" loading="lazy">
                                 {% else %}
-                                    <img src="{% static 'images/products/placeholder.png' %}" alt="placeholder">
+                                    <img src="{% static 'images/products/placeholder.png' %}" alt="placeholder" loading="lazy">
                                 {% endif %}
                             </a>
                             <div class="card-body">
@@ -73,7 +73,7 @@
 <section class="hp-about">
     <div class="about-grid">
         <div class="about-media">
-            <img src="{% static 'images/computer.png' %}" alt="Sell your device">
+            <img src="{% static 'images/computer.png' %}" alt="Sell your device" loading="lazy">
         </div>
         <div class="about-left">
             <h2>Got a laptop or PC to Sell?</h2>

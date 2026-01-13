@@ -106,14 +106,19 @@ Koya Nardz Shop Team
                     if not chosen_from or '@' not in chosen_from:
                         logger.error("MailerSend: invalid or missing DEFAULT_FROM_EMAIL/EMAIL_HOST_USER; set a valid sender email in Render env as DEFAULT_FROM_EMAIL and verify it in MailerSend dashboard")
                     else:
-                        threading.Thread(
+                        # Don't use daemon thread - let it complete before process shutdown
+                        # Non-daemon threads ensure emails send on Render before dyno shutdown
+                        thread = threading.Thread(
                             target=_send_via_mailersend,
-                            args=(subject, message, chosen_from, instance.email),
-                            daemon=True
-                        ).start()
+                            args=(subject, message, chosen_from, instance.email)
+                        )
+                        thread.daemon = False
+                        thread.start()
                 else:
-                    threading.Thread(
+                    # Don't use daemon thread - let it complete before process shutdown
+                    thread = threading.Thread(
                         target=_send_via_django,
-                        args=(subject, message, settings.EMAIL_HOST_USER, [instance.email]),
-                        daemon=True
-                    ).start()
+                        args=(subject, message, settings.EMAIL_HOST_USER, [instance.email])
+                    )
+                    thread.daemon = False
+                    thread.start()

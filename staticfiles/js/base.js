@@ -90,8 +90,15 @@
 /* Favorites: event delegation handles clicks on favorite buttons and dropdown remove buttons */
 document.addEventListener('click', function (e) {
     // Favorite button on product cards
-    const favBtn = e.target.closest && e.target.closest('.favorite_btn');
-    if (favBtn) {
+    let favBtn = e.target;
+    
+    // Check if clicked element is the icon inside the button
+    if (favBtn && favBtn.tagName === 'I' && favBtn.parentElement && favBtn.parentElement.classList.contains('favorite_btn')) {
+        favBtn = favBtn.parentElement;
+    }
+    
+    // Check if element has the class directly
+    if (favBtn && favBtn.classList && favBtn.classList.contains('favorite_btn')) {
         console.log('❤️ Favorite button clicked');
         e.preventDefault();
         e.stopPropagation();

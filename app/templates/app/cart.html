@@ -1598,7 +1598,7 @@
                     <div class="cartleft_image">
                         <div class="cartleft_image_wrapper">
                             {% if produkto.image %}
-                            <img src="{{ produkto.image }}" alt="Product">
+                            <img src="{{ produkto.image }}" alt="Product" loading="lazy">
                             {% endif %}
                             <div class="cartleft_text">
                                 <p>{{ produkto.category_name }}</p>
@@ -1685,7 +1685,7 @@
                 </button>
                 <a href="{% url 'product_item' produkto.id %}" style="text-decoration: none; color: inherit; display: block;">
                     {% if produkto.image %}
-                    <img src="{{ produkto.image.url }}" alt="Product Image">
+                    <img src="{{ produkto.image.url }}" alt="Product Image" loading="lazy">
                     {% endif %}
                     <div class="product-name">
                         <h4>{{ produkto.product_name }}</h4>

@@ -89,9 +89,26 @@
 /* Favorites */
 /* Favorites: event delegation handles clicks on favorite buttons and dropdown remove buttons */
 document.addEventListener('click', function (e) {
+    // Debug: Log all clicks on product cards to see if events reach here
+    if (e.target.closest('.product-card') || e.target.closest('.favorite_btn')) {
+        console.log('📍 Click detected on product-card/favorite_btn:', {
+            target: e.target,
+            targetClass: e.target.className,
+            targetTag: e.target.tagName,
+            button: e.target.closest('.favorite_btn')
+        });
+    }
+    
     // Favorite button on product cards
-    const favBtn = e.target.closest && e.target.closest('.favorite_btn');
-    if (favBtn) {
+    let favBtn = e.target;
+    
+    // Check if clicked element is the icon inside the button
+    if (favBtn && favBtn.tagName === 'I' && favBtn.parentElement && favBtn.parentElement.classList.contains('favorite_btn')) {
+        favBtn = favBtn.parentElement;
+    }
+    
+    // Check if element has the class directly
+    if (favBtn && favBtn.classList && favBtn.classList.contains('favorite_btn')) {
         console.log('❤️ Favorite button clicked');
         e.preventDefault();
         e.stopPropagation();
@@ -305,5 +322,88 @@ document.addEventListener('DOMContentLoaded', function () {
         if (event.key === 'Enter') {
             sendMessage();
         }
+    });
+});
+
+/* Favorite button click handler with multiple event types for maximum compatibility */
+document.addEventListener('mousedown', function(e) {
+    // Try to find the button - check if target is the button or a child of the button
+    let btn = e.target.closest('button[data-product-id]');
+    
+    if (btn && (btn.classList.contains('favorite_btn') || btn.getAttribute('data-product-id'))) {
+        console.log('✅ FAVORITE BUTTON MOUSEDOWN:', btn, 'Product ID:', btn.getAttribute('data-product-id'));
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}, true); // Capture phase
+
+document.addEventListener('click', function(e) {
+    // Try to find the button - check if target is the button or a child of the button
+    let btn = e.target.closest('button[data-product-id]');
+    
+    if (btn && (btn.classList.contains('favorite_btn') || btn.getAttribute('data-product-id'))) {
+        console.log('✅ FAVORITE BUTTON CLICKED:', btn, 'Product ID:', btn.getAttribute('data-product-id'));
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const productId = btn.getAttribute('data-product-id');
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+        
+        fetch(`/toggle_favorite/${productId}/`, {
+            method: 'POST',
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({})
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            console.log('✅ Favorite toggled successfully:', data);
+            btn.classList.toggle('favorited');
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-solid');
+                icon.classList.toggle('fa-regular');
+            }
+        })
+        .catch(err => console.error('❌ Error toggling favorite:', err));
+    }
+}, true); // Capture phase
+
+/* Lazy load all product images */
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🖼️ Setting up lazy loading for images...');
+    const images = document.querySelectorAll('img:not([loading="lazy"])');
+    images.forEach(img => {
+        if (!img.src.includes('placeholder')) {
+            img.loading = 'lazy';
+        }
+    });
+    
+    // Also add lazy loading to picture elements
+    const pictures = document.querySelectorAll('picture img');
+    pictures.forEach(img => {
+        img.loading = 'lazy';
     });
 });

@@ -112,9 +112,9 @@
                         </button>
                         <a href="{% url 'product_item' p.id %}" class="product-thumb" id="product-thumbs">
                             {% if p.image %}
-                                <img src="{{ p.image.url }}" alt="{{ p.product_name }}">
+                                <img src="{{ p.image.url }}" alt="{{ p.product_name }}" loading="lazy">
                             {% else %}
-                                <img src="{% static 'images/products/placeholder.png' %}" alt="{{ p.product_name }}">
+                                <img src="{% static 'images/products/placeholder.png' %}" alt="{{ p.product_name }}" loading="lazy">
                             {% endif %}
                         </a>
                         <div class="card-body">
@@ -1854,6 +1854,8 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 canvas.style.touchAction = 'none';
                 canvas.style.display = 'block';
                 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+                container.style.touchAction = 'none';
+                container.style.pointerEvents = 'auto';
                 container.appendChild(canvas);
 
                 const scene = new THREE.Scene();
@@ -2114,11 +2116,16 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 let touchStartDistance = 0;
                 let lastTouchTime = 0;
                 const touchThrottle = 16; // ~60fps
+                let touchedModels = []; // Track which models are under touch points
 
                 const onTouchStart = (event) => {
-                    event.stopPropagation();
-                    event.preventDefault();
+                    // Always prevent default to stop page scrolling
+                    if (event.target === canvas || canvas.contains(event.target)) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
                     lastTouchTime = Date.now();
+                    touchedModels = []; // Reset touched models
                     
                     if (event.touches.length === 1) {
                         // Single finger - treat as left-click (rotate)
@@ -2151,6 +2158,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                                 
                                 if (isIntersected) {
                                     selectedModel = model;
+                                    touchedModels = [model]; // Track this touched model
                                     isRotating = true;
                                     isDragging = false;
                                     break;
@@ -2158,67 +2166,129 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                             }
                         }
                     } else if (event.touches.length === 2) {
-                        // Two fingers - pinch zoom
-                        const dx = event.touches[0].clientX - event.touches[1].clientX;
-                        const dy = event.touches[0].clientY - event.touches[1].clientY;
+                        // Two fingers - detect which models are under each touch
+                        const touch1 = event.touches[0];
+                        const touch2 = event.touches[1];
+                        const rect = canvas.getBoundingClientRect();
+                        
+                        // Raycast first touch
+                        mouse.x = ((touch1.clientX - rect.left) / rect.width) * 2 - 1;
+                        mouse.y = -((touch1.clientY - rect.top) / rect.height) * 2 + 1;
+                        raycaster.setFromCamera(mouse, camera);
+                        const intersects1 = raycaster.intersectObjects(models, true);
+                        
+                        // Raycast second touch
+                        mouse.x = ((touch2.clientX - rect.left) / rect.width) * 2 - 1;
+                        mouse.y = -((touch2.clientY - rect.top) / rect.height) * 2 + 1;
+                        raycaster.setFromCamera(mouse, camera);
+                        const intersects2 = raycaster.intersectObjects(models, true);
+                        
+                        // Collect which models are under the touch points
+                        for (let model of models) {
+                            const onTouch1 = intersects1.some(intersection => {
+                                let obj = intersection.object;
+                                while (obj) {
+                                    if (obj === model) return true;
+                                    obj = obj.parent;
+                                }
+                                return false;
+                            });
+                            
+                            const onTouch2 = intersects2.some(intersection => {
+                                let obj = intersection.object;
+                                while (obj) {
+                                    if (obj === model) return true;
+                                    obj = obj.parent;
+                                }
+                                return false;
+                            });
+                            
+                            if (onTouch1 || onTouch2) {
+                                touchedModels.push(model);
+                            }
+                        }
+                        
+                        // For two-finger interaction on models
+                        selectedModel = touchedModels.length > 0 ? touchedModels[0] : null;
+                        
+                        // Two fingers can pinch zoom or rotate
+                        const dx = touch1.clientX - touch2.clientX;
+                        const dy = touch1.clientY - touch2.clientY;
                         touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+                        previousMousePosition = { x: (touch1.clientX + touch2.clientX) / 2, y: (touch1.clientY + touch2.clientY) / 2 };
+                        isRotating = true;
                     }
                 };
 
                 const onTouchMove = (event) => {
-                    event.stopPropagation();
-                    event.preventDefault();
+                    // Always prevent default on the canvas to stop page scrolling
+                    if (event.target === canvas || canvas.contains(event.target)) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
                     
                     const now = Date.now();
                     if (now - lastTouchTime < touchThrottle) return;
                     lastTouchTime = now;
                     
                     if (event.touches.length === 1) {
-                        // Single finger - rotate
+                        // Single finger - rotate only the touched model
                         const touch = event.touches[0];
                         const deltaX = touch.clientX - previousMousePosition.x;
                         const deltaY = touch.clientY - previousMousePosition.y;
                         
-                        // Handle model rotation
-                        if (isRotating && selectedModel) {
+                        // Handle model rotation - only if it's a touched model
+                        if (isRotating && selectedModel && touchedModels.includes(selectedModel)) {
                             selectedModel.rotation.y += deltaX * 0.01;
                             selectedModel.rotation.x += deltaY * 0.01;
                         }
                         
                         previousMousePosition = { x: touch.clientX, y: touch.clientY };
                     } else if (event.touches.length === 2) {
-                        // Two fingers - pinch zoom
-                        const dx = event.touches[0].clientX - event.touches[1].clientX;
-                        const dy = event.touches[0].clientY - event.touches[1].clientY;
+                        // Two fingers - pinch zoom on touched models only
+                        const touch1 = event.touches[0];
+                        const touch2 = event.touches[1];
+                        const dx = touch1.clientX - touch2.clientX;
+                        const dy = touch1.clientY - touch2.clientY;
                         const distance = Math.sqrt(dx * dx + dy * dy);
+                        const centerX = (touch1.clientX + touch2.clientX) / 2;
+                        const centerY = (touch1.clientY + touch2.clientY) / 2;
                         
-                        if (touchStartDistance > 0 && models.length > 0) {
-                            // Pinch gesture - zoom selected model or all
-                            // Pinch closer (distance decreases) = zoom out (0.95)
-                            // Pinch further (distance increases) = zoom in (1.05)
+                        if (touchStartDistance > 0 && touchedModels.length > 0) {
+                            // Pinch gesture - zoom only touched models
                             const zoomAmount = distance > touchStartDistance ? 1.05 : 0.95;
                             
-                            if (selectedModel) {
-                                selectedModel.scale.multiplyScalar(zoomAmount);
-                            } else {
-                                // Zoom all models
-                                models.forEach(model => {
-                                    model.scale.multiplyScalar(zoomAmount);
-                                });
+                            // Zoom only the touched models
+                            touchedModels.forEach(model => {
+                                model.scale.multiplyScalar(zoomAmount);
+                            });
+                            
+                            // Also rotate touched models based on finger movement
+                            const deltaX = centerX - previousMousePosition.x;
+                            const deltaY = centerY - previousMousePosition.y;
+                            
+                            if (isRotating && selectedModel && touchedModels.includes(selectedModel)) {
+                                selectedModel.rotation.y += deltaX * 0.005;
+                                selectedModel.rotation.x += deltaY * 0.005;
                             }
                             
                             touchStartDistance = distance;
                         }
+                        
+                        previousMousePosition = { x: centerX, y: centerY };
                     }
                 };
 
                 const onTouchEnd = (event) => {
-                    event.stopPropagation();
-                    event.preventDefault();
+                    if (event.target === canvas || canvas.contains(event.target)) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                    }
                     
                     isDragging = false;
                     isRotating = false;
                     selectedModel = null;
+                    touchedModels = [];  // Clear the touched models array
                     touchStartDistance = 0;
                 };
 

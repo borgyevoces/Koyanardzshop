@@ -42,25 +42,57 @@
     }
 
     function startOTPCountdown() {
-        const timerDisplay = document.getElementById('otp-timer');
-        const verifyBtn = document.querySelector('button[type="submit"]');
-        const otpInput = document.querySelector('input[name="otp_code"]');
+        console.log('startOTPCountdown called');
         
-        if (!timerDisplay) return;
+        const timerDisplay = document.getElementById('otp-timer');
+        const verifyBtn = document.querySelector('button[type="submit"]:not(#resend-btn)');
+        const otpInput = document.querySelector('input[name="otp_code"]');
+        const resendBtn = document.getElementById('resend-btn');
+        const cooldownDisplay = document.getElementById('resend-cooldown');
+        const resendTimerDisplay = document.getElementById('resend-timer-display');
+        
+        console.log('Elements found in startOTPCountdown:', { timerDisplay, verifyBtn, otpInput, resendBtn, cooldownDisplay, resendTimerDisplay });
+        
+        if (!timerDisplay) {
+            console.error('OTP timer display element not found!');
+            return;
+        }
+        
+        // Disable resend button initially (1-minute cooldown after signup)
+        if (resendBtn) {
+            resendBtn.disabled = true;
+            console.log('Resend button disabled initially');
+        }
+        
+        // OTP input formatting - only allow numbers
+        if (otpInput) {
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9a-f]/gi, '');
+            });
+        }
         
         // Calculate expiration time (5 minutes from now)
         const endTime = new Date(new Date().getTime() + 5 * 60 * 1000);
+        // Resend cooldown (1 minute)
+        const resendCooldownEnd = new Date(new Date().getTime() + 60 * 1000);
+        
+        // Display initial timer immediately
+        timerDisplay.innerHTML = '<span style="color: #003d99; font-weight: bold;">⏱ Time remaining: 5:00</span>';
         
         const countdown = setInterval(() => {
             const now = new Date().getTime();
             const distance = endTime - now;
+            const resendDistance = resendCooldownEnd - now;
             
+            // OTP Countdown
             if (distance <= 0) {
                 clearInterval(countdown);
                 timerDisplay.innerHTML = '<span style="color: #c33; font-weight: bold;">OTP Expired - Redirecting to signup...</span>';
-                if (verifyBtn) verifyBtn.disabled = true;
-                if (verifyBtn) verifyBtn.style.opacity = '0.5';
-                if (verifyBtn) verifyBtn.style.cursor = 'not-allowed';
+                if (verifyBtn) {
+                    verifyBtn.disabled = true;
+                    verifyBtn.style.opacity = '0.6';
+                    verifyBtn.style.cursor = 'not-allowed';
+                }
                 
                 // Redirect to signup page after 2 seconds
                 setTimeout(() => {
@@ -72,8 +104,87 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             
-            timerDisplay.innerHTML = `<span style="color: #666; font-weight: bold;">Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}</span>`;
+            timerDisplay.innerHTML = `<span style="color: #003d99; font-weight: bold;">⏱ Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}</span>`;
+            
+            // Resend Cooldown Timer
+            if (resendDistance > 0) {
+                const resendSeconds = Math.floor(resendDistance / 1000);
+                cooldownDisplay.textContent = `You can resend in ${resendSeconds}s`;
+                if (resendTimerDisplay) {
+                    resendTimerDisplay.textContent = `You can resend in ${resendSeconds}s`;
+                }
+                if (resendBtn) {
+                    resendBtn.disabled = true;
+                    resendBtn.style.opacity = '0.6';
+                    resendBtn.style.cursor = 'not-allowed';
+                }
+            } else {
+                cooldownDisplay.textContent = 'Ready to resend';
+                if (resendTimerDisplay) {
+                    resendTimerDisplay.textContent = 'Ready to resend';
+                }
+                if (resendBtn) {
+                    resendBtn.disabled = false;
+                    resendBtn.style.opacity = '1';
+                    resendBtn.style.cursor = 'pointer';
+                }
+            }
         }, 1000);
+    }
+
+    function handleResendClick(e) {
+        e.preventDefault();
+        console.log('Resend click triggered');
+        
+        const resendBtn = document.getElementById('resend-btn');
+        const cooldownDisplay = document.getElementById('resend-cooldown');
+        const resendTimerDisplay = document.getElementById('resend-timer-display');
+        const resendForm = document.getElementById('resend-otp-form');
+        
+        console.log('Elements found:', { resendBtn, cooldownDisplay, resendTimerDisplay, resendForm });
+        
+        if (!resendBtn || !cooldownDisplay || !resendForm) {
+            console.error('Missing required elements for resend click');
+            return;
+        }
+        
+        // Disable button immediately
+        resendBtn.disabled = true;
+        resendBtn.style.opacity = '0.6';
+        resendBtn.style.cursor = 'not-allowed';
+        
+        console.log('Button disabled, starting 60 second cooldown');
+        
+        // Start 60 second cooldown
+        const cooldownEnd = new Date(new Date().getTime() + 60 * 1000);
+        
+        const cooldownTimer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = cooldownEnd - now;
+            
+            if (distance <= 0) {
+                clearInterval(cooldownTimer);
+                cooldownDisplay.textContent = 'Ready to resend';
+                if (resendTimerDisplay) {
+                    resendTimerDisplay.textContent = 'Ready to resend';
+                }
+                resendBtn.disabled = false;
+                resendBtn.style.opacity = '1';
+                resendBtn.style.cursor = 'pointer';
+                console.log('Cooldown complete, button re-enabled');
+                return;
+            }
+            
+            const seconds = Math.floor(distance / 1000);
+            cooldownDisplay.textContent = `You can resend in ${seconds}s`;
+            if (resendTimerDisplay) {
+                resendTimerDisplay.textContent = `You can resend in ${seconds}s`;
+            }
+        }, 1000);
+        
+        // Submit the form
+        console.log('Submitting resend form');
+        resendForm.submit();
     }
 
     async function handleFirebaseSignup(event) {
@@ -145,14 +256,45 @@
 
     window.handleFirebaseSignup = handleFirebaseSignup;
     window.togglePasswordVisibility = togglePasswordVisibility;
+    window.startOTPCountdown = startOTPCountdown;
+    window.handleResendClick = handleResendClick;
 
     // Start countdown when OTP verification form is shown
-    document.addEventListener('DOMContentLoaded', function() {
-        const otpForm = document.querySelector('input[name="otp_code"]');
-        if (otpForm) {
+    function initializeOTPCountdown() {
+        const otpTimer = document.getElementById('otp-timer');
+        console.log('initializeOTPCountdown called, otpTimer:', otpTimer);
+        
+        if (otpTimer) {
+            console.log('OTP timer element found, starting countdown...');
             startOTPCountdown();
+            return true;
         }
-    });
+        return false;
+    }
+
+    // Try multiple times to initialize (in case elements load dynamically)
+    let initAttempts = 0;
+    const initInterval = setInterval(() => {
+        initAttempts++;
+        console.log(`Initialization attempt ${initAttempts}`);
+        
+        if (initializeOTPCountdown()) {
+            clearInterval(initInterval);
+            console.log('OTP countdown initialized successfully');
+        }
+        
+        if (initAttempts >= 10) {
+            clearInterval(initInterval);
+            console.warn('Could not find OTP timer element after 10 attempts');
+        }
+    }, 100);
+
+    // Also try immediately on DOMContentLoaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeOTPCountdown);
+    } else {
+        setTimeout(initializeOTPCountdown, 100);
+    }
 </script>
 
 <style>
@@ -196,7 +338,7 @@
     
     .signuppage {
         padding-top: 0;
-        min-height: 100vh;
+        min-height: 120vh;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -224,15 +366,15 @@
         min-height: 750px !important;
     }
     
-    .signup_leftbody {
-        width: 100%;
+    .signup_leftbody h2 {
+        font-size: 2rem;
+        margin-bottom: 32px;
+        color: #333;
+        font-weight: 700;
     }
     
-    .signup_rightbody {
+    .signup_leftbody form {
         width: 100%;
-        text-align: center;
-        color: white;
-        padding: 40px 30px;
     }
     
     .signup_rightbody h4 {
@@ -257,31 +399,18 @@
         width: 100%;
     }
     
-    .signup_leftbody form input {
-        width: 100% !important;
-        padding: 12px 40px 12px 16px !important;
-        border: 1.5px solid #ddd !important;
-        border-radius: 8px !important;
-        font-size: 0.95rem !important;
-        font-family: inherit !important;
-        transition: all 0.3s ease !important;
-        background: white !important;
-        box-sizing: border-box !important;
+    .signup_leftbody form > div {
+        margin-bottom: 20px;
     }
     
-    .signup_leftbody form input:focus {
-        outline: none !important;
-        border-color: #003d99 !important;
-        box-shadow: 0 0 0 3px rgba(0, 61, 153, 0.1) !important;
-    }
-    
-    .signup_leftbody form input::placeholder {
-        color: #999 !important;
+    .signup_leftbody form > small {
+        margin-bottom: 16px;
     }
     
     .password-wrapper {
         position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 0;
+        width: 100%;
     }
     
     .password-wrapper input {
@@ -293,6 +422,7 @@
         font-family: inherit;
         transition: all 0.3s ease;
         background: white;
+        box-sizing: border-box;
     }
     
     .password-wrapper input:focus {
@@ -328,6 +458,9 @@
     .form_field {
         position: relative;
         margin-bottom: 20px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
     }
     
     .form_field input {
@@ -339,6 +472,7 @@
         font-family: inherit;
         transition: all 0.3s ease;
         background: white;
+        box-sizing: border-box;
     }
     
     .form_field input:focus {
@@ -354,8 +488,7 @@
     .form_field i {
         position: absolute;
         right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
+        top: 12px;
         color: #666;
         pointer-events: none;
         font-size: 1.1rem;
@@ -411,25 +544,173 @@
     #otp-timer {
         text-align: center;
         margin-bottom: 20px;
+        font-size: 1.1rem;
+        color: #003d99;
+        font-weight: 600;
+    }
+    
+    .otp-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e8e8e8;
+    }
+    
+    .otp-header h3 {
+        margin-bottom: 12px;
+        font-size: 1.6rem;
+        color: #333;
+        font-weight: 700;
+    }
+    
+    .otp-header p {
+        color: #666;
+        font-size: 0.95rem;
+        margin-bottom: 0;
+        line-height: 1.5;
+    }
+    
+    .otp-messages {
+        margin-bottom: 20px;
+    }
+    
+    .otp-message {
+        padding: 12px 14px;
+        border-radius: 6px;
+        border-left: 4px solid;
+        margin-bottom: 16px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .otp-message.success {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border-left-color: #4caf50;
+    }
+    
+    .otp-message.error {
+        background-color: #fee;
+        color: #c33;
+        border-left-color: #c33;
+    }
+    
+    .otp-label {
+        display: block;
+        margin-bottom: 12px;
+        color: #333;
+        font-weight: 700;
+        font-size: 1rem;
     }
     
     .verification_code {
         width: 100%;
-        padding: 12px 16px;
-        border: 1.5px solid #ddd;
+        padding: 16px;
+        border: 2px solid #ddd;
         border-radius: 8px;
-        font-size: 1rem;
-        letter-spacing: 8px;
+        font-size: 1.3rem;
+        letter-spacing: 6px;
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
         font-family: 'Courier New', monospace;
+        font-weight: 600;
         transition: all 0.3s ease;
+        background: white;
+        box-sizing: border-box;
     }
     
     .verification_code:focus {
         outline: none;
         border-color: #003d99;
-        box-shadow: 0 0 0 3px rgba(0, 61, 153, 0.1);
+        box-shadow: 0 0 0 4px rgba(0, 61, 153, 0.15);
+        background: #f8fbff;
+    }
+    
+    .verification_code::placeholder {
+        opacity: 0.3;
+        letter-spacing: 6px;
+    }
+    
+    /* Resend OTP Section Styling */
+    .resend-section {
+        display: block !important;
+        width: 100% !important;
+        clear: both;
+        margin-top: 32px;
+        padding: 16px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+    
+    .resend-section * {
+        display: block !important;
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .resend-section h4 {
+        text-align: center;
+        margin: 0 0 12px 0 !important;
+        color: #333;
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+    
+    .resend-timer {
+        text-align: center;
+        margin-bottom: 12px !important;
+        color: #666;
+        font-weight: 500;
+        font-size: 0.8rem;
+    }
+    
+    .resend-timer-text {
+        color: #003d99;
+        font-weight: 600;
+    }
+    
+    .resend-section form {
+        margin: 0 0 8px 0 !important;
+    }
+    
+    .resend-section form input[type="hidden"] {
+        display: none !important;
+    }
+    
+    #resend-btn {
+        padding: 10px 16px;
+        background: linear-gradient(135deg, #666 0%, #555 100%);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        box-sizing: border-box;
+    }
+    
+    #resend-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 102, 102, 0.2);
+    }
+    
+    #resend-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .resend-cooldown-text {
+        text-align: center;
+        color: #666;
+        font-size: 0.75rem;
+        margin: 0 !important;
+        line-height: 1.3;
     }
     
     /* Error message styling */
@@ -454,25 +735,29 @@
         display: block;
         color: #c33;
         font-size: 0.85rem;
-        margin-top: 6px;
+        margin-top: 8px;
         line-height: 1.4;
+        width: 100%;
+        text-align: left;
     }
     
     /* Button styling */
     button[type="submit"] {
         width: 100%;
-        padding: 12px 24px;
+        padding: 11px 20px;
         background: linear-gradient(135deg, #001a4d 0%, #003d99 100%);
         color: white;
         border: none;
         border-radius: 8px;
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-top: 10px;
+        margin-top: 8px;
+        margin-bottom: 16px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        box-sizing: border-box;
     }
     
     button[type="submit"]:hover {
@@ -634,17 +919,30 @@
                 <form method="POST" onsubmit="handleFirebaseSignup(event)" id="firebase-signup-form">
                     {% csrf_token %}
                         {% if otp_code %}
-                        <h3>Verify Your Email</h3>
-                        <div id="otp-timer"></div>
-                        <label for="otp_code">Enter OTP:</label>
+                               <h3>Verify Your Email</h3>
+                        <div class="otp-header">
+                     
+                            <p>Enter the 6-digit code sent to <strong>{{ form.instance.email }}</strong></p>
+                            <div id="otp-timer"></div>
+                        </div>
+
+                        {% if messages %}
+                        <div class="otp-messages">
+                            {% for message in messages %}
+                                <div class="otp-message {% if message.tags %}{% if 'error' in message.tags or 'warning' in message.tags %}error{% else %}success{% endif %}{% else %}success{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <label for="otp_code" class="otp-label">Verification Code</label>
                         <div class="form_field">
-                            <input class="verification_code" type="text" name="otp_code" placeholder="000000" required>
+                            <input class="verification_code" type="text" name="otp_code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric" required>
                         </div>
                         <input type="hidden" name="username" value="{{ form.instance.username }}">
                         <button type="submit">Verify OTP</button>
-                        {% if not otp_code %}
-                            <a href="{% url 'resend-otp' %}">Resend OTP</a>
-                        {% endif %}
+                        
                         {% else %}
                         <!-- Firebase Email Verification Status -->
                         <div id="firebase-verification-status" style="margin-bottom: 1rem; font-size: 0.95rem; text-align: center;"></div>
@@ -675,17 +973,19 @@
                                     {% endif %}
                                 </div>
                             {% elif field.name == 'password1' or field.name == 'password2' %}
-                                <div class="password-wrapper">
-                                    {{ field }}
-                                    <img src="{% static 'images/icon/password-hide.png' %}" class="toggle-password" id="togglePassword{{ forloop.counter }}" alt="Show Password">
+                                <div class="form_field">
+                                    <div class="password-wrapper">
+                                        {{ field }}
+                                        <img src="{% static 'images/icon/password-hide.png' %}" class="toggle-password" id="togglePassword{{ forloop.counter }}" alt="Show Password">
+                                    </div>
+                                    {% if field.errors %}
+                                        <small>
+                                            {% for error in field.errors %}
+                                                {{ error }}<br>
+                                            {% endfor %}
+                                        </small>
+                                    {% endif %}
                                 </div>
-                                {% if field.errors %}
-                                    <small>
-                                        {% for error in field.errors %}
-                                            {{ error }}<br>
-                                        {% endfor %}
-                                    </small>
-                                {% endif %}
                             {% else %}
                                 <div class="form_field">
                                     {{ field }}
@@ -719,6 +1019,24 @@
                         });
                     });
                 </script>
+                {% endif %}
+                
+                <!-- Resend OTP Section - Outside main form -->
+                {% if otp_code %}
+                <div class="resend-section">
+                    <h4>⏱ Didn't receive the code?</h4>
+                    <div class="resend-timer">
+                        <span id="resend-timer-display" class="resend-timer-text">Ready to resend</span>
+                    </div>
+                    <form method="POST" action="{% url 'resend-otp' %}" id="resend-otp-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="otp_email" value="{{ form.instance.email }}">
+                        <button type="button" id="resend-btn" onclick="handleResendClick(event)">Request New Code</button>
+                    </form>
+                    <p class="resend-cooldown-text">
+                        <span id="resend-cooldown">Ready to resend</span>
+                    </p>
+                </div>
                 {% endif %}
             </div>
         </div>
