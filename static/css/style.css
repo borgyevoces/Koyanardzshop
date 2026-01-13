@@ -2529,6 +2529,11 @@ footer .footer .footer_shop {
     position: relative;
     display: flex;
     width: 100%;
+    padding: 0 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    gap: 2rem;
 }
 .appointment_body .appointment_left{
     width: 45%;
@@ -2552,6 +2557,10 @@ footer .footer .footer_shop {
 .appointment_body .appointment_right{
     display: block;
     text-align: left;
+    width: 55%;
+    max-width: 100%;
+    overflow: visible;
+    flex-shrink: 1;
 }
 .appointment_body .appointment_right p{
     padding: .5rem 0;
@@ -2565,26 +2574,31 @@ footer .footer .footer_shop {
 }
 .apppointment_rightform{
     display: flex;
-    gap: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 .appointment_body .appointment_right form p input{
-    width: 18rem;
+    width: 100%;
+    max-width: 100%;
     height: 2.5rem;
-    padding: 1rem;
-    margin: .3rem;
+    padding: 0.7rem;
+    margin: 0.3rem 0;
     font-size: 1.1rem;
     border: 1px solid grey;
     border-radius: .5rem;
     background-color: whitesmoke;
+    box-sizing: border-box;
 }
 .time-dropdown{
     position: relative;
     display: block;
-    width: 90%;
+    width: 100%;
+    max-width: 18rem;
     margin: .5rem;
     padding: .5rem;
     font-size: 1.2rem;
     border-top: 2px solid grey;
+    box-sizing: border-box;
 }
 #time-toggle{
     width: 15%;
@@ -2620,9 +2634,11 @@ footer .footer .footer_shop {
     display: block;
 }
 .apppointmentright_formbutton{
-    width: 25%;
-    margin: 1rem 2rem;
-    padding: 1rem;
+    width: auto;
+    min-width: 120px;
+    max-width: calc(100% - 2rem);
+    margin: 1rem 1rem;
+    padding: 1rem 2rem;
     font-size: 1.1rem;
     font-weight: 600;
     border: none;
@@ -2630,6 +2646,7 @@ footer .footer .footer_shop {
     color: white;
     background-color: #38728F;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 /* APPOINTMENT PAGE RESPONSIVE - TABLET (1024px) */
@@ -5995,7 +6012,6 @@ footer .footer .footer_shop {
     justify-content: center;
     align-items: center;
     padding: 3rem 2rem;
-    width: 30%;
     background: linear-gradient(135deg, #0b84c6 0%, #0971a3 100%);
     border-radius: 16px 0 0 16px;
 }
@@ -9511,12 +9527,12 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
 .products-main{max-width:1200px;margin:0 auto}
 .product-grid{grid-template-columns:repeat(4,1fr);gap:1rem}
 .product-card{background:#fff;border-radius:10px;border:1px solid #eef6fb;display:flex;flex-direction:column;position:relative}
-.product-card .product-thumb{display:block;overflow:hidden}
+.product-card .product-thumb{display:block;overflow:visible;pointer-events:auto}
 .product-card .product-thumb img{width:100%;height:220px;object-fit:cover;display:block;padding:1rem;}
 .product-card .card-body{padding:0.9rem;display:flex;flex-direction:column;gap:.6rem}
 .card-title{font-size:1rem;margin:0;color:#1B1A1A}
 .card-actions{display:flex;gap:.6rem;align-items:center;justify-content:space-between;margin-top:auto}
-.product-card .favorite_btn{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fff 0%,#f6fbff 60%);border:1px solid rgba(11,132,198,0.08);box-shadow:0 8px 20px rgba(2,24,40,0.06);cursor:pointer;transition:transform .18s ease,box-shadow .18s}
+.product-card .favorite_btn{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fff 0%,#f6fbff 60%);border:1px solid rgba(11,132,198,0.08);box-shadow:0 8px 20px rgba(2,24,40,0.06);cursor:pointer;transition:transform .18s ease,box-shadow .18s;pointer-events:auto;z-index:10}
 .product-card .favorite_btn i{color:#777;font-size:1rem;transition:color .15s ease,transform .15s}
 .product-card .favorite_btn:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(2,24,40,0.12)}
 .product-card .favorite_btn.favorited{background:linear-gradient(135deg,#ffe9ef,#ffd6e1);border-color:rgba(224,36,94,0.12)}
