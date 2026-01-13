@@ -1397,21 +1397,21 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             const productsHtml = `
                 <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%;">
                     <p class="carousel-title">${categoryLabel} - Available Options</p>
-                    <div class="product-carousel" style="display: flex; gap: 12px; overflow-x: auto; padding: 8px 0;">
+                    <div class="product-carousel" style="display: flex; gap: 12px; overflow-x: auto; padding: 8px 0; pointer-events: auto; touch-action: auto;">
                         ${products.map(product => `
-                            <div class="product-card-build" data-product-id="${product.id}" style="cursor: pointer; flex: 0 0 160px; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                <div class="product-image" style="width: 100%; height: 120px; background: #f0f0f0; overflow: hidden;">
-                                    <img src="${product.image_url || '/static/images/placeholder.png'}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div class="product-card-build" data-product-id="${product.id}" style="cursor: pointer; flex: 0 0 160px; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); pointer-events: auto; touch-action: auto;">
+                                <div class="product-image" style="width: 100%; height: 120px; background: #f0f0f0; overflow: hidden; pointer-events: none;">
+                                    <img src="${product.image_url || '/static/images/placeholder.png'}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;">
                                 </div>
-                                <div class="product-info" style="padding: 8px;">
-                                    <h4 class="product-name" style="margin: 0 0 2px 0; font-size: 12px; font-weight: 600; color: #333; line-height: 1.2;">${product.name.substring(0, 35)}</h4>
-                                    <p class="product-price" style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #667eea;">₱${parseFloat(product.price).toLocaleString('en-PH')}</p>
+                                <div class="product-info" style="padding: 8px; pointer-events: auto;">
+                                    <h4 class="product-name" style="margin: 0 0 2px 0; font-size: 12px; font-weight: 600; color: #333; line-height: 1.2; pointer-events: none;">${product.name.substring(0, 35)}</h4>
+                                    <p class="product-price" style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #667eea; pointer-events: none;">₱${parseFloat(product.price).toLocaleString('en-PH')}</p>
                                     <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                         ${this.buildInProgress ? 
-                                            `<button class="product-select-btn" data-product-id="${product.id}" data-category="${categoryId}" style="flex: 1; padding: 4px 6px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 600;">Select</button>` :
-                                            `<button class="product-details-btn" data-product-id="${product.id}" style="flex: 1; padding: 4px 6px; background: #667eea; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">Details</button>`
+                                            `<button class="product-select-btn" data-product-id="${product.id}" data-category="${categoryId}" type="button" style="flex: 1; padding: 4px 6px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; font-weight: 600; pointer-events: auto !important; touch-action: auto; -webkit-user-select: none; user-select: none; z-index: 10 !important; position: relative;">Select</button>` :
+                                            `<button class="product-details-btn" data-product-id="${product.id}" type="button" style="flex: 1; padding: 4px 6px; background: #667eea; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; pointer-events: auto !important; touch-action: auto; -webkit-user-select: none; user-select: none; z-index: 10 !important; position: relative;">Details</button>`
                                         }
-                                        ${product.model_3d ? `<button class="product-3d-ask-btn" data-product-id="${product.id}" data-product-name="${product.name}" data-model-url="${product.model_3d}" style="flex: 1; padding: 4px 6px; background: #764ba2; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">3D?</button>` : ''}
+                                        ${product.model_3d ? `<button class="product-3d-ask-btn" data-product-id="${product.id}" data-product-name="${product.name}" data-model-url="${product.model_3d}" type="button" style="flex: 1; padding: 4px 6px; background: #764ba2; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer; pointer-events: auto !important; touch-action: auto; -webkit-user-select: none; user-select: none; z-index: 10 !important; position: relative;">3D?</button>` : ''}
                                     </div>
                                 </div>
                             </div>
@@ -1427,46 +1427,65 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             // Save carousel HTML to localStorage for persistence
             this.saveChatMessage(productsHtml, 'bot', true);
 
-            // Add event listeners for component selection
+            // Add event listeners for component selection using document-level delegation with HIGHER priority
+            const selectHandler = (e) => {
+                const btn = e.target.closest('.product-select-btn');
+                if (!btn) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const productId = btn.dataset.productId;
+                const category = btn.dataset.category;
+                const product = products.find(p => p.id == productId);
+                if (product) {
+                    this.selectComponent(category, product);
+                }
+            };
+
+            // Use capture phase to intercept BEFORE the favorite handler in base.js
+            document.removeEventListener('click', selectHandler, true);
+            document.addEventListener('click', selectHandler, true);
+            
             if (this.buildInProgress) {
-                productsDiv.querySelectorAll('.product-select-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        const productId = btn.dataset.productId;
-                        const category = btn.dataset.category;
-                        const product = products.find(p => p.id == productId);
-                        if (product) {
-                            this.selectComponent(category, product);
-                        }
-                    });
-                });
-            } else {
-                productsDiv.querySelectorAll('.product-details-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-                        const productId = btn.dataset.productId;
-                        const product = products.find(p => p.id == productId);
-                        if (product) {
-                            this.addMessage(`📦 ${product.name} - ₱${parseFloat(product.price).toLocaleString('en-PH')}\n\nWould you like to add this to your cart?`, 'bot');
-                        }
-                    });
-                });
+                const detailsHandler = (e) => {
+                    const btn = e.target.closest('.product-details-btn');
+                    if (!btn) return;
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const productId = btn.dataset.productId;
+                    const product = products.find(p => p.id == productId);
+                    if (product) {
+                        this.addMessage(`📦 ${product.name} - ₱${parseFloat(product.price).toLocaleString('en-PH')}\n\nWould you like to add this to your cart?`, 'bot');
+                    }
+                };
+                document.removeEventListener('click', detailsHandler, true);
+                document.addEventListener('click', detailsHandler, true);
             }
 
             // 3D Model Ask buttons (only show if available, ask first)
-            productsDiv.querySelectorAll('.product-3d-ask-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    const productId = btn.dataset.productId;
-                    const productName = btn.dataset.productName;
-                    const modelUrl = btn.dataset.modelUrl;
-                    const product = products.find(p => p.id == productId);
-                    
-                    if (product) {
-                        this.askForModel3DView(product, modelUrl);
-                    }
-                });
-            });
+            const ask3DHandler = (e) => {
+                const btn = e.target.closest('.product-3d-ask-btn');
+                if (!btn) return;
+                
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                const productId = btn.dataset.productId;
+                const productName = btn.dataset.productName;
+                const modelUrl = btn.dataset.modelUrl;
+                const product = products.find(p => p.id == productId);
+                
+                if (product) {
+                    this.askForModel3DView(product, modelUrl);
+                }
+            };
+            document.removeEventListener('click', ask3DHandler, true);
+            document.addEventListener('click', ask3DHandler, true);
         }
 
         askForModel3DView(product, modelUrl) {
