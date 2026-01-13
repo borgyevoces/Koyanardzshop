@@ -4181,13 +4181,24 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
 
         // Add to cart (AJAX fallback) - buttons still submit forms for graceful degradation
         const cartButtons = document.querySelectorAll('.add-to-cart-btn');
-        cartButtons.forEach(btn => {
+        console.log('Found ' + cartButtons.length + ' add-to-cart buttons');
+        cartButtons.forEach((btn, index) => {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
                 const productId = this.dataset.productId;
                 
+                console.log('Add to cart button clicked, Product ID:', productId);
+                console.log('CSRF Token:', csrftoken);
+                
                 if (!productId) {
                     console.error('Product ID not found');
+                    alert('Error: Product ID not found');
+                    return;
+                }
+                
+                if (!csrftoken) {
+                    console.error('CSRF Token not found');
+                    alert('Error: Security token missing. Please refresh the page.');
                     return;
                 }
 
@@ -4202,19 +4213,22 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 .then(response => {
                     // Check if response is valid
                     if (!response.ok) {
+                        console.error(`HTTP Error: ${response.status} ${response.statusText}`);
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     // Check content type before parsing JSON
                     const contentType = response.headers.get('content-type');
                     if (!contentType || !contentType.includes('application/json')) {
+                        console.error('Invalid response format:', contentType);
                         throw new Error('Invalid response format: expected JSON');
                     }
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Add to cart response:', data);
                     if (data.error) {
                         console.error('Error adding to cart:', data.error);
-                        alert('Failed to add to cart. Please try again.');
+                        alert('Failed to add to cart: ' + data.error);
                         return;
                     }
                     
@@ -4228,6 +4242,8 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                         popup.classList.add('show');
                         setTimeout(() => popup.classList.remove('show'), 2200);
                     }
+                    
+                    console.log('Product added to cart successfully!');
                 })
                 .catch(error => {
                     console.error('Error adding to cart:', error);

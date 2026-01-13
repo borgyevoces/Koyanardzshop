@@ -222,26 +222,6 @@
         text-decoration: underline;
     }
     
-    /* Alert messages */
-    .alert {
-        padding: 12px 16px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        line-height: 1.5;
-    }
-    
-    .alert-danger {
-        background-color: #fee;
-        color: #c33;
-        border: 1px solid #fcc;
-        border-left: 4px solid #c33;
-    }
-    
-    .alert p {
-        margin: 4px 0;
-    }
-    
     /* Button styling */
     button[type="submit"] {
         width: 100%;
@@ -368,18 +348,18 @@
         <div class="loginpage_right">
             <div class="loginpage_rightbody">
                 <h2>Sign In</h2>
-                {% if messages %}
-                <div class="alert alert-danger">
-                    {% for message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
                 <form method="POST">
                     {% csrf_token %}
                     <div class="form_field">
                         <input type="text" name="username_or_email" placeholder="Username" required>
                         <i class="fa fa-user"></i>
+                        {% if messages %}
+                            <small style="color: #c33; display: block; margin-top: 6px;">
+                                {% for message in messages %}
+                                    {{ message }}<br>
+                                {% endfor %}
+                            </small>
+                        {% endif %}
                     </div>
                     <div class="password-wrapper">
                         <input type="password" name="password" id="password-field" placeholder="Password" required>

@@ -69,10 +69,11 @@
         
         console.log('Elements found in startOTPCountdown:', { otpInput, resendBtn, cooldownDisplay, resendTimerDisplay });
         
-        // OTP input formatting - only allow numbers
+        // OTP input formatting - allow numbers and letters (for hex codes)
         if (otpInput) {
             otpInput.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9a-f]/gi, '');
+                this.value = this.value.replace(/[^0-9a-zA-Z]/gi, '');
+            });
             });
         }
         
@@ -284,17 +285,12 @@
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Processing...';
             
-            // Disable the form itself to prevent re-submission
-            const inputs = form.querySelectorAll('input, select, textarea, button');
-            inputs.forEach(input => input.disabled = true);
-            
             // Re-enable after 5 seconds if form submission somehow fails
             setTimeout(() => {
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
                 submitBtn.style.cursor = 'pointer';
                 submitBtn.textContent = originalText;
-                inputs.forEach(input => input.disabled = false);
             }, 5000);
             
             return true; // Allow the actual form submission
@@ -712,6 +708,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        width: 100%;
     }
     
     .resend-section form input[type="hidden"] {
@@ -813,6 +810,8 @@
         .resend-section form {
             width: 100%;
             justify-content: center;
+            display: block;
+            text-align: center;
         }
         
         #resend-btn {
@@ -820,6 +819,7 @@
             font-size: 0.8rem !important;
             width: auto !important;
             margin: 0 auto;
+            display: inline-block;
         }
 
         .resend-cooldown-text {
@@ -1088,10 +1088,16 @@
 
                         <label for="otp_code" class="otp-label">Verification Code</label>
                         <div class="form_field">
-                            <input class="verification_code" type="text" name="otp_code" placeholder="000000" maxlength="6" autocomplete="off" inputmode="numeric" required>
+                            <input class="verification_code" type="text" name="otp_code" placeholder="000000" maxlength="6" autocomplete="off" required>
                         </div>
                         <input type="hidden" name="username" value="{{ form.instance.username }}">
                         <button type="submit">Verify OTP</button>
+                        
+                        <!-- Debug info -->
+                        <div style="margin-top: 15px; font-size: 12px; color: #999; text-align: center;">
+                            <p>Username: {{ form.instance.username }}</p>
+                            <p>Email: {{ form.instance.email }}</p>
+                        </div>
                         
                         {% else %}
                         {% for field in form %}
@@ -1168,9 +1174,9 @@
                 </script>
                 {% endif %}
                 
-                <!-- Resend OTP Section - Outside main form -->
+                <!-- Resend OTP Section - Only show after delay on fresh OTP -->
                 {% if otp_code %}
-                <div class="resend-section">
+                <div class="resend-section" id="resend-section" style="display: {% if is_fresh_otp %}none{% else %}block{% endif %};">
                     <h4>⏱ Didn't receive the code?</h4>
                     <form method="POST" action="{% url 'resend-otp' %}" id="resend-otp-form">
                         {% csrf_token %}
@@ -1179,6 +1185,19 @@
                     </form>
                     <div id="resend-cooldown" class="resend-cooldown-text"></div>
                 </div>
+                {% if is_fresh_otp %}
+                <script>
+                    // Show resend section after 60 seconds on fresh OTP to prevent accidental double OTP
+                    console.log('Fresh OTP detected, hiding resend for 60 seconds');
+                    setTimeout(() => {
+                        const resendSection = document.getElementById('resend-section');
+                        if (resendSection) {
+                            resendSection.style.display = 'block';
+                            console.log('Resend section shown after 60 seconds');
+                        }
+                    }, 60000);
+                </script>
+                {% endif %}
                 {% endif %}
             </div>
         </div>

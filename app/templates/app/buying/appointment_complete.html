@@ -37,32 +37,6 @@
             </div>
         </div>
     </div>
-    <div class="complete_bottom">
-        <div class="product-container">
-        {% if products %}
-            {% for produkto in products %}
-                <div class="product-card">
-                <button type="button" class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" id="homefavorites" aria-label="Toggle favorite"><i class="{% if produkto.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart" aria-hidden="true"></i></button>
-                {% if produkto.image %}
-                <a href="{% url 'product_item' produkto.id %}">
-                    <img src="{{ produkto.image.url }}" alt="Product Image">
-                </a>
-                {% endif %}
-                <div class="product-name">
-                    <h4>{{ produkto.product_name }}</h4>
-                    <p>₱{{ produkto.price|intcomma }}</p>
-                    <div class="productcard-button">
-                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">
-                            {% csrf_token %}
-                            <button>Add to Cart</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        {% endif %}
-        </div>
-    </div>
 </div>
 
 {% endblock content %}

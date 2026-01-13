@@ -328,10 +328,9 @@ document.addEventListener('DOMContentLoaded', function () {
 /* Favorite button click handler with multiple event types for maximum compatibility */
 document.addEventListener('mousedown', function(e) {
     // Try to find the button - check if target is the button or a child of the button
-    let btn = e.target.closest('button[data-product-id]');
+    let btn = e.target.closest('button.favorite_btn[data-product-id]');
     
-    // EXCLUDE product selection buttons and 3D ask buttons
-    if (btn && !btn.classList.contains('product-select-btn') && !btn.classList.contains('product-3d-ask-btn') && !btn.classList.contains('product-details-btn') && (btn.classList.contains('favorite_btn') || btn.getAttribute('data-product-id'))) {
+    if (btn) {
         console.log('✅ FAVORITE BUTTON MOUSEDOWN:', btn, 'Product ID:', btn.getAttribute('data-product-id'));
         e.preventDefault();
         e.stopPropagation();
@@ -340,10 +339,9 @@ document.addEventListener('mousedown', function(e) {
 
 document.addEventListener('click', function(e) {
     // Try to find the button - check if target is the button or a child of the button
-    let btn = e.target.closest('button[data-product-id]');
+    let btn = e.target.closest('button.favorite_btn[data-product-id]');
     
-    // EXCLUDE product selection buttons and 3D ask buttons
-    if (btn && !btn.classList.contains('product-select-btn') && !btn.classList.contains('product-3d-ask-btn') && !btn.classList.contains('product-details-btn') && (btn.classList.contains('favorite_btn') || btn.getAttribute('data-product-id'))) {
+    if (btn) {
         console.log('✅ FAVORITE BUTTON CLICKED:', btn, 'Product ID:', btn.getAttribute('data-product-id'));
         e.preventDefault();
         e.stopPropagation();

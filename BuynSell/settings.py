@@ -78,6 +78,11 @@ CSRF_TRUSTED_ORIGINS = [c.strip() for c in csrf_env.split(',')] if csrf_env else
 CSRF_COOKIE_HTTPONLY = False  # Allow template tag to work
 CSRF_COOKIE_AGE = 31449600  # One year
 CSRF_USE_SESSIONS = False  # Use cookies instead of sessions for CSRF
+# Set CSRF_COOKIE_SECURE based on DEBUG - only secure on HTTPS in production
+CSRF_COOKIE_SECURE = not DEBUG  # True in production (HTTPS), False in development
+CSRF_COOKIE_SAMESITE = 'Lax'  # Allow cross-site cookie submission for forms
+CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS  # Include already-defined CSRF_TRUSTED_ORIGINS
+CSRF_FAILURE_VIEW = 'app.csrf_views.csrf_failure_view'
 
 ROOT_URLCONF = 'BuynSell.urls'
 

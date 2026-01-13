@@ -3,7 +3,7 @@ from django.views.generic import TemplateView, CreateView
 from .models import OtpToken, Category, Brand, Product, ProductImage, ProductReview, Appointment, AppointmentProduct, Selling, Favorite, ProductVariation
 from .forms import RegisterForm, LoginForm, ProfileForm, ProfileUpdateForm, AddCategory, AddBrand, Add, AddVariantForm, ProductReviewForm, AppointmentForm, SellingForm
 from .serializers import ProductSerializer
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt, csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.urls import reverse_lazy
@@ -449,7 +449,9 @@ def delete_products(request):
 
 #REGISTER & LOGIN
 
+@ensure_csrf_cookie
 @csrf_protect
+@ensure_csrf_cookie
 def register(request):
     form = RegisterForm()
     otp_code = None 
@@ -459,23 +461,42 @@ def register(request):
     if request.method == 'POST':
         if 'otp_code' in request.POST: 
             # OTP Verification - only now create the account
-            username = request.POST.get('username', '')
+            username = request.POST.get('username', '').strip()
             otp_code_input = request.POST.get('otp_code', '').strip()
+            
+            logger.info(f"OTP verification attempt for username: {username}, OTP input length: {len(otp_code_input)}")
+            
+            if not username or not otp_code_input:
+                messages.error(request, "❌ Username and OTP code are required.")
+                return redirect("register")
             
             try:
                 user = get_user_model().objects.get(username=username)
                 user_otp = OtpToken.objects.filter(user=user).last()
+                
+                logger.info(f"User found: {username}, has OTP: {user_otp is not None}")
+                
+                if user_otp:
+                    logger.info(f"OTP stored code: '{user_otp.otp_code}' (len={len(str(user_otp.otp_code))})")
+                    logger.info(f"OTP input code: '{otp_code_input}' (len={len(otp_code_input)})")
+                    logger.info(f"OTP codes match: {str(user_otp.otp_code) == otp_code_input}")
 
-                if user_otp and user_otp.otp_code == otp_code_input:
+                if user_otp and str(user_otp.otp_code) == otp_code_input:
+                    logger.info(f"OTP code matches for {username}")
                     if user_otp.otp_expires_at > timezone.now():
                         # OTP verified! Activate the user
                         user.is_active = True
                         user.save()
                         logger.info(f"OTP verified for user: {username}")
                         
+                        # Refresh user from database to ensure fresh state
+                        user = get_user_model().objects.get(username=username)
+                        
                         # Auto-login the user after OTP verification
                         auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                         logger.info(f"User {username} logged in after OTP verification")
+                        logger.info(f"User is_active after login: {user.is_active}")
+                        logger.info(f"Request user after login: {request.user}, is_authenticated: {request.user.is_authenticated}")
                         
                         # Delete the OTP token after successful verification
                         user_otp.delete()
@@ -483,16 +504,31 @@ def register(request):
                         messages.success(request, "✓ Email verified! Welcome to Koya Nardz Shop!")
                         return redirect("home")
                     else:
+                        logger.warning(f"OTP expired for user: {username}")
                         messages.error(request, "⏱ OTP expired. Please request a new code.")
                         otp = OtpToken.objects.filter(user=user).last()
                         if otp:
                             otp_code = otp.otp_code
+                        # Keep the form with the user's data for resend
+                        context = {
+                            "form": RegisterForm(instance=user),
+                            "otp_code": otp_code,
+                        }
+                        return render(request, "app/account/signup.html", context)
                 else:
+                    logger.warning(f"Invalid OTP code for user: {username}")
                     messages.error(request, "❌ Invalid OTP code. Please check and try again.")
                     otp = OtpToken.objects.filter(user=user).last()
                     if otp:
                         otp_code = otp.otp_code
+                    # Keep the form with the user's data for retry
+                    context = {
+                        "form": RegisterForm(instance=user),
+                        "otp_code": otp_code,
+                    }
+                    return render(request, "app/account/signup.html", context)
             except get_user_model().DoesNotExist:
+                logger.error(f"User not found during OTP verification: {username}")
                 messages.error(request, "❌ User not found. Please sign up again.")
                 return redirect("register")
 
@@ -587,6 +623,9 @@ Koya Nardz Shop Team
                     )
                     logger.info(f"OTP email sent successfully to {email}")
                     otp_code = otp.otp_code
+                    # Set session flag to indicate fresh OTP was just sent
+                    request.session['fresh_otp_timestamp'] = timezone.now().timestamp()
+                    request.session['fresh_otp_user'] = username
                     messages.success(request, "✉ Verification code sent! Check your email.")
                 except Exception as e:
                     logger.exception(f"Failed to send OTP email to {email}: {str(e)}")
@@ -599,36 +638,103 @@ Koya Nardz Shop Team
     context = {
         "form": form,
         "otp_code": otp_code,
+        "is_fresh_otp": otp_code is not None,  # True only if we just created/sent an OTP in this request
     }
     return render(request, "app/account/signup.html", context)
 
 
-@csrf_protect
+@ensure_csrf_cookie
 def resend_otp(request):
+    """
+    Resend OTP to user's email
+    Handles cooldown and creates a new OTP token
+    """
     if request.method == 'POST':
-        user_email = request.POST.get("otp_email", "")
+        user_email = request.POST.get("otp_email", "").strip()
+        
+        logger.info(f"Resend OTP request received for email: {user_email}")
+        logger.debug(f"Request META: {request.META.get('CONTENT_TYPE')}")
+        logger.debug(f"POST data: {list(request.POST.keys())}")
+        
+        # Check if a fresh OTP was sent very recently (within 90 seconds)
+        fresh_otp_timestamp = request.session.get('fresh_otp_timestamp')
+        fresh_otp_user = request.session.get('fresh_otp_user')
+        
+        if fresh_otp_timestamp and fresh_otp_user:
+            time_since_fresh = timezone.now().timestamp() - fresh_otp_timestamp
+            logger.info(f"Fresh OTP was sent {time_since_fresh}s ago for user {fresh_otp_user}")
+            
+            if time_since_fresh < 90:
+                # Too soon - likely an accidental duplicate submission during initial signup
+                logger.warning(f"Blocking resend_otp - fresh OTP sent only {time_since_fresh}s ago")
+                seconds_remaining = int(90 - time_since_fresh)
+                messages.warning(request, f"⏱ Please wait {seconds_remaining} seconds before requesting a new OTP")
+                
+                # Get existing OTP and return signup form
+                try:
+                    user = get_user_model().objects.get(email=user_email)
+                    last_otp = OtpToken.objects.filter(user=user).order_by('-tp_created_at').first()
+                    form = RegisterForm(instance=user)
+                    context = {
+                        "form": form,
+                        "otp_code": last_otp.otp_code if last_otp else None,
+                        "is_fresh_otp": True,
+                    }
+                    return render(request, "app/account/signup.html", context)
+                except:
+                    return redirect("register")
+
+        if not user_email:
+            logger.warning("Resend OTP: Email address is required")
+            messages.error(request, "❌ Email address is required.")
+            return redirect("register")
 
         if not get_user_model().objects.filter(email=user_email).exists():
+            logger.warning(f"Resend OTP: Email does not exist: {user_email}")
             messages.error(request, "❌ This email doesn't exist in our system.")
             return redirect("register")
         
         user = get_user_model().objects.get(email=user_email)
+        logger.info(f"Found user for resend OTP: {user.username}")
+        
         last_otp = OtpToken.objects.filter(user=user).order_by('-tp_created_at').first()
         
-        # Check 1-minute cooldown
-        if last_otp and last_otp.last_resend_at:
-            time_since_resend = timezone.now() - last_otp.last_resend_at
-            if time_since_resend.total_seconds() < 60:
-                seconds_remaining = int(60 - time_since_resend.total_seconds())
-                messages.warning(request, f"⏱ Please wait {seconds_remaining} seconds before resending OTP")
-                return redirect("register")
+        # Check cooldown from OTP CREATION time
+        if last_otp:
+            time_since_creation = timezone.now() - last_otp.tp_created_at
+            seconds_remaining = int(60 - time_since_creation.total_seconds())
+            
+            logger.info(f"OTP age for {user.username}: {time_since_creation.total_seconds()}s, cooldown remaining: {seconds_remaining}s")
+            
+            if time_since_creation.total_seconds() < 60:
+                logger.info(f"Resend OTP cooldown active - cannot resend yet")
+                messages.warning(request, f"⏱ Please wait {seconds_remaining} seconds before requesting a new OTP")
+                # Return with the EXISTING OTP code, don't create a new one
+                form = RegisterForm(instance=user)
+                context = {
+                    "form": form,
+                    "otp_code": last_otp.otp_code,
+                    "is_fresh_otp": False,  # Not a fresh OTP, user is just resending
+                }
+                return render(request, "app/account/signup.html", context)
+        
+        # Only create new OTP if cooldown has passed
+        if last_otp:
+            logger.info(f"Cooldown passed, deleting old OTP for user: {user.username}")
+            last_otp.delete()
+        
+        # Clear the fresh OTP flag since we're explicitly resending
+        request.session.pop('fresh_otp_timestamp', None)
+        request.session.pop('fresh_otp_user', None)
         
         # Create new OTP
+        logger.info(f"Creating new OTP for user: {user.username}")
         otp = OtpToken.objects.create(
             user=user, 
             otp_expires_at=timezone.now() + timezone.timedelta(minutes=5),
             last_resend_at=timezone.now()
         )
+        logger.info(f"New OTP created: {otp.otp_code}")
 
         subject = "Email Verification Code - Koya Nardz Shop"
         message = f"""
@@ -653,20 +759,22 @@ Koya Nardz Shop Team
                 [user.email],
                 fail_silently=False,
             )
+            logger.info(f"OTP email sent successfully to {user.email}")
             messages.success(request, "✉ New code sent! Check your email.")
         except Exception as e:
-            logger.exception(f"Failed to send OTP email to {user.email}")
+            logger.exception(f"Failed to send OTP email to {user.email}: {str(e)}")
             messages.error(request, "❌ Failed to send email. Please try again.")
         
-        # After resending, go back to the OTP verification view with a fresh code,
-        # keeping the user's details visible and restarting the timers.
+        # After resending, go back to the OTP verification view with the new code
         form = RegisterForm(instance=user)
         context = {
             "form": form,
             "otp_code": otp.otp_code,
         }
+        logger.info(f"Rendering signup.html with new OTP for user: {user.username}")
         return render(request, "app/account/signup.html", context)
 
+    logger.debug("Resend OTP GET request received")
     context = {}
     return render(request, "app/account/resend_otp.html", context)
 
@@ -847,6 +955,10 @@ def user_profile(request):
 
 def logout_view(request):
     logout(request)
+    # Clear any remaining messages from session
+    from django.contrib.messages import get_messages
+    storage = get_messages(request)
+    storage.used = True
     return redirect('home') 
 
 #END REGISTER & LOGIN
@@ -1234,9 +1346,28 @@ def appoint(request):
             'color': 'green'
         }for appoint in appointments]
 
+    # Get product information from direct_checkout session if available
+    direct_checkout = request.session.get('direct_checkout')
+    product_info = None
+    if direct_checkout:
+        try:
+            product = Product.objects.get(id=direct_checkout.get('product_id'))
+            product_info = {
+                'product_id': product.id,
+                'product_name': product.product_name,
+                'price': product.price,
+                'quantity': direct_checkout.get('quantity', 1),
+                'image': product.image.url if product.image else None,
+                'total_price': product.price * direct_checkout.get('quantity', 1)
+            }
+        except Product.DoesNotExist:
+            product_info = None
+
     return render(request, 'app/buying/appointment.html', {
         'form': form,
-        'events': json.dumps(events)  
+        'events': json.dumps(events),
+        'product_info': product_info,
+        'direct_checkout': direct_checkout
     })
 
 def appointing(request):
@@ -1380,6 +1511,10 @@ class ProductPage(TemplateView):
     model = Product
     template_name = 'app/buying/product.html'
     context_object_name = 'products'
+
+    @method_decorator(ensure_csrf_cookie)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     COMPONENT_TO_GBL = {
     "cpu": "cpu.gbl",
@@ -1846,6 +1981,7 @@ class SellingPage(TemplateView):
 
             messages.success(request, 'Selling appointment submitted successfully!')
             request.session['reference_number'] = selling_appointment.reference_number
+            request.session['selling_id'] = selling_appointment.id
             return redirect('selling_complete')
 
         return self.render_to_response({'form': form})
@@ -1856,6 +1992,34 @@ class SellingCompletePage(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['reference_number'] = self.request.session.get('reference_number')
+        
+        # Retrieve the selling appointment details
+        selling_id = self.request.session.get('selling_id')
+        if selling_id:
+            try:
+                selling = Selling.objects.get(id=selling_id)
+                context['selling'] = selling
+                context['selling_data'] = {
+                    'first_name': selling.first_name,
+                    'last_name': selling.last_name,
+                    'contact': selling.contact,
+                    'email': selling.email,
+                    'address': selling.address,
+                    'selling_date': selling.selling_date,
+                    'selling_time': selling.selling_time,
+                    'product_name': selling.product_name,
+                    'category': selling.category.category_name if selling.category else 'N/A',
+                    'price': selling.price,
+                    'description': selling.description,
+                    'image': selling.image.url if selling.image else None,
+                }
+            except Selling.DoesNotExist:
+                context['selling'] = None
+                context['selling_data'] = None
+        else:
+            context['selling'] = None
+            context['selling_data'] = None
+        
         return context
 
 class SellingInfoPage(TemplateView):
@@ -1911,10 +2075,9 @@ class MySellingAppointmentPage(TemplateView):
         search_query = self.request.GET.get('q', '')
 
         if user.is_authenticated:
-            today = timezone.now().date()
+            # Show all selling appointments regardless of date
             sellings = Selling.objects.filter(email=user.email) \
-                .exclude(status__in=['Cancelled', 'Completed']) \
-                .filter(selling_date__gte=today) \
+                .exclude(status__in=['Cancelled']) \
                 .order_by('-selling_date')
 
             if status_filter:
