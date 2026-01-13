@@ -393,10 +393,11 @@
 
     html .favorite_btn,
     .favorite_btn {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        border-radius: 50% !important;
+        width: auto !important;
+        height: auto !important;
+        min-width: auto !important;
+        padding: 14px 24px !important;
+        border-radius: 10px !important;
         background: white !important;
         border: 1.5px solid #e0e0e0 !important;
         cursor: pointer !important;
@@ -1913,47 +1914,83 @@
                     </form>
 
                     <script>
-                        // Setup edit star rating
-                        const editStars = document.querySelectorAll('#edit_star_container span');
-                        const editRatingValue = document.getElementById('editRatingValue');
-                        editStars.forEach(star => {
-                            star.addEventListener('click', function() {
-                                editRatingValue.value = this.dataset.star;
-                                updateEditStarDisplay();
-                            });
-                            star.addEventListener('mouseover', function() {
-                                updateEditStarHover(this.dataset.star);
-                            });
-                        });
-                        document.getElementById('edit_star_container').addEventListener('mouseleave', updateEditStarDisplay);
-                        
-                        function updateEditStarHover(rating) {
+                        // Setup edit star rating - wait for DOM to be ready
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const editStarContainer = document.getElementById('edit_star_container');
+                            const editStars = editStarContainer ? editStarContainer.querySelectorAll('span[data-star]') : [];
+                            const editRatingValue = document.getElementById('editRatingValue');
+                            
+                            if (editStars.length === 0) {
+                                console.log('Edit stars not found');
+                                return;
+                            }
+                            
+                            // Initialize stars
+                            const initialRating = editRatingValue ? parseInt(editRatingValue.value) || 0 : 0;
+                            
+                            function updateEditStarHover(rating) {
+                                editStars.forEach(star => {
+                                    const starNum = parseInt(star.getAttribute('data-star'));
+                                    if (starNum <= parseInt(rating)) {
+                                        star.style.setProperty('color', '#ffc107', 'important');
+                                    } else {
+                                        star.style.setProperty('color', '#e0e0e0', 'important');
+                                    }
+                                });
+                            }
+                            
+                            function updateEditStarDisplay() {
+                                const currentRating = editRatingValue ? parseInt(editRatingValue.value) || 0 : 0;
+                                editStars.forEach(star => {
+                                    const starNum = parseInt(star.getAttribute('data-star'));
+                                    if (starNum <= currentRating) {
+                                        star.style.setProperty('color', '#ffc107', 'important');
+                                    } else {
+                                        star.style.setProperty('color', '#e0e0e0', 'important');
+                                    }
+                                });
+                            }
+                            
                             editStars.forEach(star => {
-                                if (star.dataset.star <= rating) {
-                                    star.style.color = '#667eea';
-                                } else {
-                                    star.style.color = '#e0e0e0';
-                                }
+                                star.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const rating = parseInt(this.getAttribute('data-star'));
+                                    console.log('Edit star clicked:', rating);
+                                    if (editRatingValue) {
+                                        editRatingValue.value = rating;
+                                    }
+                                    updateEditStarDisplay();
+                                });
+                                
+                                star.addEventListener('mouseover', function() {
+                                    const hoverRating = parseInt(this.getAttribute('data-star'));
+                                    updateEditStarHover(hoverRating);
+                                });
                             });
-                        }
-                        
-                        function updateEditStarDisplay() {
-                            const currentRating = editRatingValue.value || 0;
-                            editStars.forEach(star => {
-                                if (star.dataset.star <= currentRating) {
-                                    star.style.color = '#ffc107';
-                                } else {
-                                    star.style.color = '#e0e0e0';
-                                }
-                            });
-                        }
-                        updateEditStarDisplay();
+                            
+                            if (editStarContainer) {
+                                editStarContainer.addEventListener('mouseleave', function() {
+                                    updateEditStarDisplay();
+                                });
+                            }
+                            
+                            // Initialize display
+                            updateEditStarDisplay();
 
-                        // Show edit form on click
-                        document.querySelector('a[href="#edit-review"]').addEventListener('click', function(e) {
-                            e.preventDefault();
-                            document.getElementById('edit-review').style.display = 'block';
-                            document.getElementById('edit-review').scrollIntoView({ behavior: 'smooth' });
+                            // Show edit form on click
+                            const editLink = document.querySelector('a[href="#edit-review"]');
+                            if (editLink) {
+                                editLink.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    const editForm = document.getElementById('edit-review');
+                                    if (editForm) {
+                                        editForm.style.display = 'block';
+                                        editForm.scrollIntoView({ behavior: 'smooth' });
+                                        updateEditStarDisplay();
+                                    }
+                                });
+                            }
                         });
                     </script>
                     {% else %}
@@ -1983,58 +2020,70 @@
                     </form>
                     
                     <script>
-                        // Handle star rating display - Initialize immediately
-                        const starContainer = document.getElementById('star_container');
-                        const ratingValue = document.getElementById('ratingValue');
-                        const ratingDisplay = document.getElementById('ratingDisplay');
-                        const selectedRating = document.getElementById('selectedRating');
-                        const stars = starContainer ? starContainer.querySelectorAll('span[data-star]') : [];
-                        
-                        // Initialize stars to gray
-                        stars.forEach(s => {
-                            s.style.color = '#e0e0e0';
-                        });
-                        
-                        function updateStarDisplay(rating) {
+                        // Handle star rating display - wait for DOM to be ready
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const starContainer = document.getElementById('star_container');
+                            const ratingValue = document.getElementById('ratingValue');
+                            const ratingDisplay = document.getElementById('ratingDisplay');
+                            const selectedRating = document.getElementById('selectedRating');
+                            const stars = starContainer ? starContainer.querySelectorAll('span[data-star]') : [];
+                            
+                            if (stars.length === 0) {
+                                console.log('Stars not found');
+                                return;
+                            }
+                            
+                            // Initialize stars to gray
                             stars.forEach(s => {
-                                const starNum = parseInt(s.getAttribute('data-star'));
-                                if (starNum <= rating) {
-                                    s.style.color = '#ffc107';
-                                } else {
-                                    s.style.color = '#e0e0e0';
-                                }
-                            });
-                        }
-                        
-                        function updateStarHover(rating) {
-                            stars.forEach(s => {
-                                const starNum = parseInt(s.getAttribute('data-star'));
-                                if (starNum <= rating) {
-                                    s.style.color = '#667eea';
-                                } else {
-                                    s.style.color = '#e0e0e0';
-                                }
-                            });
-                        }
-                        
-                        stars.forEach(star => {
-                            star.addEventListener('click', function() {
-                                const rating = parseInt(this.getAttribute('data-star'));
-                                ratingValue.value = rating;
-                                selectedRating.textContent = rating;
-                                ratingDisplay.style.display = 'inline';
-                                updateStarDisplay(rating);
+                                s.style.setProperty('color', '#e0e0e0', 'important');
                             });
                             
-                            star.addEventListener('mouseover', function() {
-                                const hoverRating = parseInt(this.getAttribute('data-star'));
-                                updateStarHover(hoverRating);
+                            function updateStarDisplay(rating) {
+                                stars.forEach(s => {
+                                    const starNum = parseInt(s.getAttribute('data-star'));
+                                    if (starNum <= rating) {
+                                        s.style.setProperty('color', '#ffc107', 'important');
+                                    } else {
+                                        s.style.setProperty('color', '#e0e0e0', 'important');
+                                    }
+                                });
+                            }
+                            
+                            function updateStarHover(rating) {
+                                stars.forEach(s => {
+                                    const starNum = parseInt(s.getAttribute('data-star'));
+                                    if (starNum <= rating) {
+                                        s.style.setProperty('color', '#ffc107', 'important');
+                                    } else {
+                                        s.style.setProperty('color', '#e0e0e0', 'important');
+                                    }
+                                });
+                            }
+                            
+                            stars.forEach(star => {
+                                star.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const rating = parseInt(this.getAttribute('data-star'));
+                                    console.log('Star clicked:', rating);
+                                    ratingValue.value = rating;
+                                    selectedRating.textContent = rating;
+                                    ratingDisplay.style.display = 'inline';
+                                    updateStarDisplay(rating);
+                                });
+                                
+                                star.addEventListener('mouseover', function() {
+                                    const hoverRating = parseInt(this.getAttribute('data-star'));
+                                    updateStarHover(hoverRating);
+                                });
                             });
-                        });
-                        
-                        starContainer.addEventListener('mouseleave', function() {
-                            const currentRating = parseInt(ratingValue.value) || 0;
-                            updateStarDisplay(currentRating);
+                            
+                            if (starContainer) {
+                                starContainer.addEventListener('mouseleave', function() {
+                                    const currentRating = parseInt(ratingValue.value) || 0;
+                                    updateStarDisplay(currentRating);
+                                });
+                            }
                         });
                     </script>
                     {% endif %}

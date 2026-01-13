@@ -42,7 +42,7 @@
                                 {% endwith %}
                             {% endif %}
                             <button class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
-                                <i class="fa-regular fa-heart"></i>
+                                <i class="{% if produkto.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
                             </button>
                             <a class="product-thumb" href="{% url 'product_item' produkto.id %}">
                                 {% if produkto.image %}
@@ -123,26 +123,27 @@
     // Favorite button handlers are managed globally by base.js
 
     // Carousel functionality
-    const track = document.querySelector('.carousel-track');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    let currentPosition = 0;
+    document.addEventListener('DOMContentLoaded', function() {
+        const track = document.querySelector('.carousel-track');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        let currentPosition = 0;
 
-    if (track) {
-        const slideWidth = 16 * 16 + 2 * 16; // 16rem slide + 2rem gap in pixels
-        const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
+        if (track && prevBtn && nextBtn) {
+            const slideWidth = 16 * 16 + 2 * 16; // 16rem slide + 2rem gap in pixels
+            const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
 
-        nextBtn.addEventListener('click', function () {
-            currentPosition = Math.min(currentPosition + slideWidth, maxScroll);
-            track.style.transform = `translateX(-${currentPosition}px)`;
-        });
+            nextBtn.addEventListener('click', function () {
+                currentPosition = Math.min(currentPosition + slideWidth, maxScroll);
+                track.style.transform = `translateX(-${currentPosition}px)`;
+            });
 
-        prevBtn.addEventListener('click', function () {
-            currentPosition = Math.max(currentPosition - slideWidth, 0);
-            track.style.transform = `translateX(-${currentPosition}px)`;
-        });
-    }
-});
+            prevBtn.addEventListener('click', function () {
+                currentPosition = Math.max(currentPosition - slideWidth, 0);
+                track.style.transform = `translateX(-${currentPosition}px)`;
+            });
+        }
+    });
 </script>
 
 {% endblock content %}
