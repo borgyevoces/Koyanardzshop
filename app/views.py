@@ -460,7 +460,7 @@ def register(request):
         if 'otp_code' in request.POST: 
             # OTP Verification - only now create the account
             username = request.POST.get('username', '')
-            otp_code_input = request.POST.get('otp_code', '')
+            otp_code_input = request.POST.get('otp_code', '').strip()
             
             try:
                 user = get_user_model().objects.get(username=username)
@@ -471,13 +471,16 @@ def register(request):
                         # OTP verified! Activate the user
                         user.is_active = True
                         user.save()
+                        logger.info(f"OTP verified for user: {username}")
                         
                         # Auto-login the user after OTP verification
-                        try:
-                            auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                        except Exception:
-                            pass
-                        messages.success(request, "✓ Email verified successfully!")
+                        auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                        logger.info(f"User {username} logged in after OTP verification")
+                        
+                        # Delete the OTP token after successful verification
+                        user_otp.delete()
+                        
+                        messages.success(request, "✓ Email verified! Welcome to Koya Nardz Shop!")
                         return redirect("home")
                     else:
                         messages.error(request, "⏱ OTP expired. Please request a new code.")
@@ -507,12 +510,36 @@ def register(request):
                 
                 logger.info(f"Form valid. Email: {email}, Username: {username}")
                 
-                # Check if user already exists
-                if get_user_model().objects.filter(username=username).exists():
+                # Check if user already exists (includes inactive users awaiting OTP verification)
+                existing_user = get_user_model().objects.filter(username=username).first()
+                if existing_user:
+                    # If inactive user exists with active OTP, just show OTP screen
+                    if not existing_user.is_active:
+                        user_otp = OtpToken.objects.filter(user=existing_user).last()
+                        if user_otp and user_otp.otp_expires_at > timezone.now():
+                            logger.info(f"User {username} already in signup process, showing OTP screen")
+                            otp_code = user_otp.otp_code
+                            context = {
+                                "form": RegisterForm(instance=existing_user),
+                                "otp_code": otp_code,
+                            }
+                            return render(request, "app/account/signup.html", context)
                     messages.error(request, "❌ Username already exists.")
                     return redirect("register")
                 
-                if get_user_model().objects.filter(email=email).exists():
+                existing_email = get_user_model().objects.filter(email=email).first()
+                if existing_email:
+                    # If inactive user exists with active OTP, just show OTP screen
+                    if not existing_email.is_active:
+                        user_otp = OtpToken.objects.filter(user=existing_email).last()
+                        if user_otp and user_otp.otp_expires_at > timezone.now():
+                            logger.info(f"Email {email} already in signup process, showing OTP screen")
+                            otp_code = user_otp.otp_code
+                            context = {
+                                "form": RegisterForm(instance=existing_email),
+                                "otp_code": otp_code,
+                            }
+                            return render(request, "app/account/signup.html", context)
                     messages.error(request, "❌ Email already registered.")
                     return redirect("register")
                 
@@ -523,7 +550,10 @@ def register(request):
                 user.save()
                 logger.info(f"User created: {username}")
                 
-                # Generate and send OTP
+                # Delete any old OTP tokens for this user (in case of retries)
+                OtpToken.objects.filter(user=user).delete()
+                
+                # Generate and send OTP (only one)
                 otp = OtpToken.objects.create(
                     user=user,
                     otp_expires_at=timezone.now() + timezone.timedelta(minutes=5)

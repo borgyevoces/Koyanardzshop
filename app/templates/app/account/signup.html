@@ -272,7 +272,39 @@
     window.startOTPCountdown = startOTPCountdown;
     window.handleResendClick = handleResendClick;
     
-    console.log('✓ All functions exposed to window:', { handleFirebaseSignup: window.handleFirebaseSignup, togglePasswordVisibility: window.togglePasswordVisibility, startOTPCountdown: window.startOTPCountdown, handleResendClick: window.handleResendClick });
+    // Prevent double form submission
+    window.disableSubmitButton = function(event) {
+        const form = event.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        if (submitBtn && !submitBtn.disabled) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.style.cursor = 'not-allowed';
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            
+            // Disable the form itself to prevent re-submission
+            const inputs = form.querySelectorAll('input, select, textarea, button');
+            inputs.forEach(input => input.disabled = true);
+            
+            // Re-enable after 5 seconds if form submission somehow fails
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+                submitBtn.textContent = originalText;
+                inputs.forEach(input => input.disabled = false);
+            }, 5000);
+            
+            return true; // Allow the actual form submission
+        }
+        
+        // If button is already disabled, prevent the submission
+        return false;
+    };
+    
+    console.log('✓ All functions exposed to window:', { handleFirebaseSignup: window.handleFirebaseSignup, togglePasswordVisibility: window.togglePasswordVisibility, startOTPCountdown: window.startOTPCountdown, handleResendClick: window.handleResendClick, disableSubmitButton: window.disableSubmitButton });
 
     // Start countdown when OTP verification form is shown
     function initializeOTPCountdown() {
@@ -1034,7 +1066,7 @@
         <div class="signup_left">
             <div class="signup_leftbody">
                 <h2>Sign Up</h2>
-                <form method="POST" id="firebase-signup-form">
+                <form method="POST" id="firebase-signup-form" onsubmit="disableSubmitButton(event)">
                     {% csrf_token %}
                         {% if otp_code %}
                                <h3>Verify Your Email</h3>

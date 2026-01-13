@@ -1427,65 +1427,59 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             // Save carousel HTML to localStorage for persistence
             this.saveChatMessage(productsHtml, 'bot', true);
 
-            // Add event listeners for component selection using document-level delegation with HIGHER priority
-            const selectHandler = (e) => {
-                const btn = e.target.closest('.product-select-btn');
-                if (!btn) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
-                const productId = btn.dataset.productId;
-                const category = btn.dataset.category;
-                const product = products.find(p => p.id == productId);
-                if (product) {
-                    this.selectComponent(category, product);
-                }
-            };
+            // Store products in a map for quick lookup by ID
+            const productsMap = new Map(products.map(p => [String(p.id), p]));
 
-            // Use capture phase to intercept BEFORE the favorite handler in base.js
-            document.removeEventListener('click', selectHandler, true);
-            document.addEventListener('click', selectHandler, true);
-            
-            if (this.buildInProgress) {
-                const detailsHandler = (e) => {
-                    const btn = e.target.closest('.product-details-btn');
-                    if (!btn) return;
-                    
+            // Add event listeners directly to the newly created buttons using the stable container
+            const selectBtns = productsDiv.querySelectorAll('.product-select-btn');
+            selectBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     
                     const productId = btn.dataset.productId;
-                    const product = products.find(p => p.id == productId);
+                    const category = btn.dataset.category;
+                    const product = productsMap.get(String(productId));
+                    if (product) {
+                        this.selectComponent(category, product);
+                    }
+                });
+            });
+
+            // Details buttons (when not in build mode)
+            const detailsBtns = productsDiv.querySelectorAll('.product-details-btn');
+            detailsBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    const productId = btn.dataset.productId;
+                    const product = productsMap.get(String(productId));
                     if (product) {
                         this.addMessage(`📦 ${product.name} - ₱${parseFloat(product.price).toLocaleString('en-PH')}\n\nWould you like to add this to your cart?`, 'bot');
                     }
-                };
-                document.removeEventListener('click', detailsHandler, true);
-                document.addEventListener('click', detailsHandler, true);
-            }
+                });
+            });
 
-            // 3D Model Ask buttons (only show if available, ask first)
-            const ask3DHandler = (e) => {
-                const btn = e.target.closest('.product-3d-ask-btn');
-                if (!btn) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                
-                const productId = btn.dataset.productId;
-                const productName = btn.dataset.productName;
-                const modelUrl = btn.dataset.modelUrl;
-                const product = products.find(p => p.id == productId);
-                
-                if (product) {
-                    this.askForModel3DView(product, modelUrl);
-                }
-            };
-            document.removeEventListener('click', ask3DHandler, true);
-            document.addEventListener('click', ask3DHandler, true);
+            // 3D Model Ask buttons
+            const ask3DBtns = productsDiv.querySelectorAll('.product-3d-ask-btn');
+            ask3DBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    const productId = btn.dataset.productId;
+                    const modelUrl = btn.dataset.modelUrl;
+                    const product = productsMap.get(String(productId));
+                    
+                    if (product) {
+                        this.askForModel3DView(product, modelUrl);
+                    }
+                });
+            });
         }
 
         askForModel3DView(product, modelUrl) {
