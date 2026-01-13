@@ -616,7 +616,14 @@ Koya Nardz Shop Team
             logger.exception(f"Failed to send OTP email to {user.email}")
             messages.error(request, "❌ Failed to send email. Please try again.")
         
-        return redirect("register")
+        # After resending, go back to the OTP verification view with a fresh code,
+        # keeping the user's details visible and restarting the timers.
+        form = RegisterForm(instance=user)
+        context = {
+            "form": form,
+            "otp_code": otp.otp_code,
+        }
+        return render(request, "app/account/signup.html", context)
 
     context = {}
     return render(request, "app/account/resend_otp.html", context)

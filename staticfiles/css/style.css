@@ -5340,8 +5340,8 @@ footer .footer .footer_shop {
 /* Hero Section */
 .selling-hero {
     padding: 60px 0;
-    background: linear-gradient(135deg, #072A53 0%, #0F4A7F 100%);
-    color: white;
+    background: whitesmoke;
+    color: #333;
 }
 
 .hero-content {
@@ -5417,26 +5417,26 @@ footer .footer .footer_shop {
 }
 
 .btn-primary {
-    background: #00D9FF;
-    color: #072A53;
+    background: #0b84c6;
+    color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 30px rgba(0, 217, 255, 0.5);
-    background: #00B8D4;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 30px rgba(11, 132, 198, 0.5);
+    background: #0969a3;
+    text-shadow: none;
 }
 
 .btn-secondary {
     background: transparent;
-    color: #00D9FF;
+    color: #0b84c6;
 }
 
 .btn-secondary:hover {
-    background: rgba(0, 217, 255, 0.15);
+    background: rgba(11, 132, 198, 0.15);
     transform: translateY(-3px);
-    box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+    box-shadow: 0 0 20px rgba(11, 132, 198, 0.3);
 }
 
 .hero-right {
@@ -5446,8 +5446,6 @@ footer .footer .footer_shop {
 .hero-image img {
     width: 100%;
     height: auto;
-    border-radius: 15px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
 }
 
 /* How It Works Section */
@@ -9522,6 +9520,10 @@ background: linear-gradient(210deg,rgba(79, 159, 186, 1) 0%, rgba(207, 126, 221,
 .add-to-cart-btn i, .add-to-cart-btn img{font-size:1.05rem;color:inherit}
 .add-to-cart-btn:hover{transform:translateY(-3px);box-shadow:0 16px 36px rgba(11,132,198,0.12)}
 .card-actions{display:flex;gap:.6rem;align-items:center;justify-content:center;margin-top:auto}
+
+/* Product Card Bottom Section - Price and Add to Cart */
+.cardbody_bottom{display:flex;gap:0.8rem;align-items:center;justify-content:space-between;margin-top:auto;width:100%}
+.cardbody_bottom .price{margin:0;flex-grow:1}
 
 /* Product Tag styling */
 .product-tag{position:absolute;top:12px;left:12px;color:#fff;padding:0.4rem 0.8rem;border-radius:0.5rem;font-size:0.9rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:1;transition:transform .2s ease}

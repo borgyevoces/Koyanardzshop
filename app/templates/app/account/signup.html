@@ -448,12 +448,12 @@
     
     .toggle-password {
         position: absolute;
-        right: 14px;
+        right: 12px;
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         opacity: 0.6;
         transition: opacity 0.2s;
     }
@@ -677,6 +677,9 @@
     
     .resend-section form {
         margin: 0 0 8px 0 !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
     
     .resend-section form input[type="hidden"] {
@@ -715,56 +718,103 @@
         text-align: center;
     }
     
-    /* Mobile Responsive */
+    /* Mobile Responsive - OTP + resend layout */
     @media (max-width: 768px) {
-        .signup_body {
-            padding: 15px !important;
+        .signuppage {
+            padding: 24px 12px;
+            align-items: flex-start;
         }
-        
+
+        .signup_body {
+            flex-direction: column;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+            border-radius: 14px;
+        }
+
+        .signup_left,
+        .signup_right {
+            padding: 28px 20px;
+            min-height: auto !important;
+        }
+
+        .signup_leftbody h2 {
+            text-align: center;
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+        }
+
         .otp-header {
-            margin-bottom: 20px !important;
-            padding-bottom: 15px !important;
+            text-align: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
         }
         
         .otp-header h3 {
-            font-size: 1.3rem !important;
+            font-size: 1.35rem !important;
         }
         
         .otp-header p {
-            font-size: 0.85rem !important;
+            font-size: 0.9rem !important;
         }
         
         #otp-timer {
-            font-size: 0.7rem !important;
-            margin-top: 10px !important;
-        }
-        
-        .resend-section {
-            padding: 15px !important;
-        }
-        
-        .resend-section h4 {
-            font-size: 0.95rem !important;
-        }
-        
-        #resend-btn {
-            padding: 8px 12px !important;
-            font-size: 0.7rem !important;
-            width: 100% !important;
+            font-size: 0.75rem !important;
+            margin-top: 8px !important;
         }
         
         .verification_code {
+            font-size: 1rem !important;
+        }
+
+        .resend-section {
+            padding: 14px 12px !important;
+            text-align: center;
+        }
+        
+        .resend-section h4 {
             font-size: 0.9rem !important;
+            text-align: center;
+        }
+
+        .resend-section form {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        #resend-btn {
+            padding: 9px 24px !important;
+            font-size: 0.8rem !important;
+            width: auto !important;
+            margin: 0 auto;
+        }
+
+        .resend-cooldown-text {
+            font-size: 0.75rem;
         }
     }
     
     @media (max-width: 480px) {
+        .signuppage {
+            padding: 18px 8px;
+        }
+
         .signup_body {
-            padding: 12px !important;
+            max-width: 360px;
+        }
+        
+        .signup_left,
+        .signup_right {
+            padding: 22px 16px;
+        }
+
+        .signup_leftbody h2 {
+            font-size: 1.4rem;
         }
         
         .otp-header h3 {
-            font-size: 1.1rem !important;
+            font-size: 1.2rem !important;
         }
         
         .otp-header p {
@@ -772,12 +822,12 @@
         }
         
         #otp-timer {
-            font-size: 0.65rem !important;
+            font-size: 0.7rem !important;
         }
         
         #resend-btn {
-            padding: 7px 10px !important;
-            font-size: 0.65rem !important;
+            padding: 8px 12px !important;
+            font-size: 0.7rem !important;
         }
     }
     

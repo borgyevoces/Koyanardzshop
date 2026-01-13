@@ -55,7 +55,7 @@
                                 <h3 class="card-title">{{ produkto.product_name }}</h3>
                                 <div class="cardbody_bottom">
                                     <p class="price">₱{{ produkto.price|intcomma }}</p>
-                                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button class="btn btn-sm">Add to cart</button></form>
+                                    <form action="{% url 'add_to_cart' produkto.id %}" method="POST" class="add-cart-form">{% csrf_token %}<button type="submit" class="add-to-cart-btn" aria-label="Add to cart"><i class="fa-solid fa-shopping-cart"></i></button></form>
                                 </div>
                             </div>
                         </article>
