@@ -562,7 +562,8 @@ Koya Nardz Shop Team
                     logger.exception(f"Failed to send OTP email to {email}: {str(e)}")
                     # Delete the user if email fails
                     user.delete()
-                    messages.error(request, f"❌ Failed to send verification email: {str(e)}")
+                    # Don't expose technical error details to user
+                    messages.error(request, "❌ Failed to send verification email. Please try again later or contact support.")
                     return redirect("register")
 
     context = {

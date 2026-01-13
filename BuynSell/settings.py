@@ -170,19 +170,20 @@ EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() in ('1', 'true', 'ye
 # timeouts and process exits in production). Can be overridden via env var.
 EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', 10))
 
-# Mailgun (via Anymail) support - set these env vars on Render when using Mailgun:
-# MAILGUN_API_KEY and MAILGUN_DOMAIN
-MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY', '').strip()
-MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN', '').strip()
-if MAILGUN_API_KEY:
-    # ensure Anymail is available
+# SendGrid (via Anymail) support - Render-friendly email service
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY', '').strip()
+if SENDGRID_API_KEY:
+    # Ensure Anymail is available for SendGrid
     if 'anymail' not in INSTALLED_APPS:
         INSTALLED_APPS.append('anymail')
-    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+    EMAIL_BACKEND = 'anymail.backends.sendgrid.EmailBackend'
     ANYMAIL = {
-        'MAILGUN_API_KEY': MAILGUN_API_KEY,
-        'MAILGUN_SENDER_DOMAIN': MAILGUN_DOMAIN or None,
+        'SENDGRID_API_KEY': SENDGRID_API_KEY,
     }
+    DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@koyanardzshop.com')
+else:
+    # Fallback to Gmail for local development (requires app-specific password)
+    # On Render production, set SENDGRID_API_KEY environment variable instead
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # Default primary key field type
