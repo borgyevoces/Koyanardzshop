@@ -1,11 +1,12 @@
 // Firebase Email Verification Handler
+// Import Firebase pieces from our config and the CDN-based auth module
 import { auth } from './firebase-config.js';
-import { 
-  createUserWithEmailAndPassword, 
+import {
+  createUserWithEmailAndPassword,
   sendEmailVerification,
   onAuthStateChanged,
   signOut
-} from "firebase/auth";
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 class FirebaseSignupHandler {
   constructor() {
@@ -163,3 +164,5 @@ class FirebaseSignupHandler {
 
 // Export singleton instance
 export const firebaseSignupHandler = new FirebaseSignupHandler();
+// Also expose globally for non-module scripts
+window.firebaseSignupHandler = firebaseSignupHandler;

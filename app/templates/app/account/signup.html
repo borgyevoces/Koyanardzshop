@@ -3,10 +3,27 @@
 
 {% block content %}
 
-<script type="module">
-    import { firebaseSignupHandler } from "{% static 'js/firebase-signup.js' %}";
+<script>
+    // Load Firebase signup handler with module support
+    function loadFirebaseSignup() {
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = "{% static 'js/firebase-signup.js' %}";
+        script.onload = () => {
+            console.log('Firebase signup script loaded');
+        };
+        script.onerror = (e) => {
+            console.error('Failed to load firebase-signup.js', e);
+        };
+        document.head.appendChild(script);
+    }
     
-    window.firebaseSignupHandler = firebaseSignupHandler;
+    // Load it when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadFirebaseSignup);
+    } else {
+        loadFirebaseSignup();
+    }
 
     function togglePasswordVisibility(button) {
         event.preventDefault();
@@ -44,25 +61,13 @@
     function startOTPCountdown() {
         console.log('startOTPCountdown called');
         
-        const timerDisplay = document.getElementById('otp-timer');
-        const verifyBtn = document.querySelector('button[type="submit"]:not(#resend-btn)');
         const otpInput = document.querySelector('input[name="otp_code"]');
         const resendBtn = document.getElementById('resend-btn');
         const cooldownDisplay = document.getElementById('resend-cooldown');
         const resendTimerDisplay = document.getElementById('resend-timer-display');
+        const otpTimerDisplay = document.getElementById('otp-timer');
         
-        console.log('Elements found in startOTPCountdown:', { timerDisplay, verifyBtn, otpInput, resendBtn, cooldownDisplay, resendTimerDisplay });
-        
-        if (!timerDisplay) {
-            console.error('OTP timer display element not found!');
-            return;
-        }
-        
-        // Disable resend button initially (1-minute cooldown after signup)
-        if (resendBtn) {
-            resendBtn.disabled = true;
-            console.log('Resend button disabled initially');
-        }
+        console.log('Elements found in startOTPCountdown:', { otpInput, resendBtn, cooldownDisplay, resendTimerDisplay });
         
         // OTP input formatting - only allow numbers
         if (otpInput) {
@@ -71,55 +76,56 @@
             });
         }
         
-        // Calculate expiration time (5 minutes from now)
-        const endTime = new Date(new Date().getTime() + 5 * 60 * 1000);
+        // OTP validity timer (5 minutes)
+        const otpExpiresAt = new Date(new Date().getTime() + 5 * 60 * 1000);
+
+        const otpCountdown = setInterval(() => {
+            if (!otpTimerDisplay) {
+                clearInterval(otpCountdown);
+                return;
+            }
+            const now = new Date().getTime();
+            const distance = otpExpiresAt - now;
+
+            if (distance <= 0) {
+                clearInterval(otpCountdown);
+                otpTimerDisplay.textContent = '⚠ OTP expired. Please request a new code.';
+                return;
+            }
+
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            otpTimerDisplay.textContent = `OTP expires in ${minutes}m ${seconds}s`;
+        }, 1000);
+
         // Resend cooldown (1 minute)
         const resendCooldownEnd = new Date(new Date().getTime() + 60 * 1000);
         
-        // Display initial timer immediately
-        timerDisplay.innerHTML = '<span style="color: #003d99; font-weight: bold;">⏱ Time remaining: 5:00</span>';
+        // Disable resend button initially
+        if (resendBtn) {
+            resendBtn.disabled = true;
+            resendBtn.style.opacity = '0.6';
+            resendBtn.style.cursor = 'not-allowed';
+        }
         
         const countdown = setInterval(() => {
             const now = new Date().getTime();
-            const distance = endTime - now;
             const resendDistance = resendCooldownEnd - now;
-            
-            // OTP Countdown
-            if (distance <= 0) {
-                clearInterval(countdown);
-                timerDisplay.innerHTML = '<span style="color: #c33; font-weight: bold;">OTP Expired - Redirecting to signup...</span>';
-                if (verifyBtn) {
-                    verifyBtn.disabled = true;
-                    verifyBtn.style.opacity = '0.6';
-                    verifyBtn.style.cursor = 'not-allowed';
-                }
-                
-                // Redirect to signup page after 2 seconds
-                setTimeout(() => {
-                    window.location.href = '{% url "register" %}';
-                }, 2000);
-                return;
-            }
-            
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            timerDisplay.innerHTML = `<span style="color: #003d99; font-weight: bold;">⏱ Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}</span>`;
             
             // Resend Cooldown Timer
             if (resendDistance > 0) {
                 const resendSeconds = Math.floor(resendDistance / 1000);
-                cooldownDisplay.textContent = `You can resend in ${resendSeconds}s`;
+                if (cooldownDisplay) {
+                    cooldownDisplay.textContent = `You can resend in ${resendSeconds}s`;
+                }
                 if (resendTimerDisplay) {
                     resendTimerDisplay.textContent = `You can resend in ${resendSeconds}s`;
                 }
-                if (resendBtn) {
-                    resendBtn.disabled = true;
-                    resendBtn.style.opacity = '0.6';
-                    resendBtn.style.cursor = 'not-allowed';
-                }
             } else {
-                cooldownDisplay.textContent = 'Ready to resend';
+                clearInterval(countdown);
+                if (cooldownDisplay) {
+                    cooldownDisplay.textContent = 'Ready to resend';
+                }
                 if (resendTimerDisplay) {
                     resendTimerDisplay.textContent = 'Ready to resend';
                 }
@@ -190,6 +196,13 @@
     async function handleFirebaseSignup(event) {
         event.preventDefault();
         
+        // Check if firebaseSignupHandler is loaded
+        if (!window.firebaseSignupHandler) {
+            console.error('Firebase signup handler not loaded yet');
+            alert('Firebase is loading. Please try again in a moment.');
+            return;
+        }
+        
         const email = document.querySelector('input[name="email"]').value;
         const password1 = document.querySelector('input[name="password1"]').value;
         const password2 = document.querySelector('input[name="password2"]').value;
@@ -210,7 +223,7 @@
         submitBtn.textContent = 'Creating account...';
 
         try {
-            const result = await firebaseSignupHandler.signup(email, password1);
+            const result = await window.firebaseSignupHandler.signup(email, password1);
             
             if (result.success) {
                 // Clear errors
@@ -258,6 +271,8 @@
     window.togglePasswordVisibility = togglePasswordVisibility;
     window.startOTPCountdown = startOTPCountdown;
     window.handleResendClick = handleResendClick;
+    
+    console.log('✓ All functions exposed to window:', { handleFirebaseSignup: window.handleFirebaseSignup, togglePasswordVisibility: window.togglePasswordVisibility, startOTPCountdown: window.startOTPCountdown, handleResendClick: window.handleResendClick });
 
     // Start countdown when OTP verification form is shown
     function initializeOTPCountdown() {
@@ -543,8 +558,9 @@
     /* OTP Verification styling */
     #otp-timer {
         text-align: center;
+        margin-top: 15px;
         margin-bottom: 20px;
-        font-size: 1.1rem;
+        font-size: 0.8rem;
         color: #003d99;
         font-weight: 600;
     }
@@ -659,19 +675,6 @@
         line-height: 1.4;
     }
     
-    .resend-timer {
-        text-align: center;
-        margin-bottom: 12px !important;
-        color: #666;
-        font-weight: 500;
-        font-size: 0.8rem;
-    }
-    
-    .resend-timer-text {
-        color: #003d99;
-        font-weight: 600;
-    }
-    
     .resend-section form {
         margin: 0 0 8px 0 !important;
     }
@@ -706,11 +709,76 @@
     }
     
     .resend-cooldown-text {
+        margin-top: 8px;
+        font-size: 0.8rem;
+        color: #555;
         text-align: center;
-        color: #666;
-        font-size: 0.75rem;
-        margin: 0 !important;
-        line-height: 1.3;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .signup_body {
+            padding: 15px !important;
+        }
+        
+        .otp-header {
+            margin-bottom: 20px !important;
+            padding-bottom: 15px !important;
+        }
+        
+        .otp-header h3 {
+            font-size: 1.3rem !important;
+        }
+        
+        .otp-header p {
+            font-size: 0.85rem !important;
+        }
+        
+        #otp-timer {
+            font-size: 0.7rem !important;
+            margin-top: 10px !important;
+        }
+        
+        .resend-section {
+            padding: 15px !important;
+        }
+        
+        .resend-section h4 {
+            font-size: 0.95rem !important;
+        }
+        
+        #resend-btn {
+            padding: 8px 12px !important;
+            font-size: 0.7rem !important;
+            width: 100% !important;
+        }
+        
+        .verification_code {
+            font-size: 0.9rem !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .signup_body {
+            padding: 12px !important;
+        }
+        
+        .otp-header h3 {
+            font-size: 1.1rem !important;
+        }
+        
+        .otp-header p {
+            font-size: 0.8rem !important;
+        }
+        
+        #otp-timer {
+            font-size: 0.65rem !important;
+        }
+        
+        #resend-btn {
+            padding: 7px 10px !important;
+            font-size: 0.65rem !important;
+        }
     }
     
     /* Error message styling */
@@ -916,15 +984,15 @@
         <div class="signup_left">
             <div class="signup_leftbody">
                 <h2>Sign Up</h2>
-                <form method="POST" onsubmit="handleFirebaseSignup(event)" id="firebase-signup-form">
+                <form method="POST" id="firebase-signup-form">
                     {% csrf_token %}
                         {% if otp_code %}
                                <h3>Verify Your Email</h3>
                         <div class="otp-header">
                      
                             <p>Enter the 6-digit code sent to <strong>{{ form.instance.email }}</strong></p>
-                            <div id="otp-timer"></div>
                         </div>
+                        <div id="otp-timer"></div>
 
                         {% if messages %}
                         <div class="otp-messages">
@@ -944,9 +1012,6 @@
                         <button type="submit">Verify OTP</button>
                         
                         {% else %}
-                        <!-- Firebase Email Verification Status -->
-                        <div id="firebase-verification-status" style="margin-bottom: 1rem; font-size: 0.95rem; text-align: center;"></div>
-                        
                         {% for field in form %}
                             {% if field.name == 'email' %}
                                 <div class="form_field">
@@ -1025,17 +1090,12 @@
                 {% if otp_code %}
                 <div class="resend-section">
                     <h4>⏱ Didn't receive the code?</h4>
-                    <div class="resend-timer">
-                        <span id="resend-timer-display" class="resend-timer-text">Ready to resend</span>
-                    </div>
                     <form method="POST" action="{% url 'resend-otp' %}" id="resend-otp-form">
                         {% csrf_token %}
                         <input type="hidden" name="otp_email" value="{{ form.instance.email }}">
                         <button type="button" id="resend-btn" onclick="handleResendClick(event)">Request New Code</button>
                     </form>
-                    <p class="resend-cooldown-text">
-                        <span id="resend-cooldown">Ready to resend</span>
-                    </p>
+                    <div id="resend-cooldown" class="resend-cooldown-text"></div>
                 </div>
                 {% endif %}
             </div>

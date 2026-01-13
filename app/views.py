@@ -22,6 +22,9 @@ from django.core.mail import send_mail
 from .email_utils import send_email
 from django.core.exceptions import ValidationError
 import logging
+
+logger = logging.getLogger(__name__)
+
 from django.utils import timezone
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str

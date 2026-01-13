@@ -1,7 +1,11 @@
 // Firebase Configuration
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+// Import the functions you need from the Firebase CDN as ES modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  getAuth,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -19,7 +23,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Set persistence to LOCAL so user stays logged in
-import { setPersistence, browserLocalPersistence } from "firebase/auth";
 setPersistence(auth, browserLocalPersistence).catch((error) => {
   console.error("Persistence setup failed:", error);
 });
