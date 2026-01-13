@@ -1861,10 +1861,10 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 renderer.setClearColor(0xeeeeee, 1);
                 renderer.setPixelRatio(1); // Fixed pixel ratio for better performance
 
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
                 scene.add(ambientLight);
 
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.75);
                 directionalLight.position.set(10, 15, 10);
                 scene.add(directionalLight);
 
@@ -2832,20 +2832,20 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
 
                 const renderer = new THREE.WebGLRenderer({ 
                     canvas: canvas,
-                    antialias: false, 
+                    antialias: true, 
                     alpha: false,
                     powerPreference: 'high-performance'
                 });
                 renderer.setSize(width, height);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
                 renderer.setClearColor(0xeeeeee, 1);
                 renderer.outputEncoding = THREE.sRGBEncoding;
 
                 // Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
                 scene.add(ambientLight);
 
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9);
                 directionalLight.position.set(5, 10, 7);
                 scene.add(directionalLight);
 
