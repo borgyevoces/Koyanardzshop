@@ -495,10 +495,16 @@ def register(request):
         else: 
             # Initial signup - just send OTP, don't create account yet
             form = RegisterForm(request.POST)
+            logger.info(f"Signup form received. Is valid: {form.is_valid()}")
+            if not form.is_valid():
+                logger.warning(f"Form validation failed. Errors: {form.errors}")
+            
             if form.is_valid():
                 email = form.cleaned_data.get('email')
                 username = form.cleaned_data.get('username')
                 password = form.cleaned_data.get('password1')
+                
+                logger.info(f"Form valid. Email: {email}, Username: {username}")
                 
                 # Check if user already exists
                 if get_user_model().objects.filter(username=username).exists():
@@ -514,12 +520,14 @@ def register(request):
                 user.is_active = False  # NOT ACTIVE UNTIL OTP VERIFIED
                 user.set_password(password)
                 user.save()
+                logger.info(f"User created: {username}")
                 
                 # Generate and send OTP
                 otp = OtpToken.objects.create(
                     user=user,
                     otp_expires_at=timezone.now() + timezone.timedelta(minutes=5)
                 )
+                logger.info(f"OTP created: {otp.otp_code}")
                 
                 # Send OTP email
                 subject = "Email Verification Code - Koya Nardz Shop"
@@ -538,6 +546,7 @@ Koya Nardz Shop Team
                 """
                 
                 try:
+                    logger.info(f"Attempting to send OTP email to {email}")
                     send_mail(
                         subject,
                         message,
@@ -545,13 +554,14 @@ Koya Nardz Shop Team
                         [email],
                         fail_silently=False,
                     )
+                    logger.info(f"OTP email sent successfully to {email}")
                     otp_code = otp.otp_code
                     messages.success(request, "✉ Verification code sent! Check your email.")
                 except Exception as e:
-                    logger.exception(f"Failed to send OTP email to {email}")
+                    logger.exception(f"Failed to send OTP email to {email}: {str(e)}")
                     # Delete the user if email fails
                     user.delete()
-                    messages.error(request, "❌ Failed to send verification email. Please try again.")
+                    messages.error(request, f"❌ Failed to send verification email: {str(e)}")
                     return redirect("register")
 
     context = {

@@ -65,8 +65,14 @@ default_cors = [
 cors_env = os.getenv('CORS_ALLOWED_ORIGINS')
 CORS_ALLOWED_ORIGINS = [c.strip() for c in cors_env.split(',')] if cors_env else default_cors
 
+# CSRF trusted origins - include Render domain by default
+default_csrf = [
+    "https://koyanardzshop.onrender.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 csrf_env = os.getenv('CSRF_TRUSTED_ORIGINS')
-CSRF_TRUSTED_ORIGINS = [c.strip() for c in csrf_env.split(',')] if csrf_env else []
+CSRF_TRUSTED_ORIGINS = [c.strip() for c in csrf_env.split(',')] if csrf_env else default_csrf
 
 ROOT_URLCONF = 'BuynSell.urls'
 
@@ -228,6 +234,8 @@ SOCIALACCOUNT_STORE_TOKENS = True
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', 2592000))  # 30 days
