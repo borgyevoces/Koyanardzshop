@@ -1820,18 +1820,32 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 // Check if this is fullscreen mode
                 const isFullscreen = container.id.includes('fullscreen');
                 
-                // Lower resolution for better performance - cap at 1280x720 for chat, full size for fullscreen
+                // Dynamic sizing based on device
                 let canvas_width, canvas_height;
+                const isMobile = window.innerWidth < 768;
+                
                 if (isFullscreen) {
-                    // Use full window dimensions for fullscreen
-                    canvas_width = window.innerWidth;
-                    canvas_height = window.innerHeight - 80; // Leave room for header/footer
+                    // Full screen mode - use window dimensions with mobile adjustments
+                    if (isMobile) {
+                        canvas_width = window.innerWidth;
+                        canvas_height = window.innerHeight - 120; // Account for header/footer on mobile
+                    } else {
+                        canvas_width = window.innerWidth;
+                        canvas_height = window.innerHeight - 80; // Desktop header space
+                    }
                 } else {
-                    // Cap at 1280x720 for chat view
-                    const maxWidth = 1280;
-                    const maxHeight = 720;
-                    canvas_width = Math.min(container.clientWidth, maxWidth);
-                    canvas_height = Math.min(container.clientHeight, maxHeight);
+                    // Chat view - responsive sizing
+                    if (isMobile) {
+                        // Mobile: use 100% width with height adjustment
+                        canvas_width = container.clientWidth;
+                        canvas_height = Math.min(container.clientHeight, window.innerHeight * 0.6);
+                    } else {
+                        // Desktop: cap at 1280x720
+                        const maxWidth = 1280;
+                        const maxHeight = 720;
+                        canvas_width = Math.min(container.clientWidth, maxWidth);
+                        canvas_height = Math.min(container.clientHeight, maxHeight);
+                    }
                 }
                 
                 canvas.width = canvas_width;
@@ -1851,7 +1865,10 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                     0.1, 
                     1000
                 );
-                camera.position.set(0, 0, 15);
+                
+                // Adjust camera position based on screen size and model count
+                const isMobileView = isMobile;
+                camera.position.set(0, 0, isMobileView ? 12 : 15);
 
                 const renderer = new THREE.WebGLRenderer({ 
                     canvas: canvas,
@@ -2093,6 +2110,122 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 canvas.addEventListener('mouseup', onMouseUp);
                 canvas.addEventListener('wheel', onWheel, { passive: false });
 
+                // Touch controls for mobile
+                let touchStartDistance = 0;
+                let lastTouchTime = 0;
+                const touchThrottle = 16; // ~60fps
+
+                const onTouchStart = (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    lastTouchTime = Date.now();
+                    
+                    if (event.touches.length === 1) {
+                        // Single finger - treat as left-click (rotate)
+                        const touch = event.touches[0];
+                        const rect = canvas.getBoundingClientRect();
+                        
+                        // Calculate mouse position in normalized device coordinates
+                        mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+                        mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+                        
+                        previousMousePosition = { x: touch.clientX, y: touch.clientY };
+                        
+                        // Update raycaster
+                        raycaster.setFromCamera(mouse, camera);
+                        
+                        // Check which models are intersected
+                        const intersects = raycaster.intersectObjects(models, true);
+                        
+                        if (intersects.length > 0) {
+                            // Find which model was hit
+                            for (let model of models) {
+                                const isIntersected = intersects.some(intersection => {
+                                    let obj = intersection.object;
+                                    while (obj) {
+                                        if (obj === model) return true;
+                                        obj = obj.parent;
+                                    }
+                                    return false;
+                                });
+                                
+                                if (isIntersected) {
+                                    selectedModel = model;
+                                    isRotating = true;
+                                    isDragging = false;
+                                    break;
+                                }
+                            }
+                        }
+                    } else if (event.touches.length === 2) {
+                        // Two fingers - pinch zoom
+                        const dx = event.touches[0].clientX - event.touches[1].clientX;
+                        const dy = event.touches[0].clientY - event.touches[1].clientY;
+                        touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+                    }
+                };
+
+                const onTouchMove = (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    
+                    const now = Date.now();
+                    if (now - lastTouchTime < touchThrottle) return;
+                    lastTouchTime = now;
+                    
+                    if (event.touches.length === 1) {
+                        // Single finger - rotate
+                        const touch = event.touches[0];
+                        const deltaX = touch.clientX - previousMousePosition.x;
+                        const deltaY = touch.clientY - previousMousePosition.y;
+                        
+                        // Handle model rotation
+                        if (isRotating && selectedModel) {
+                            selectedModel.rotation.y += deltaX * 0.01;
+                            selectedModel.rotation.x += deltaY * 0.01;
+                        }
+                        
+                        previousMousePosition = { x: touch.clientX, y: touch.clientY };
+                    } else if (event.touches.length === 2) {
+                        // Two fingers - pinch zoom
+                        const dx = event.touches[0].clientX - event.touches[1].clientX;
+                        const dy = event.touches[0].clientY - event.touches[1].clientY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (touchStartDistance > 0 && models.length > 0) {
+                            // Pinch gesture - zoom selected model or all
+                            // Pinch closer (distance decreases) = zoom out (0.95)
+                            // Pinch further (distance increases) = zoom in (1.05)
+                            const zoomAmount = distance > touchStartDistance ? 1.05 : 0.95;
+                            
+                            if (selectedModel) {
+                                selectedModel.scale.multiplyScalar(zoomAmount);
+                            } else {
+                                // Zoom all models
+                                models.forEach(model => {
+                                    model.scale.multiplyScalar(zoomAmount);
+                                });
+                            }
+                            
+                            touchStartDistance = distance;
+                        }
+                    }
+                };
+
+                const onTouchEnd = (event) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    
+                    isDragging = false;
+                    isRotating = false;
+                    selectedModel = null;
+                    touchStartDistance = 0;
+                };
+
+                canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+                canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+                canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+
                 // Load models sequentially
                 const loadNextModel = () => {
                     if (modelIndex >= modelsToLoad.length) {
@@ -2109,20 +2242,58 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                     loader.load(item.model_3d, (gltf) => {
                         let model = gltf.scene;
                         
-                        // Position models
-                        const spacing = 8;
-                        const xPos = (index - modelsToLoad.length / 2 + 0.5) * spacing;
-                        model.position.x = xPos;
+                        // Responsive positioning based on screen size and model count
+                        const isMobileLayout = window.innerWidth < 768;
+                        const modelCount = modelsToLoad.length;
+                        
+                        let xPos, yPos;
+                        
+                        if (isMobileLayout) {
+                            // Mobile: stack vertically or in grid
+                            if (modelCount <= 2) {
+                                // Single or dual: vertical stack
+                                yPos = (index - modelCount / 2 + 0.5) * 5;
+                                xPos = 0;
+                            } else if (modelCount <= 4) {
+                                // 3-4 models: 2x2 grid
+                                const row = Math.floor(index / 2);
+                                const col = index % 2;
+                                xPos = (col - 0.5) * 4;
+                                yPos = (row - 0.5) * 4;
+                            } else {
+                                // 5+ models: 3x3 grid
+                                const row = Math.floor(index / 3);
+                                const col = index % 3;
+                                xPos = (col - 1) * 3.5;
+                                yPos = (row - 1) * 3.5;
+                            }
+                        } else {
+                            // Desktop: horizontal spacing
+                            if (modelCount <= 3) {
+                                const spacing = 6;
+                                xPos = (index - modelCount / 2 + 0.5) * spacing;
+                                yPos = 0;
+                            } else {
+                                // Multiple rows for many models
+                                const cols = Math.ceil(modelCount / 2);
+                                const row = Math.floor(index / cols);
+                                const col = index % cols;
+                                xPos = (col - cols / 2 + 0.5) * 5;
+                                yPos = (row - 0.5) * 4;
+                            }
+                        }
+                        
+                        model.position.set(xPos, yPos, 0);
                         
                         // Scale model
                         const box = new THREE.Box3().setFromObject(model);
                         const size = box.getSize(new THREE.Vector3());
                         const maxDim = Math.max(size.x, size.y, size.z);
-                        const scale = 3.5 / maxDim;
+                        const scale = isMobileLayout ? 2.5 / maxDim : 3.5 / maxDim;
                         
                         const center = box.getCenter(new THREE.Vector3());
                         model.position.sub(center);
-                        model.position.x = xPos;
+                        model.position.set(xPos, yPos, 0);
                         model.scale.multiplyScalar(scale);
                         
                         scene.add(model);
@@ -2679,15 +2850,20 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
              */
             const modal = document.createElement('div');
             modal.className = 'fullscreen-multi-3d-modal';
+            
+            const isMobile = window.innerWidth < 768;
+            const headerHeight = isMobile ? '70px' : '50px';
+            const footerHeight = isMobile ? '70px' : '50px';
+            
             modal.innerHTML = `
                 <div style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #000; margin: 0; padding: 0; overflow: hidden;">
-                    <div style="background: #764ba2; color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; flex-shrink: 0;">
+                    <div style="background: #764ba2; color: white; padding: ${isMobile ? '10px 12px' : '12px 16px'}; display: flex; justify-content: space-between; align-items: center; font-weight: 600; flex-shrink: 0; font-size: ${isMobile ? '14px' : '16px'}; height: ${headerHeight}; box-sizing: border-box;">
                         <span>🎮 Your Build - Multi-Model 3D Viewer</span>
-                        <button class="close-fullscreen-multi-btn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                        <button class="close-fullscreen-multi-btn" style="background: none; border: none; color: white; font-size: ${isMobile ? '28px' : '24px'}; cursor: pointer; padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
                     </div>
                     <div id="fullscreen-multi-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #d3d3d3; width: 100%; overflow: hidden;"></div>
-                    <div style="background: #333; color: #aaa; padding: 10px 16px; font-size: 12px; border-top: 1px solid #555; flex-shrink: 0;">
-                        🖱️ <strong>Controls:</strong> Left-click + drag to rotate | Scroll to zoom | Right-click + drag to pan | View multiple models side-by-side
+                    <div style="background: #333; color: #aaa; padding: ${isMobile ? '8px 12px' : '10px 16px'}; font-size: ${isMobile ? '11px' : '12px'}; border-top: 1px solid #555; flex-shrink: 0; height: ${footerHeight}; box-sizing: border-box; overflow-y: auto;">
+                        🖱️ <strong>Controls:</strong> ${isMobile ? 'Drag to rotate | Pinch to zoom | Long-press & drag to move' : 'Left-click + drag to rotate | Scroll to zoom | Right-click & drag to pan'}
                     </div>
                 </div>
             `;
@@ -2879,6 +3055,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                     // Add basic mouse control fallback - ISOLATED TO THIS CANVAS ONLY
                     let isDragging = false;
                     let previousMousePosition = { x: 0, y: 0 };
+                    let previousTouchDistance = 0;
                     
                     const onMouseDown = (e) => {
                         e.stopPropagation();
@@ -2926,16 +3103,85 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                             }
                         }
                     };
+
+                    // Touch controls for mobile devices
+                    const onTouchStart = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        if (e.touches.length === 1) {
+                            // Single finger - rotation
+                            isDragging = true;
+                            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                        } else if (e.touches.length === 2) {
+                            // Two fingers - zoom
+                            const dx = e.touches[0].clientX - e.touches[1].clientX;
+                            const dy = e.touches[0].clientY - e.touches[1].clientY;
+                            previousTouchDistance = Math.sqrt(dx * dx + dy * dy);
+                            isDragging = false;
+                        }
+                    };
+
+                    const onTouchMove = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        
+                        if (e.touches.length === 1 && isDragging) {
+                            // Single finger drag - rotation
+                            const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                            const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                            
+                            // Find and rotate the model
+                            const models = scene.children.filter(child => !(child instanceof THREE.Light || child instanceof THREE.Camera));
+                            if (models.length > 0) {
+                                const model = models[0];
+                                model.rotation.y += deltaX * 0.005;
+                                model.rotation.x += deltaY * 0.005;
+                            }
+                            
+                            previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                        } else if (e.touches.length === 2) {
+                            // Two finger pinch - zoom
+                            const dx = e.touches[0].clientX - e.touches[1].clientX;
+                            const dy = e.touches[0].clientY - e.touches[1].clientY;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            if (previousTouchDistance > 0) {
+                                // Find and zoom the model
+                                const models = scene.children.filter(child => !(child instanceof THREE.Light || child instanceof THREE.Camera));
+                                if (models.length > 0) {
+                                    const model = models[0];
+                                    // Pinch closer = zoom in (multiply by > 1), pinch further = zoom out (multiply by < 1)
+                                    const zoomAmount = distance > previousTouchDistance ? 1.05 : 0.95;
+                                    model.scale.multiplyScalar(zoomAmount);
+                                }
+                            }
+                            
+                            previousTouchDistance = distance;
+                        }
+                    };
+
+                    const onTouchEnd = (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        isDragging = false;
+                        previousTouchDistance = 0;
+                    };
                     
                     renderer.domElement.addEventListener('mousedown', onMouseDown);
                     renderer.domElement.addEventListener('mousemove', onMouseMove);
                     renderer.domElement.addEventListener('mouseup', onMouseUp);
                     renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
+                    renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: false });
+                    renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+                    renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: false });
                     
                     eventListeners.push({ type: 'mousedown', handler: onMouseDown });
                     eventListeners.push({ type: 'mousemove', handler: onMouseMove });
                     eventListeners.push({ type: 'mouseup', handler: onMouseUp });
                     eventListeners.push({ type: 'wheel', handler: onWheel });
+                    eventListeners.push({ type: 'touchstart', handler: onTouchStart });
+                    eventListeners.push({ type: 'touchmove', handler: onTouchMove });
+                    eventListeners.push({ type: 'touchend', handler: onTouchEnd });
                     
                     // Store cleanup function for when container is removed
                     container._cleanup = () => {
