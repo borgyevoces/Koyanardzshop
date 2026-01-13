@@ -218,7 +218,14 @@
     class GeminiChat {
         constructor() {
             // Get API key from Django template context
-            this.apiKey = '{{ gemini_api_key }}';
+            this.apiKey = '{{ gemini_api_key }}' || '';
+            
+            // Validate API key exists
+            if (!this.apiKey || this.apiKey.trim() === '') {
+                console.error('⚠️ Gemini API key is missing!');
+                this.apiKey = '';
+            }
+            
             // System prompt will be loaded from server
             this.systemPrompt = '';
             this.storeInfo = null;
@@ -227,6 +234,7 @@
             this.unreadCount = 0;
             this.messagesLoaded = false;
             this.firstMessageShown = false;
+            
             // Generate or get unique session ID
             this.sessionId = this.getOrCreateSessionId();
             this.isLoggedIn = '{{ user.is_authenticated }}' === 'True';
@@ -237,18 +245,28 @@
             this.componentOrder = ['monitor', 'mouse', 'keyboard', 'headset', 'case', 'storage', 'gpu', 'motherboard', 'ram', 'fan'];
             this.currentComponentIndex = 0;
             
-            this.loadStoreInfo(); // Load store info first
-            this.loadSystemPrompt(); // Load prompt from server on initialization
-            this.init();
-            this.loadChatHistory();
+            // Error tracking for debugging
+            this.lastError = null;
+            this.errorCount = 0;
+            this.maxErrors = 5;
             
-            // Restore build state if one was in progress
-            if (this.loadBuildState()) {
-                // Build was in progress, need to restore the UI
-                this.addMessage(`🔧 Restoring your build in progress...`, 'bot');
-                setTimeout(() => {
-                    this.displayComponentCategories();
-                }, 500);
+            try {
+                this.loadStoreInfo(); // Load store info first
+                this.loadSystemPrompt(); // Load prompt from server on initialization
+                this.init();
+                this.loadChatHistory();
+                
+                // Restore build state if one was in progress
+                if (this.loadBuildState()) {
+                    // Build was in progress, need to restore the UI
+                    this.addMessage(`🔧 Restoring your build in progress...`, 'bot');
+                    setTimeout(() => {
+                        this.displayComponentCategories();
+                    }, 500);
+                }
+            } catch (e) {
+                console.error('Chat initialization error:', e);
+                this.lastError = e.message;
             }
         }
 
@@ -327,6 +345,7 @@
 CRITICAL: ONLY recommend products from these actual categories:
 - Laptops
 - Desktop Computers
+- PC Sets (Pre-assembled desktop computer bundles)
 - Monitors
 - Motherboards
 - Processors (CPUs)
@@ -340,6 +359,12 @@ CRITICAL: ONLY recommend products from these actual categories:
 - Mouse/Pointing Devices
 - Cables & Adapters
 - Accessories
+
+IMPORTANT: PC SETS INFORMATION
+- We sell PC Sets: Pre-assembled desktop computer bundles (complete, ready-to-use systems)
+- When user asks about "pre-built computers", "PC bundles", or "computer sets", recommend PC Sets
+- PC Sets are ready-to-use, so customers don't need to build their own
+- Search term for PC Sets: @SHOW_PRODUCTS_FOR:PC Set
 
 STORE INFO:
 - Hours: Monday-Saturday, 9 AM - 6 PM
@@ -355,6 +380,7 @@ SERVICES:
 - Trade-in evaluation (bring device + valid ID)
 - Device inspection before purchase
 - Custom builds and bundles
+- PC Sets (pre-assembled desktop computer bundles)
 - New and secondhand items
 - Repair assessment
 
@@ -597,6 +623,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                     widget.classList.add('hidden');
                     toggleBtn.classList.remove('active');
                     toggleBtn.style.display = 'flex';
+                    // Keep quick actions state - don't change it when closing
                 }
             }
         }
@@ -609,6 +636,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 widget.classList.add('hidden');
                 toggleBtn.classList.remove('active');
                 toggleBtn.style.display = 'flex';
+                // Keep quick actions state - don't change it when closing
             }
         }
 
@@ -689,17 +717,52 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         async sendMessage() {
             const input = document.getElementById('custom-chat-input');
             
-            if (!input || !input.value.trim()) return;
-
-            const userMessage = input.value.trim();
+            // Validate input exists and has value
+            if (!input) {
+                console.error('❌ Chat input element not found');
+                return;
+            }
+            
+            const userMessage = input?.value?.trim() || '';
+            
+            // Validate message is not empty
+            if (!userMessage || userMessage.length === 0) {
+                console.warn('⚠️ Empty message attempted');
+                return;
+            }
+            
+            // Prevent excessively long messages
+            if (userMessage.length > 2000) {
+                this.addMessage('⚠️ Message is too long (max 2000 characters)', 'bot');
+                return;
+            }
+            
             const messageLower = userMessage.toLowerCase();
             
             // Hide quick actions when user sends a message
             this.hideQuickActions();
+            
+            // Validate API key before proceeding
+            if (!this.apiKey || this.apiKey.trim() === '') {
+                this.addMessage('🔑 Chat service not configured. Please refresh the page.', 'bot');
+                console.error('❌ API key missing or empty');
+                return;
+            }
+            
+            // Validate conversation history is an array
+            if (!Array.isArray(this.conversationHistory)) {
+                console.error('⚠️ Conversation history is invalid, reinitializing...');
+                this.conversationHistory = [];
+            }
 
             // Check if user wants to build a PC BEFORE sending to AI (natural language detection)
-            // Detects: "build pc", "build computer", "help build", "custom pc build", etc.
-            const buildTriggers = [
+            // Two categories: direct build requests vs. build questions about the feature
+            
+            // Direct build triggers - user explicitly wants to start building
+            const directBuildTriggers = [
+                /\byes\b/i,  // User saying "yes" to activation
+                /\bok\b/i,   // User saying "ok" to activation
+                /\bactivate\b/i,  // User saying "activate it"
                 /build.*pc/i,
                 /build.*computer/i,
                 /help.*build/i,
@@ -707,12 +770,29 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 /custom.*build/i,
                 /want.*build/i,
                 /create.*pc/i,
-                /assemble.*pc/i
+                /assemble.*pc/i,
+                /start.*building/i,
+                /let.*me.*build/i
             ];
             
-            const shouldTriggerBuild = buildTriggers.some(regex => regex.test(messageLower)) && !this.buildInProgress;
+            // Build feature questions - user asking about the build process
+            const buildQuestionTriggers = [
+                /what.*question.*build/i,
+                /what.*do.*you.*ask.*build/i,
+                /how.*do.*i.*start.*build/i,
+                /what.*does.*build.*ask/i,
+                /explain.*build.*feature/i,
+                /how.*does.*build.*work/i,
+                /what.*happen.*build/i
+            ];
             
-            if (shouldTriggerBuild) {
+            const isDirect = directBuildTriggers.some(regex => regex.test(messageLower));
+            const isQuestion = buildQuestionTriggers.some(regex => regex.test(messageLower));
+            const shouldTriggerBuildDirectly = isDirect && !this.buildInProgress;
+            const shouldOfferBuildFeature = isQuestion && !this.buildInProgress;
+            
+            // Handle direct build trigger
+            if (shouldTriggerBuildDirectly) {
                 // Display user message
                 this.addMessage(userMessage, 'user');
                 this.conversationHistory.push({
@@ -740,6 +820,25 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 return;
             }
             
+            // Handle build feature question - offer to activate
+            if (shouldOfferBuildFeature) {
+                // Display user message
+                this.addMessage(userMessage, 'user');
+                this.conversationHistory.push({
+                    role: 'user',
+                    content: userMessage,
+                    timestamp: new Date().getTime()
+                });
+                input.value = '';
+                
+                // Offer to activate the build feature
+                setTimeout(() => {
+                    this.addMessage('🎯 Would you like to activate the **Build a PC** feature? It will guide you through selecting components step-by-step. Just say yes to get started!', 'bot');
+                }, 300);
+                
+                return;
+            }
+            
             // Display user message
             this.addMessage(userMessage, 'user');
             this.conversationHistory.push({
@@ -754,11 +853,17 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
 
             // Send to Gemini API
             try {
+                // Validate system prompt is loaded
+                if (!this.systemPrompt || this.systemPrompt.trim().length === 0) {
+                    throw new Error('System prompt not initialized');
+                }
+                
                 // Use models with billing enabled (1000 req/min, pay per token)
                 // gemini-2.5-flash: better quality responses (primary)
                 // gemini-2.0-flash: fast fallback
                 const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
                 let response = null;
+                let lastError = null;
                 
                 for (const modelName of models) {
                     try {
@@ -766,111 +871,311 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                         
                         console.log(`Trying ${modelName}...`);
                         
+                        // Validate conversation history before sending
+                        const validHistory = this.conversationHistory.filter(msg => {
+                            return msg && 
+                                   msg.role && 
+                                   msg.content && 
+                                   typeof msg.content === 'string' &&
+                                   msg.content.trim().length > 0;
+                        });
+                        
+                        // Validate we have valid messages
+                        if (validHistory.length === 0) {
+                            throw new Error('No valid messages in conversation history');
+                        }
+                        
+                        const requestBody = {
+                            systemInstruction: {
+                                parts: [{ text: this.systemPrompt }]
+                            },
+                            contents: validHistory.map(msg => ({
+                                role: msg.role === 'user' ? 'user' : 'model',
+                                parts: [{ text: String(msg.content).substring(0, 4000) }] // Limit message size
+                            })),
+                            tools: [
+                                {
+                                    googleSearch: {}
+                                }
+                            ]
+                        };
+                        
                         response = await fetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({
-                                systemInstruction: {
-                                    parts: [{ text: this.systemPrompt }]
-                                },
-                                contents: this.conversationHistory.map(msg => ({
-                                    role: msg.role === 'user' ? 'user' : 'model',
-                                    parts: [{ text: msg.content }]
-                                })),
-                                tools: [
-                                    {
-                                        googleSearch: {}
-                                    }
-                                ]
-                            })
+                            body: JSON.stringify(requestBody),
+                            signal: AbortSignal.timeout(30000) // 30 second timeout
                         });
                         
                         if (response.ok) {
                             console.log(`✅ Success with ${modelName}`);
                             break;
                         } else {
-                            console.log(`${modelName} failed with status ${response.status}`);
+                            lastError = `${modelName} failed with status ${response.status}`;
+                            console.log(lastError);
                         }
                     } catch (e) {
+                        lastError = e.message;
                         console.error(`Error trying ${modelName}:`, e);
                     }
                 }
 
                 this.hideTypingIndicator();
 
-                if (!response || !response.ok) {
+                // Validate we got a response
+                if (!response) {
+                    console.error('❌ All models failed to respond');
+                    this.addMessage('⚠️ AI service unavailable. Please try again in a moment.', 'bot');
+                    this.errorCount++;
+                    this.lastError = lastError || 'No response from any model';
+                    return;
+                }
+
+                // Validate response status
+                if (!response.ok) {
+                    this.errorCount++;
+                    
+                    // Handle specific HTTP errors
+                    if (response.status === 429) {
+                        this.addMessage('⏳ Too many requests. Please wait a moment before trying again.', 'bot');
+                        this.lastError = 'Rate limited';
+                    } else if (response.status === 401) {
+                        this.addMessage('🔑 Authentication error. Please refresh the page.', 'bot');
+                        this.lastError = 'Invalid API key';
+                    } else if (response.status === 500) {
+                        this.addMessage('🔧 AI service error. Please try again in a moment.', 'bot');
+                        this.lastError = 'Server error';
+                    } else {
+                        this.addMessage('⚠️ Service error. Please try again.', 'bot');
+                        this.lastError = `HTTP ${response.status}`;
+                    }
+                    
                     try {
-                        const errorData = await (response?.json?.() || Promise.resolve({}));
-                        console.error('Gemini API error:', errorData);
-                        this.addMessage('⚠️ AI service unavailable. Please try again in a moment.', 'bot');
+                        const errorData = await response.json();
+                        console.error('API error response:', errorData);
                     } catch (e) {
-                        this.addMessage('Unable to connect to AI service.', 'bot');
+                        console.error('Could not parse error response');
                     }
                     return;
                 }
 
-                const data = await response.json();
-                console.log('Gemini response:', data);
+                // Parse response
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    console.error('❌ Failed to parse response JSON:', e);
+                    this.addMessage('Invalid response format. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
 
-                if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
-                    const botResponse = data.candidates[0].content.parts[0].text;
+                console.log('Gemini response:', data);
+                
+                // Validate response structure
+                if (!data || typeof data !== 'object') {
+                    console.error('❌ Invalid response type:', typeof data);
+                    this.addMessage('Unexpected response format. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+
+                // Check for API errors in response
+                if (data.error) {
+                    console.error('API returned error:', data.error);
+                    this.addMessage(`⚠️ ${data.error.message || 'An error occurred'}`, 'bot');
+                    this.errorCount++;
+                    this.lastError = data.error.message;
+                    return;
+                }
+
+                // Validate candidates array exists and has content
+                if (!data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0) {
+                    console.error('❌ No candidates in response');
+                    console.error('Response keys:', Object.keys(data));
+                    this.addMessage('No response content. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+
+                // Check if we have usageMetadata but no candidates content (API quirk)
+                if (data.usageMetadata && (!data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0)) {
+                    console.warn('⚠️ API returned metadata but empty content - possible API quirk');
+                    console.log('Attempting recovery by checking for finishReason...');
                     
-                    // Check if response contains product carousel trigger
-                    if (botResponse.includes('@SHOW_PRODUCTS_FOR:')) {
-                        // Extract product search parameters
-                        const match = botResponse.match(/@SHOW_PRODUCTS_FOR:([^\n]+)/);
-                        if (match) {
-                            const searchParams = match[1].trim();
-                            
-                            // Extract text before the trigger
-                            const textBefore = botResponse.split('@SHOW_PRODUCTS_FOR:')[0].trim();
-                            
-                            // Display text response if any
-                            if (textBefore) {
-                                this.addMessage(textBefore, 'bot');
-                            }
-                            
-                            // Parse search parameters
-                            const params = new URLSearchParams();
-                            const parts = searchParams.split(',');
-                            
-                            // First part is the query
-                            params.append('query', parts[0].trim());
-                            
-                            // Additional parameters like max_price:50000
-                            for (let i = 1; i < parts.length; i++) {
-                                const param = parts[i].split(':');
-                                if (param.length === 2) {
-                                    params.append(param[0].trim(), param[1].trim());
-                                }
-                            }
-                            
-                            // Fetch and display products
-                            this.searchAndDisplayProducts(params.toString());
-                        }
+                    // Check finish reason to understand why response is empty
+                    const finishReason = data.candidates[0]?.finishReason;
+                    console.log('Finish reason:', finishReason);
+                    
+                    if (finishReason === 'SAFETY') {
+                        this.addMessage('⚠️ Your message was flagged by our safety filters. Please rephrase and try again.', 'bot');
+                    } else if (finishReason === 'MAX_TOKENS') {
+                        this.addMessage('Response was too long. Please try a shorter question.', 'bot');
                     } else {
-                        // Regular text response - display as is
-                        this.addMessage(botResponse, 'bot');
+                        this.addMessage('AI service returned empty content. Please try again.', 'bot');
                     }
                     
-                    this.conversationHistory.push({
-                        role: 'assistant',
-                        content: botResponse,
-                        timestamp: new Date().getTime()
-                    });
-                    
-                    // Save conversation
-                    this.saveChatHistory();
-                } else {
-                    console.error('Unexpected response format:', data);
-                    this.addMessage('Unexpected response. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
                 }
+
+                const candidate = data.candidates[0];
+                if (!candidate || !candidate.content) {
+                    console.error('❌ Candidate or content missing:', {
+                        hasCandidate: !!candidate,
+                        hasContent: candidate?.content ? true : false,
+                        candidateKeys: candidate ? Object.keys(candidate) : [],
+                        fullCandidate: candidate
+                    });
+                    this.addMessage('Empty response. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+
+                // Check if content has parts
+                if (!candidate.content.parts) {
+                    console.error('❌ Content.parts is missing or undefined:', {
+                        contentKeys: Object.keys(candidate.content),
+                        fullContent: candidate.content
+                    });
+                    this.addMessage('Invalid response structure. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+
+                if (!Array.isArray(candidate.content.parts)) {
+                    console.error('❌ Content.parts is not an array:', typeof candidate.content.parts);
+                    this.addMessage('Invalid response format. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+
+                if (candidate.content.parts.length === 0) {
+                    console.error('❌ Content.parts is empty array');
+                    console.log('Full response for debugging:', JSON.stringify(data, null, 2));
+                    
+                    // Try to extract any text from alternative locations
+                    if (candidate.content.text) {
+                        console.log('✅ Found text in candidate.content.text (alternate location)');
+                        const botResponse = candidate.content.text;
+                        
+                        if (botResponse && typeof botResponse === 'string' && botResponse.trim().length > 0) {
+                            this.addMessage(botResponse, 'bot');
+                            this.conversationHistory.push({
+                                role: 'assistant',
+                                content: botResponse,
+                                timestamp: new Date().getTime()
+                            });
+                            this.saveChatHistory();
+                            this.errorCount = 0;
+                            return;
+                        }
+                    }
+                    
+                    this.addMessage('No response content available. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+
+                const botResponse = candidate.content.parts[0]?.text;
+                
+                // Validate response text
+                if (!botResponse || typeof botResponse !== 'string' || botResponse.trim().length === 0) {
+                    console.error('❌ Invalid or empty response text:', {
+                        hasText: !!botResponse,
+                        type: typeof botResponse,
+                        length: botResponse?.length,
+                        parts: candidate.content.parts
+                    });
+                    this.addMessage('Empty response from AI. Please try again.', 'bot');
+                    this.errorCount++;
+                    return;
+                }
+                
+                // Check if response contains product carousel trigger
+                if (botResponse.includes('@SHOW_PRODUCTS_FOR:')) {
+                    // Extract product search parameters
+                    const match = botResponse.match(/@SHOW_PRODUCTS_FOR:([^\n]+)/);
+                    if (match && match[1]) {
+                        const searchParams = match[1].trim();
+                        
+                        // Validate search params
+                        if (!searchParams || searchParams.length === 0) {
+                            console.error('❌ Empty search params');
+                            this.addMessage('Unable to process product search.', 'bot');
+                            return;
+                        }
+                        
+                        // Extract text before the trigger
+                        const textBefore = botResponse.split('@SHOW_PRODUCTS_FOR:')[0].trim();
+                        
+                        // Display text response if any
+                        if (textBefore && textBefore.length > 0) {
+                            this.addMessage(textBefore, 'bot');
+                        }
+                        
+                        // Parse search parameters
+                        const params = new URLSearchParams();
+                        const parts = searchParams.split(',');
+                        
+                        // First part is the query
+                        if (parts[0] && parts[0].trim()) {
+                            params.append('query', parts[0].trim());
+                        }
+                        
+                        // Additional parameters like max_price:50000
+                        for (let i = 1; i < parts.length; i++) {
+                            const param = parts[i].split(':');
+                            if (param.length === 2 && param[0] && param[1]) {
+                                params.append(param[0].trim(), param[1].trim());
+                            }
+                        }
+                        
+                        // Fetch and display products
+                        this.searchAndDisplayProducts(params.toString());
+                    }
+                } else {
+                    // Regular text response - display as is
+                    this.addMessage(botResponse, 'bot');
+                }
+                
+                // Add to conversation history
+                this.conversationHistory.push({
+                    role: 'assistant',
+                    content: botResponse,
+                    timestamp: new Date().getTime()
+                });
+                
+                // Save conversation
+                this.saveChatHistory();
+                
+                // Reset error count on success
+                this.errorCount = 0;
+                
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ Error in sendMessage:', error);
                 this.hideTypingIndicator();
-                this.addMessage('Connection error. Please check your internet.', 'bot');
+                
+                this.lastError = error.message;
+                this.errorCount++;
+                
+                // Different messages for different error types
+                if (error.name === 'AbortError') {
+                    this.addMessage('⏱️ Request timed out. Please check your internet connection.', 'bot');
+                } else if (error.message.includes('Network')) {
+                    this.addMessage('🌐 Network error. Please check your internet connection.', 'bot');
+                } else if (error.message.includes('System prompt')) {
+                    this.addMessage('⚙️ Chat service not fully initialized. Please refresh the page.', 'bot');
+                } else {
+                    this.addMessage('❌ An error occurred. Please try again.', 'bot');
+                }
+                
+                // Log detailed error for debugging
+                if (this.errorCount > this.maxErrors) {
+                    console.error('⛔ Too many errors, stopping chat:', this.lastError);
+                }
             }
         }
 
@@ -880,7 +1185,16 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
              * Only show one component at a time in sequence
              */
             const container = document.getElementById('custom-chat-messages');
-            if (!container) return;
+            if (!container) {
+                console.error('❌ Chat messages container not found');
+                return;
+            }
+
+            // Validate component order exists
+            if (!Array.isArray(this.componentOrder)) {
+                console.error('❌ Component order not initialized');
+                return;
+            }
 
             // Get the current component in the order
             if (this.currentComponentIndex >= this.componentOrder.length) {
@@ -892,6 +1206,11 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             }
 
             const currentComponentId = this.componentOrder[this.currentComponentIndex];
+            
+            if (!currentComponentId || typeof currentComponentId !== 'string') {
+                console.error('❌ Invalid component ID:', currentComponentId);
+                return;
+            }
             
             const categories = [
                 { id: 'monitor', name: '🖥️ Monitor', label: 'Monitor' },
@@ -908,10 +1227,13 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
 
             // Find the current category
             const currentCategory = categories.find(cat => cat.id === currentComponentId);
-            if (!currentCategory) return;
+            if (!currentCategory) {
+                console.error('❌ Category not found:', currentComponentId);
+                return;
+            }
 
             // Check if already selected (skip if yes)
-            if (this.selectedComponents[currentComponentId]) {
+            if (this.selectedComponents && this.selectedComponents[currentComponentId]) {
                 // Already selected, move to next
                 this.currentComponentIndex++;
                 this.displayComponentCategories();
@@ -919,15 +1241,20 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             }
 
             const categoryDiv = document.createElement('div');
+            if (!categoryDiv) {
+                console.error('❌ Failed to create category div');
+                return;
+            }
+
             categoryDiv.className = 'custom-chat-message bot-message';
             categoryDiv.innerHTML = `
                 <div class="custom-chat-bubble" style="max-width: 100%; padding: 16px;">
                     <p style="margin: 0 0 12px 0; font-weight: 600; color: #333;">Which ${currentCategory.label} would you like?</p>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="skip-component-btn" data-category="${currentComponentId}" data-label="${currentCategory.label}" style="padding: 10px 12px; background: #e8f0ff; border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: #667eea; transition: all 0.3s;">
+                        <button class="skip-component-btn" data-category="${currentCategory.id}" data-label="${currentCategory.label}" style="padding: 10px 12px; background: #e8f0ff; border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: #667eea; transition: all 0.3s;">
                             ⏭️ Skip ${currentCategory.label}
                         </button>
-                        <button class="browse-component-btn" data-category="${currentComponentId}" data-label="${currentCategory.label}" style="padding: 10px 12px; background: #667eea; border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: white; transition: all 0.3s;">
+                        <button class="browse-component-btn" data-category="${currentCategory.id}" data-label="${currentCategory.label}" style="padding: 10px 12px; background: #667eea; border: 2px solid #667eea; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: white; transition: all 0.3s;">
                             🔍 Browse ${currentCategory.label}
                         </button>
                     </div>
@@ -937,25 +1264,55 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             container.appendChild(categoryDiv);
             container.scrollTop = container.scrollHeight;
 
-            // Add event listeners
-            categoryDiv.querySelectorAll('.browse-component-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const category = btn.dataset.category;
-                    const label = btn.dataset.label;
-                    this.handleCategorySelection(category, label);
+            // Add event listeners with error handling
+            const browseButtons = categoryDiv.querySelectorAll('.browse-component-btn');
+            if (browseButtons && browseButtons.length > 0) {
+                browseButtons.forEach(btn => {
+                    if (!btn) return;
+                    btn.addEventListener('click', (e) => {
+                        try {
+                            const category = btn.dataset.category;
+                            const label = btn.dataset.label;
+                            
+                            if (!category || !label) {
+                                console.error('❌ Missing category or label data');
+                                return;
+                            }
+                            
+                            this.handleCategorySelection(category, label);
+                        } catch (error) {
+                            console.error('❌ Error handling category selection:', error);
+                            this.addMessage('An error occurred. Please try again.', 'bot');
+                        }
+                    });
                 });
-            });
+            }
 
-            categoryDiv.querySelectorAll('.skip-component-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    this.addMessage(`Skipping ${btn.dataset.label}`, 'user');
-                    this.currentComponentIndex++;
-                    this.saveBuildState();
-                    setTimeout(() => {
-                        this.displayComponentCategories();
-                    }, 500);
+            const skipButtons = categoryDiv.querySelectorAll('.skip-component-btn');
+            if (skipButtons && skipButtons.length > 0) {
+                skipButtons.forEach(btn => {
+                    if (!btn) return;
+                    btn.addEventListener('click', (e) => {
+                        try {
+                            const label = btn.dataset.label;
+                            if (!label) {
+                                console.error('❌ Missing label for skip button');
+                                return;
+                            }
+                            
+                            this.addMessage(`Skipping ${label}`, 'user');
+                            this.currentComponentIndex++;
+                            this.saveBuildState();
+                            setTimeout(() => {
+                                this.displayComponentCategories();
+                            }, 500);
+                        } catch (error) {
+                            console.error('❌ Error skipping component:', error);
+                            this.addMessage('An error occurred. Please try again.', 'bot');
+                        }
+                    });
                 });
-            });
+            }
         }
 
         async handleCategorySelection(category, label) {
@@ -1368,7 +1725,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             const multiModelHtml = `
                 <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
                     <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">Your Build - 3D View</p>
-                    <div id="${viewerId}" style="width: 100%; height: 350px; background: #1a1a1a; border-radius: 6px; position: relative; margin-bottom: 8px; pointer-events: auto; touch-action: none;"></div>
+                    <div id="${viewerId}" style="width: 100%; height: 350px; background: #d3d3d3; border-radius: 6px; position: relative; margin-bottom: 8px; pointer-events: auto; touch-action: none;"></div>
                     <p style="margin: 0 0 8px 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
                         🖱️ Click & drag to move | Shift + drag to rotate | Scroll to zoom | Right-click & drag to pan
                     </p>
@@ -1483,7 +1840,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 container.appendChild(canvas);
 
                 const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x1a1a1a);
+                scene.background = new THREE.Color(0xeeeeee);
 
                 const camera = new THREE.PerspectiveCamera(
                     65, 
@@ -1501,7 +1858,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                     precision: 'lowp'
                 });
                 renderer.setSize(canvas.width, canvas.height);
-                renderer.setClearColor(0x1a1a1a);
+                renderer.setClearColor(0xeeeeee, 1);
                 renderer.setPixelRatio(1); // Fixed pixel ratio for better performance
 
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
@@ -2053,38 +2410,117 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         saveBuildState() {
             /**
              * Save current build state to localStorage for persistence across page refreshes
+             * Validates all data before saving
              */
-            const buildState = {
-                selectedComponents: this.selectedComponents,
-                currentComponentIndex: this.currentComponentIndex,
-                buildInProgress: this.buildInProgress,
-                currentBuildCategory: this.currentBuildCategory,
-                timestamp: new Date().getTime()
-            };
-            localStorage.setItem('currentBuildState', JSON.stringify(buildState));
+            try {
+                // Validate selectedComponents is an object
+                const selectedComponents = this.selectedComponents || {};
+                if (typeof selectedComponents !== 'object' || Array.isArray(selectedComponents)) {
+                    console.error('❌ selectedComponents is invalid:', typeof selectedComponents);
+                    return;
+                }
+
+                // Validate currentComponentIndex is a number
+                const currentComponentIndex = typeof this.currentComponentIndex === 'number' 
+                    ? this.currentComponentIndex 
+                    : 0;
+
+                // Validate buildInProgress is a boolean
+                const buildInProgress = Boolean(this.buildInProgress);
+
+                // Create build state object
+                const buildState = {
+                    selectedComponents: selectedComponents,
+                    currentComponentIndex: currentComponentIndex,
+                    buildInProgress: buildInProgress,
+                    currentBuildCategory: String(this.currentBuildCategory || 'PC'),
+                    timestamp: Date.now ? new Date().getTime() : Math.floor(Date.now()),
+                    version: 1 // For future compatibility
+                };
+
+                // Validate the entire state before saving
+                const stateJson = JSON.stringify(buildState);
+                if (!stateJson || stateJson.length === 0) {
+                    console.error('❌ Failed to serialize build state');
+                    return;
+                }
+
+                // Save to localStorage with quota handling
+                localStorage.setItem('currentBuildState', stateJson);
+                console.log('✅ Build state saved');
+
+            } catch (e) {
+                if (e.name === 'QuotaExceededError') {
+                    console.error('❌ localStorage quota exceeded for build state');
+                    try {
+                        localStorage.removeItem('currentBuildState');
+                    } catch (clearError) {
+                        console.error('❌ Failed to clear build state:', clearError);
+                    }
+                } else {
+                    console.error('❌ Error saving build state:', e.message);
+                }
+            }
         }
 
         loadBuildState() {
             /**
              * Load build state from localStorage if available
+             * Validates all data before using it
              */
             try {
                 const savedState = localStorage.getItem('currentBuildState');
-                if (savedState) {
-                    const buildState = JSON.parse(savedState);
-                    // Only restore if build was in progress
-                    if (buildState.buildInProgress) {
-                        this.selectedComponents = buildState.selectedComponents || {};
-                        this.currentComponentIndex = buildState.currentComponentIndex || 0;
-                        this.buildInProgress = buildState.buildInProgress || false;
-                        this.currentBuildCategory = buildState.currentBuildCategory || 'PC';
-                        return true;
-                    }
+                
+                if (!savedState || savedState.trim() === '') {
+                    return false;
                 }
+
+                let buildState;
+                try {
+                    buildState = JSON.parse(savedState);
+                } catch (parseError) {
+                    console.error('❌ Failed to parse build state:', parseError);
+                    localStorage.removeItem('currentBuildState');
+                    return false;
+                }
+
+                // Validate buildState is an object
+                if (!buildState || typeof buildState !== 'object') {
+                    console.error('❌ Build state is not an object');
+                    return false;
+                }
+
+                // Validate buildInProgress flag
+                if (!buildState.buildInProgress || buildState.buildInProgress !== true) {
+                    console.log('No build in progress to restore');
+                    return false;
+                }
+
+                // Validate selectedComponents
+                if (buildState.selectedComponents && typeof buildState.selectedComponents === 'object') {
+                    this.selectedComponents = buildState.selectedComponents;
+                } else {
+                    this.selectedComponents = {};
+                }
+
+                // Validate currentComponentIndex
+                if (typeof buildState.currentComponentIndex === 'number' && buildState.currentComponentIndex >= 0) {
+                    this.currentComponentIndex = buildState.currentComponentIndex;
+                } else {
+                    this.currentComponentIndex = 0;
+                }
+
+                // Restore build state
+                this.buildInProgress = true;
+                this.currentBuildCategory = buildState.currentBuildCategory || 'PC';
+                
+                console.log('✅ Build state restored');
+                return true;
+
             } catch (error) {
-                console.error('Error loading build state:', error);
+                console.error('❌ Error loading build state:', error.message);
+                return false;
             }
-            return false;
         }
 
         saveChatConversation() {
@@ -2147,7 +2583,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             modelDiv.innerHTML = `
                 <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
                     <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">${productName} - 3D Model</p>
-                    <div id="${viewerId}" style="width: 100%; height: 280px; background: #1a1a1a; border-radius: 6px; position: relative; margin-bottom: 8px; cursor: pointer; pointer-events: auto; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;" class="fullscreen-3d-trigger"></div>
+                    <div id="${viewerId}" style="width: 100%; height: 280px; background: #d3d3d3; border-radius: 6px; position: relative; margin-bottom: 8px; cursor: pointer; pointer-events: auto; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;" class="fullscreen-3d-trigger"></div>
                     <div style="display: flex; gap: 8px;">
                         <p style="flex: 1; margin: 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
                             🖱️ Left-click + drag to rotate | Scroll to zoom
@@ -2196,7 +2632,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                         <span>🎮 ${productName} - 3D Model Viewer</span>
                         <button class="close-fullscreen-btn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
                     </div>
-                    <div id="fullscreen-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #1a1a1a;"></div>
+                    <div id="fullscreen-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #d3d3d3;"></div>
                     <div style="background: #333; color: #aaa; padding: 10px 16px; font-size: 12px; border-top: 1px solid #555;">
                         🖱️ <strong>Controls:</strong> Left-click + drag to rotate | Scroll to zoom | Right-click + drag to pan
                     </div>
@@ -2246,7 +2682,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                         <span>🎮 Your Build - Multi-Model 3D Viewer</span>
                         <button class="close-fullscreen-multi-btn" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
                     </div>
-                    <div id="fullscreen-multi-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #1a1a1a; width: 100%; overflow: hidden;"></div>
+                    <div id="fullscreen-multi-3d-canvas-${Date.now()}" style="flex: 1; position: relative; background: #d3d3d3; width: 100%; overflow: hidden;"></div>
                     <div style="background: #333; color: #aaa; padding: 10px 16px; font-size: 12px; border-top: 1px solid #555; flex-shrink: 0;">
                         🖱️ <strong>Controls:</strong> Left-click + drag to rotate | Scroll to zoom | Right-click + drag to pan | View multiple models side-by-side
                     </div>
@@ -2380,7 +2816,7 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 
                 // Initialize Three.js scene - ISOLATED FOR THIS VIEWER ONLY
                 const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x1a1a1a);
+                scene.background = new THREE.Color(0xeeeeee);
 
                 const width = container.clientWidth;
                 const height = container.clientHeight;
@@ -2402,7 +2838,8 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 });
                 renderer.setSize(width, height);
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
-                renderer.setClearColor(0x1a1a1a);
+                renderer.setClearColor(0xeeeeee, 1);
+                renderer.outputEncoding = THREE.sRGBEncoding;
 
                 // Lighting
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
@@ -2570,135 +3007,214 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         }
 
         addMessage(text, sender) {
-            const container = document.getElementById('custom-chat-messages');
-            if (!container) return;
+            try {
+                // Validate container exists
+                const container = document.getElementById('custom-chat-messages');
+                if (!container) {
+                    console.error('❌ Chat messages container not found');
+                    return;
+                }
 
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `custom-chat-message ${sender}-message`;
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'custom-chat-bubble';
-            
-            const content = document.createElement('div');
-            content.className = 'custom-chat-text';
-            
-            // Format text with proper line breaks and markdown support
-            let formattedText = text
-                .split('\n')
-                .map(line => {
-                    // Convert **bold** to <strong>bold</strong>
-                    line = line.replace(/\*\*([^\*]+)\*\*/g, '<strong>$1</strong>');
-                    // Convert __italic__ to <em>italic</em>
-                    line = line.replace(/__([^_]+)__/g, '<em>$1</em>');
-                    return line;
-                })
-                .join('<br>');
-            
-            content.innerHTML = formattedText;
-            bubble.appendChild(content);
-            
-            messageDiv.appendChild(bubble);
-            container.appendChild(messageDiv);
+                // Validate inputs
+                if (!text || typeof text !== 'string') {
+                    console.error('❌ Invalid message text:', typeof text);
+                    return;
+                }
 
-            // Auto scroll
-            container.scrollTop = container.scrollHeight;
+                if (!sender || !['user', 'bot'].includes(sender)) {
+                    console.error('❌ Invalid sender:', sender);
+                    return;
+                }
 
-            // Update badge if minimized
-            if (sender === 'bot' && this.isMinimized) {
-                this.unreadCount++;
-                this.updateBadge();
+                // Sanitize text to prevent XSS
+                const sanitizedText = String(text)
+                    .trim()
+                    .substring(0, 5000); // Limit message length
+
+                if (sanitizedText.length === 0) {
+                    console.warn('⚠️ Empty message text after sanitization');
+                    return;
+                }
+
+                const messageDiv = document.createElement('div');
+                if (!messageDiv) {
+                    console.error('❌ Failed to create message div');
+                    return;
+                }
+
+                messageDiv.className = `custom-chat-message ${sender}-message`;
+                
+                const bubble = document.createElement('div');
+                if (!bubble) {
+                    console.error('❌ Failed to create bubble');
+                    return;
+                }
+
+                bubble.className = 'custom-chat-bubble';
+                
+                const content = document.createElement('div');
+                if (!content) {
+                    console.error('❌ Failed to create content div');
+                    return;
+                }
+
+                content.className = 'custom-chat-text';
+                
+                // Format text with proper line breaks and markdown support
+                // Use textContent + careful HTML building to prevent XSS
+                let formattedText = sanitizedText
+                    .split('\n')
+                    .map((line, index) => {
+                        if (!line || typeof line !== 'string') {
+                            return '';
+                        }
+                        
+                        // Escape HTML first
+                        line = line
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;');
+                        
+                        // Then apply safe markdown transformations
+                        // Convert **bold** to <strong>bold</strong>
+                        line = line.replace(/\*\*([^\*]+)\*\*/g, (match, content) => {
+                            return '<strong>' + content + '</strong>';
+                        });
+                        
+                        // Convert __italic__ to <em>italic</em>
+                        line = line.replace(/__([^_]+)__/g, (match, content) => {
+                            return '<em>' + content + '</em>';
+                        });
+                        
+                        return line;
+                    })
+                    .join('<br>');
+                
+                // Use safe innerHTML assignment
+                try {
+                    content.innerHTML = formattedText;
+                } catch (e) {
+                    console.error('❌ Failed to set innerHTML:', e);
+                    // Fallback to textContent
+                    content.textContent = sanitizedText;
+                }
+                
+                bubble.appendChild(content);
+                messageDiv.appendChild(bubble);
+                container.appendChild(messageDiv);
+
+                // Auto scroll with error handling
+                try {
+                    container.scrollTop = container.scrollHeight;
+                } catch (e) {
+                    console.warn('⚠️ Failed to scroll container:', e);
+                }
+
+                // Update badge if minimized
+                try {
+                    if (sender === 'bot' && this.isMinimized) {
+                        this.unreadCount++;
+                        this.updateBadge();
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Failed to update badge:', e);
+                }
+
+                // Save message to localStorage for persistence
+                this.saveChatMessage(sanitizedText, sender);
+
+            } catch (error) {
+                console.error('❌ Error in addMessage:', error);
             }
-
-            // Save message to localStorage for persistence
-            this.saveChatMessage(text, sender);
         }
 
         saveChatMessage(text, sender, isHtml = false, metadata = null) {
             // Save individual message to localStorage (supports both text and HTML content)
-            // NOW SAVES 3D model metadata for persistence
+            // Validates all inputs before saving
             try {
-                const messages = JSON.parse(localStorage.getItem('gemini_chat_messages') || '[]');
-                messages.push({
-                    text: text,
-                    sender: sender,
-                    timestamp: new Date().getTime(),
-                    isHtml: isHtml,  // Flag to indicate if content is HTML
-                    metadata: metadata  // Additional data for special content (3D models, carousels, etc)
-                });
+                // Validate inputs
+                if (!text || typeof text !== 'string') {
+                    console.warn('⚠️ Invalid message text for saving');
+                    return;
+                }
+
+                if (!sender || !['user', 'bot'].includes(sender)) {
+                    console.warn('⚠️ Invalid sender for saving:', sender);
+                    return;
+                }
+
+                // Load existing messages with error handling
+                let messages = [];
+                try {
+                    const stored = localStorage.getItem('gemini_chat_messages');
+                    if (stored && stored.trim() !== '') {
+                        messages = JSON.parse(stored);
+                        if (!Array.isArray(messages)) {
+                            console.warn('⚠️ Stored messages is not an array, resetting');
+                            messages = [];
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('❌ Failed to parse stored messages:', parseError);
+                    messages = [];
+                }
+
+                // Create message object with all validations
+                const messageObj = {
+                    text: String(text).substring(0, 5000), // Limit size
+                    sender: String(sender),
+                    timestamp: Date.now ? new Date().getTime() : Math.floor(Date.now()),
+                    isHtml: Boolean(isHtml),
+                    metadata: metadata && typeof metadata === 'object' ? metadata : null
+                };
+
+                messages.push(messageObj);
+
+                // Prevent localStorage from growing indefinitely
+                const MAX_MESSAGES = 500;
+                if (messages.length > MAX_MESSAGES) {
+                    messages = messages.slice(-MAX_MESSAGES);
+                    console.warn(`⚠️ Trimmed messages to last ${MAX_MESSAGES}`);
+                }
+
+                // Save with error handling
                 localStorage.setItem('gemini_chat_messages', JSON.stringify(messages));
+
             } catch (e) {
-                console.log('Could not save message:', e);
+                // Handle quota exceeded and other errors gracefully
+                if (e.name === 'QuotaExceededError') {
+                    console.error('❌ localStorage quota exceeded, clearing old messages');
+                    try {
+                        localStorage.removeItem('gemini_chat_messages');
+                    } catch (clearError) {
+                        console.error('❌ Failed to clear localStorage:', clearError);
+                    }
+                } else {
+                    console.warn('⚠️ Could not save message to localStorage:', e.message);
+                }
             }
         }
 
         loadMessagesFromStorage() {
             // Load and display saved messages from localStorage
-            // NOW RECREATES 3D MODELS AND MULTI-MODEL VIEWERS
+            // LAZY LOADS 3D MODELS - only initializes when scrolled into view
             // Returns: number of messages loaded
             try {
                 const messages = JSON.parse(localStorage.getItem('gemini_chat_messages') || '[]');
-                let multi3DModelCount = 0; // Track count of multi-3D models
                 
                 if (messages.length > 0) {
                     for (const msg of messages) {
                         if (msg.metadata?.type === '3d-model') {
-                            // Recreate single 3D model viewer
-                            this.show3DModelInChat(msg.metadata.modelUrl, msg.metadata.productName);
+                            // Create placeholder, load on visibility
+                            this.createLazy3DModelPlaceholder(msg.metadata.modelUrl, msg.metadata.productName);
                         } else if (msg.metadata?.type === 'multi-3d-model') {
-                            // Only load the LAST multi-3D model to prevent duplicates causing lag
-                            multi3DModelCount++;
-                            // Recreate multi-model 3D viewer
-                            // First, restore selectedComponents from metadata
+                            // Create placeholder for multi-model, load on visibility
                             try {
                                 const savedComponents = JSON.parse(msg.metadata.selectedComponents || '{}');
                                 if (Object.keys(savedComponents).length > 0) {
                                     this.selectedComponents = savedComponents;
-                                    // Now recreate the multi-model viewer
-                                    // Mark as loading to prevent duplicates
-                                    const viewerId = 'multi-3d-viewer-' + Date.now();
-                                    
-                                    const container = document.getElementById('custom-chat-messages');
-                                    const modelDiv = document.createElement('div');
-                                    modelDiv.className = 'custom-chat-message bot-message';
-                                    
-                                    const multiModelHtml = `
-                                        <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
-                                            <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">Your Build - 3D View</p>
-                                            <div id="${viewerId}" style="width: 100%; height: 350px; background: #1a1a1a; border-radius: 6px; position: relative; margin-bottom: 8px; pointer-events: auto; touch-action: none;"></div>
-                                            <p style="margin: 0 0 8px 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
-                                                🖱️ Left-click + drag to rotate | Scroll to zoom | Right-click & drag to drag models
-                                            </p>
-                                            <div style="display: flex; gap: 8px;">
-                                                <button class="fullscreen-multi-3d-btn" style="flex: 1; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">⛶ Full Screen</button>
-                                                <button class="continue-after-3d-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Continue with Build</button>
-                                            </div>
-                                        </div>
-                                    `;
-                                    modelDiv.innerHTML = multiModelHtml;
-                                    container.appendChild(modelDiv);
-                                    container.scrollTop = container.scrollHeight;
-                                    
-                                    // Add fullscreen button listener
-                                    modelDiv.querySelector('.fullscreen-multi-3d-btn').addEventListener('click', (e) => {
-                                        e.stopPropagation();
-                                        this.openFullscreenMultiModel3D();
-                                    });
-
-                                    // Add continue button listener
-                                    modelDiv.querySelector('.continue-after-3d-btn').addEventListener('click', (e) => {
-                                        e.stopPropagation();
-                                        this.addMessage('Ready to finalize your build?', 'user');
-                                        setTimeout(() => {
-                                            this.showBuildFinishOptions();
-                                        }, 500);
-                                    });
-                                    
-                                    // Load viewer
-                                    this.waitForThreeExtensions().then(() => {
-                                        this.loadMultiModel3DViewer(viewerId);
-                                    });
+                                    this.createLazyMultiModel3DPlaceholder();
                                 } else {
-                                    // No components saved, show placeholder
                                     this.addMessageDirectly('🗂️ Your Build - 3D View (click "View Build" to reload)', 'bot');
                                 }
                             } catch (e) {
@@ -2719,6 +3235,115 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
                 console.log('Could not load chat messages:', e);
                 return 0;
             }
+        }
+
+        createLazy3DModelPlaceholder(modelUrl, productName) {
+            /**
+             * Create a placeholder for 3D model that only loads when visible
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const modelDiv = document.createElement('div');
+            modelDiv.className = 'custom-chat-message bot-message';
+            const viewerId = `chat-3d-viewer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            
+            modelDiv.innerHTML = `
+                <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
+                    <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">🎬 ${productName}</p>
+                    <div id="${viewerId}" style="width: 100%; height: 280px; background: #eeeeee; border-radius: 6px; position: relative; margin-bottom: 8px; cursor: pointer; pointer-events: auto; touch-action: none; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">Click to load 3D model</div>
+                    <p style="margin: 0 0 8px 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
+                        🖱️ Left-click + drag to rotate | Scroll to zoom | Right-click & drag to pan
+                    </p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="fullscreen-3d-btn" style="flex: 1; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">⛶ Full Screen</button>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(modelDiv);
+
+            // Setup Intersection Observer for lazy loading
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.dataset.loaded) {
+                        entry.target.dataset.loaded = 'true';
+                        observer.unobserve(entry.target);
+                        
+                        // Load the 3D model now
+                        this.waitForThreeExtensions().then(() => {
+                            this.loadChatEmbedded3DModel(viewerId, modelUrl, productName, false);
+                        });
+                    }
+                });
+            }, { rootMargin: '100px' });
+
+            observer.observe(modelDiv);
+
+            // Add fullscreen button listener
+            modelDiv.querySelector('.fullscreen-3d-btn').addEventListener('click', () => {
+                this.openFullscreen3DViewer(modelUrl, productName);
+            });
+        }
+
+        createLazyMultiModel3DPlaceholder() {
+            /**
+             * Create a placeholder for multi-model 3D viewer that only loads when visible
+             */
+            const container = document.getElementById('custom-chat-messages');
+            if (!container) return;
+
+            const modelDiv = document.createElement('div');
+            modelDiv.className = 'custom-chat-message bot-message';
+            const viewerId = `multi-3d-viewer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            
+            const multiModelHtml = `
+                <div class="custom-chat-bubble product-carousel-bubble" style="max-width: 100%; padding: 12px;">
+                    <p style="margin: 0 0 10px 0; font-weight: 600; font-size: 13px; color: #333;">Your Build - 3D View</p>
+                    <div id="${viewerId}" style="width: 100%; height: 350px; background: #eeeeee; border-radius: 6px; position: relative; margin-bottom: 8px; pointer-events: auto; touch-action: none; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">Click to load 3D models</div>
+                    <p style="margin: 0 0 8px 0; font-size: 11px; color: #666; background: #f0f4ff; padding: 6px 8px; border-radius: 4px;">
+                        🖱️ Left-click + drag to rotate | Scroll to zoom | Right-click & drag to drag models
+                    </p>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="fullscreen-multi-3d-btn" style="flex: 1; padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">⛶ Full Screen</button>
+                        <button class="continue-after-3d-btn" style="flex: 1; padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: 600;">Continue with Build</button>
+                    </div>
+                </div>
+            `;
+            modelDiv.innerHTML = multiModelHtml;
+            container.appendChild(modelDiv);
+
+            // Setup Intersection Observer for lazy loading
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !entry.target.dataset.loaded) {
+                        entry.target.dataset.loaded = 'true';
+                        observer.unobserve(entry.target);
+                        
+                        // Load the multi-model viewer now
+                        this.waitForThreeExtensions().then(() => {
+                            this.loadMultiModel3DViewer(viewerId);
+                        });
+                    }
+                });
+            }, { rootMargin: '100px' });
+
+            observer.observe(modelDiv);
+
+            // Add fullscreen button listener
+            modelDiv.querySelector('.fullscreen-multi-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openFullscreenMultiModel3D();
+            });
+
+            // Add continue button listener
+            modelDiv.querySelector('.continue-after-3d-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.addMessage('Ready to finalize your build?', 'user');
+                setTimeout(() => {
+                    this.showBuildFinishOptions();
+                }, 500);
+            });
         }
 
         addMessageFromHtml(htmlContent, sender) {
@@ -2822,30 +3447,116 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         async searchAndDisplayProducts(paramsString) {
             /**
              * Search products using API parameters and automatically display in carousel
+             * Validates all inputs and handles errors gracefully
              */
             try {
+                // Validate params string
+                if (!paramsString || typeof paramsString !== 'string') {
+                    console.error('❌ Invalid params string:', typeof paramsString);
+                    this.addMessage('Invalid search parameters. Please try again.', 'bot');
+                    return;
+                }
+
                 const url = `/api/products/recommend/?${paramsString}`;
-                const response = await fetch(url);
                 
+                // Validate URL
+                if (!url || url.length === 0) {
+                    console.error('❌ Invalid URL constructed');
+                    return;
+                }
+
+                console.log('🔍 Searching:', url);
+
+                // Fetch with timeout
+                const response = await fetch(url, {
+                    signal: AbortSignal.timeout(15000) // 15 second timeout for search
+                });
+                
+                // Validate response object
+                if (!response) {
+                    console.error('❌ No response received');
+                    this.addMessage('No response from server. Please try again.', 'bot');
+                    return;
+                }
+
                 if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.products && data.products.length > 0) {
+                    // Parse response with error handling
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (parseError) {
+                        console.error('❌ Failed to parse search response:', parseError);
+                        this.addMessage('Invalid response format. Please try again.', 'bot');
+                        return;
+                    }
+
+                    // Validate data structure
+                    if (!data || typeof data !== 'object') {
+                        console.error('❌ Invalid data object');
+                        this.addMessage('Invalid response data. Please try again.', 'bot');
+                        return;
+                    }
+
+                    // Check for API errors
+                    if (data.error) {
+                        console.error('API error:', data.error);
+                        this.addMessage(`Error: ${data.error}`, 'bot');
+                        return;
+                    }
+
+                    // Validate products array
+                    if (data.success && data.products && Array.isArray(data.products) && data.products.length > 0) {
                         // Extract query from params for display
                         const params = new URLSearchParams(paramsString);
                         const query = params.get('query') || 'Products';
-                        const description = `${data.count} ${query}(s) found:`;
                         
-                        // Display carousel
+                        // Validate query string
+                        if (!query || typeof query !== 'string') {
+                            console.error('❌ Invalid query:', query);
+                            return;
+                        }
+
+                        const description = `${data.count || data.products.length} ${String(query).trim()}(s) found:`;
+                        
+                        console.log(`✅ Found ${data.products.length} products`);
+
+                        // Display carousel with error handling
                         this.displayProductCarousel(data.products, description);
-                    } else {
+                    } else if (data.success === false || !data.products || data.products.length === 0) {
                         this.addMessage('😔 Sorry, no products found matching your criteria. Try different search terms or visit our store!', 'bot');
+                    } else {
+                        console.error('❌ Unexpected response structure:', data);
+                        this.addMessage('Could not process search results. Please try again.', 'bot');
                     }
                 } else {
-                    this.addMessage('Unable to search products. Please try again.', 'bot');
+                    // Handle different HTTP error codes
+                    if (response.status === 404) {
+                        this.addMessage('Search service not available. Please try again.', 'bot');
+                    } else if (response.status === 429) {
+                        this.addMessage('Too many search requests. Please wait a moment.', 'bot');
+                    } else if (response.status === 500) {
+                        this.addMessage('Server error. Please try again later.', 'bot');
+                    } else {
+                        this.addMessage(`Search error (${response.status}). Please try again.`, 'bot');
+                    }
+
+                    try {
+                        const errorData = await response.json();
+                        console.error('API error response:', errorData);
+                    } catch (e) {
+                        console.error('HTTP ' + response.status + ' response received');
+                    }
                 }
             } catch (error) {
-                console.error('Error displaying products:', error);
-                this.addMessage('Error loading products. Please try again.', 'bot');
+                console.error('❌ Error in searchAndDisplayProducts:', error);
+                
+                if (error.name === 'AbortError') {
+                    this.addMessage('Search timed out. Please try again.', 'bot');
+                } else if (error.message && error.message.includes('Network')) {
+                    this.addMessage('Network error. Please check your connection.', 'bot');
+                } else {
+                    this.addMessage('Error loading products. Please try again.', 'bot');
+                }
             }
         }
 
@@ -2853,27 +3564,70 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             /**
              * Search for products using the recommendation API
              * Returns matching products from store inventory
+             * Validates all inputs before using
              */
             try {
-                let url = `/api/products/recommend/?query=${encodeURIComponent(query)}&max_results=6`;
-                
-                if (component) {
-                    url += `&component=${encodeURIComponent(component)}`;
+                // Validate query
+                if (!query || typeof query !== 'string') {
+                    console.error('❌ Invalid query:', typeof query);
+                    return {
+                        success: false,
+                        products: [],
+                        count: 0
+                    };
                 }
 
-                const response = await fetch(url);
+                const queryEncoded = encodeURIComponent(String(query).substring(0, 100).trim());
+                let url = `/api/products/recommend/?query=${queryEncoded}&max_results=6`;
+                
+                if (component && typeof component === 'string') {
+                    const componentEncoded = encodeURIComponent(String(component).substring(0, 100).trim());
+                    url += `&component=${componentEncoded}`;
+                }
+
+                console.log('Searching products:', url);
+
+                const response = await fetch(url, {
+                    signal: AbortSignal.timeout(15000)
+                });
+
+                // Validate response
+                if (!response) {
+                    console.error('❌ No response from product search');
+                    return {
+                        success: false,
+                        products: [],
+                        count: 0
+                    };
+                }
+
                 if (response.ok) {
-                    const data = await response.json();
-                    if (data.success && data.products && data.products.length > 0) {
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (parseError) {
+                        console.error('❌ Failed to parse product search response:', parseError);
+                        return {
+                            success: false,
+                            products: [],
+                            count: 0
+                        };
+                    }
+
+                    // Validate response structure
+                    if (data.success && data.products && Array.isArray(data.products) && data.products.length > 0) {
+                        console.log(`✅ Found ${data.products.length} products`);
                         return {
                             success: true,
                             products: data.products,
-                            count: data.count
+                            count: data.count || data.products.length
                         };
                     }
+                } else {
+                    console.error(`Search failed with status ${response.status}`);
                 }
             } catch (error) {
-                console.error('Error searching products:', error);
+                console.error('❌ Error searching products:', error.message);
             }
 
             return {
@@ -2884,39 +3638,67 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
         }
 
         showTypingIndicator() {
-            const container = document.getElementById('custom-chat-messages');
-            if (!container) return;
+            try {
+                const container = document.getElementById('custom-chat-messages');
+                if (!container) {
+                    console.error('❌ Chat container not found');
+                    return;
+                }
 
-            const indicatorDiv = document.createElement('div');
-            indicatorDiv.className = 'custom-chat-message bot-message';
-            indicatorDiv.id = 'typing-indicator';
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'custom-chat-bubble typing-bubble';
-            
-            bubble.innerHTML = '<span></span><span></span><span></span>';
-            indicatorDiv.appendChild(bubble);
-            container.appendChild(indicatorDiv);
-            
-            container.scrollTop = container.scrollHeight;
+                const indicatorDiv = document.createElement('div');
+                if (!indicatorDiv) {
+                    console.error('❌ Failed to create indicator div');
+                    return;
+                }
+
+                indicatorDiv.className = 'custom-chat-message bot-message';
+                indicatorDiv.id = 'typing-indicator';
+                
+                const bubble = document.createElement('div');
+                if (!bubble) {
+                    console.error('❌ Failed to create bubble');
+                    return;
+                }
+
+                bubble.className = 'custom-chat-bubble typing-bubble';
+                bubble.innerHTML = '<span></span><span></span><span></span>';
+                
+                indicatorDiv.appendChild(bubble);
+                container.appendChild(indicatorDiv);
+                
+                container.scrollTop = container.scrollHeight;
+            } catch (error) {
+                console.error('❌ Error showing typing indicator:', error);
+            }
         }
 
         hideTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (indicator) {
-                indicator.remove();
+            try {
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator && indicator.parentNode) {
+                    indicator.remove();
+                }
+            } catch (error) {
+                console.error('⚠️ Error hiding typing indicator:', error);
             }
         }
 
         updateBadge() {
-            const badge = document.getElementById('custom-chat-badge');
-            if (badge) {
-                if (this.unreadCount > 0) {
-                    badge.textContent = this.unreadCount;
+            try {
+                const badge = document.getElementById('custom-chat-badge');
+                if (!badge) {
+                    console.warn('⚠️ Badge element not found');
+                    return;
+                }
+
+                if (this.unreadCount && this.unreadCount > 0) {
+                    badge.textContent = String(this.unreadCount);
                     badge.style.display = 'flex';
                 } else {
                     badge.style.display = 'none';
                 }
+            } catch (error) {
+                console.warn('⚠️ Error updating badge:', error);
             }
         }
     }

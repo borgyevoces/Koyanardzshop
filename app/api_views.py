@@ -210,44 +210,28 @@ def api_products_recommend(request):
             try:
                 category_lower = category.lower()
                 
-                # Map category names to component_type values (using database choices)
-                category_map = {
-                    'monitor': 'monitor',
-                    'mouse': 'mouse',
-                    'keyboard': 'keyboard',
-                    'headset': 'headset',
-                    'case': 'case',
-                    'storage': 'storage',
-                    'gpu': 'gpu',
-                    'graphics card': 'gpu',
-                    'motherboard': 'motherboard',
-                    'ram': 'ram',
-                    'cpu': 'cpu',
-                    'processor': 'cpu',
-                    'cooling': 'cooling',
-                    'fan': 'cooling',
-                    'psu': 'psu',
-                    'power': 'psu'
-                }
+                # Create flexible search query using Q objects
+                # This allows multiple search terms to work
+                search_query = Q()
                 
-                component_type = category_map.get(category_lower, category_lower)
+                # Add the main category search
+                search_query |= Q(category_name__category_name__icontains=category_lower)
                 
-                # Strategy 1: Try case-insensitive component_type match
+                # Add aliases for common component names
+                if 'gpu' in category_lower or 'graphic' in category_lower or 'video card' in category_lower:
+                    # Search for GPU, graphics card, or any variant
+                    search_query |= Q(category_name__category_name__icontains='gpu')
+                    search_query |= Q(category_name__category_name__icontains='graphics')
+                    search_query |= Q(category_name__category_name__icontains='card')
+                    search_query |= Q(product_name__icontains='graphics')
+                    search_query |= Q(product_name__icontains='gpu')
+                
+                # Strategy 1: Try category_name match with flexible search
                 products_list = list(Product.objects.filter(
-                    stock__gt=0,
-                    component_type__iexact=component_type
+                    Q(stock__gt=0) & search_query
                 ).select_related('brand', 'category_name')[:max_results])
                 
-                # Strategy 2: If no results, try category_name field (case-insensitive)
-                if not products_list:
-                    products_list = list(Product.objects.filter(
-                        stock__gt=0,
-                        category_name__category_name__icontains=category_lower
-                    ).exclude(
-                        component_type__in=['monitor', 'case']
-                    ).select_related('brand', 'category_name')[:max_results])
-                
-                # Strategy 3: If still no results, try product name (case-insensitive)
+                # Strategy 2: If no results, try product name (case-insensitive)
                 if not products_list:
                     products_list = list(Product.objects.filter(
                         stock__gt=0,
@@ -279,7 +263,6 @@ def api_products_recommend(request):
                             'name': product.product_name,
                             'brand': brand_name,
                             'price': float(product.price),
-                            'component_type': product.component_type,
                             'category': category_name,
                             'image_url': product.image.url if product.image else '/static/images/placeholder.png',
                             'description': product.description or '',
@@ -304,50 +287,41 @@ def api_products_recommend(request):
             })
         
         if query:
-            # Try component_type search first (for monitor, cpu, gpu, ram, etc.)
+            # Create flexible search query using Q objects
+            search_query = Q()
+            
+            # Add the main query search
+            search_query |= Q(category_name__category_name__icontains=query)
+            
+            # Add special aliases for common components
+            if 'gpu' in query.lower() or 'graphic' in query.lower() or 'video' in query.lower():
+                # Graphics card search - find any variant
+                search_query |= Q(category_name__category_name__icontains='gpu')
+                search_query |= Q(category_name__category_name__icontains='graphics')
+                search_query |= Q(product_name__icontains='graphics')
+                search_query |= Q(product_name__icontains='gpu')
+            
+            # Try category and product name search first
             try:
-                component_products = Product.objects.filter(
-                    stock__gt=0,
-                    component_type__icontains=query
+                category_products = Product.objects.filter(
+                    Q(stock__gt=0) & search_query
                 ).select_related('brand', 'category_name')
                 
-                if component_products.exists():
+                if category_products.exists():
                     # Apply price filter
                     if max_price:
                         try:
                             max_price_val = float(max_price)
-                            component_products = component_products.filter(price__lte=max_price_val)
+                            category_products = category_products.filter(price__lte=max_price_val)
                         except:
                             pass
                     
-                    products_list = list(component_products[:max_results])
-            except Exception as comp_error:
-                logger.error(f"Component type search error: {str(comp_error)}")
+                    products_list = list(category_products[:max_results])
+            except Exception as cat_error:
+                logger.error(f"Category search error: {str(cat_error)}")
                 pass
             
-            # If no component type results, try category search
-            if not products_list:
-                try:
-                    category_products = Product.objects.filter(
-                        stock__gt=0,
-                        category_name__category_name__icontains=query
-                    ).select_related('brand', 'category_name')
-                    
-                    if category_products.exists():
-                        # Apply price filter
-                        if max_price:
-                            try:
-                                max_price_val = float(max_price)
-                                category_products = category_products.filter(price__lte=max_price_val)
-                            except:
-                                pass
-                        
-                        products_list = list(category_products[:max_results])
-                except Exception as cat_error:
-                    logger.error(f"Category search error: {str(cat_error)}")
-                    pass
-            
-            # If still no results, try product name search (but NOT description)
+            # If no category results, try product name search
             if not products_list:
                 try:
                     name_products = Product.objects.filter(
@@ -367,6 +341,28 @@ def api_products_recommend(request):
                         products_list = list(name_products[:max_results])
                 except Exception as name_error:
                     logger.error(f"Product name search error: {str(name_error)}")
+                    pass
+            
+            # If still no results, try brand search
+            if not products_list:
+                try:
+                    brand_products = Product.objects.filter(
+                        stock__gt=0,
+                        brand__brand__icontains=query
+                    ).select_related('brand', 'category_name')
+                    
+                    if brand_products.exists():
+                        # Apply price filter
+                        if max_price:
+                            try:
+                                max_price_val = float(max_price)
+                                brand_products = brand_products.filter(price__lte=max_price_val)
+                            except:
+                                pass
+                        
+                        products_list = list(brand_products[:max_results])
+                except Exception as brand_error:
+                    logger.error(f"Brand search error: {str(brand_error)}")
                     pass
         
         # Format results
@@ -644,3 +640,65 @@ def api_delete_chat_conversation(request):
         logger.error(f"Error deleting chat: {str(e)}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
+
+# Firebase Email Verification
+@api_view(['POST'])
+def firebase_signup_verify(request):
+    """
+    Verify Firebase signup and create Django user
+    Expects: {
+        "uid": "firebase_user_id",
+        "email": "user@example.com",
+        "email_verified": true,
+        "display_name": "User Name" (optional)
+    }
+    """
+    try:
+        from .firebase_auth import get_or_create_user_from_firebase
+        from django.contrib.auth import get_user_model, login
+        
+        data = request.data
+        
+        # Validate required fields
+        if not data.get('email'):
+            return Response({
+                'success': False,
+                'message': 'Email is required'
+            }, status=400)
+        
+        if not data.get('email_verified'):
+            return Response({
+                'success': False,
+                'message': 'Email must be verified'
+            }, status=400)
+        
+        firebase_uid = data.get('uid', '')
+        email = data.get('email')
+        display_name = data.get('display_name', '')
+        
+        # Get or create Django user
+        user, created = get_or_create_user_from_firebase(firebase_uid, email, display_name)
+        
+        # Login the user
+        from django.contrib.auth.backends import ModelBackend
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        
+        return Response({
+            'success': True,
+            'message': 'Email verified successfully!' if created else 'Welcome back!',
+            'created': created,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'is_staff': user.is_staff
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Firebase signup verification error: {str(e)}")
+        return Response({
+            'success': False,
+            'message': 'Verification failed. Please try again.',
+            'error': str(e)
+        }, status=500)

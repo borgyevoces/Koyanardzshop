@@ -63,7 +63,7 @@
 
     html .canvas-3d-wrapper,
     .canvas-3d-wrapper {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        background: #f0f0f0 !important;
         border-radius: 12px !important;
         overflow: hidden !important;
         aspect-ratio: 1 !important;
@@ -89,7 +89,7 @@
 
     html .main-image-wrapper,
     .main-image-wrapper {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        background: #f0f0f0 !important;
         border-radius: 12px !important;
         overflow: hidden !important;
         aspect-ratio: 1 !important;
@@ -118,7 +118,7 @@
         width: 100% !important;
         height: 100% !important;
         display: block !important;
-        background-color: #1a1a1a !important;
+        background-color: #f0f0f0 !important;
         cursor: grab !important;
     }
 
@@ -2370,7 +2370,7 @@
 
                     // Create scene
                     scene = new THREE.Scene();
-                    scene.background = new THREE.Color(0x1a1a1a);
+                    scene.background = new THREE.Color(0xeeeeee);
                     console.log('Scene created');
 
                     // Create camera - use actual dimensions
@@ -2393,7 +2393,8 @@
                     // Set renderer size based on actual canvas size
                     renderer.setSize(actualWidth, actualHeight, false);
                     renderer.setPixelRatio(window.devicePixelRatio);
-                    renderer.setClearColor(0x1a1a1a);
+                    renderer.setClearColor(0xeeeeee, 1);
+                    renderer.outputEncoding = THREE.sRGBEncoding;
                     console.log('Renderer created with size:', actualWidth, 'x', actualHeight);
 
                     // Add lights

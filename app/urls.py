@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import HomePage, ProductPage, ProductItemPage, AIBotPage, CheckoutPage, AppointmentCompletePage, SellingPage, SellingCompletePage, SellingInfoPage, MyAppointmentPage, MySellingAppointmentPage, MyCancelledAppointmentPage, MyHistoryAppointmentPage, CartPage, FavoritePage, add_to_cart, AdminDashboard, AdminInventory, AdminProduct, AdminAppointment, AdminSellingAppointment
 from . import views
-from .api_views import api_product_3d_model, api_search_products_with_3d, api_gemini_system_prompt, api_products_recommend, api_available_categories, api_store_info, api_save_chat_conversation, api_load_chat_conversation, api_delete_chat_conversation
+from .api_views import api_product_3d_model, api_search_products_with_3d, api_gemini_system_prompt, api_products_recommend, api_available_categories, api_store_info, api_save_chat_conversation, api_load_chat_conversation, api_delete_chat_conversation, firebase_signup_verify
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -56,6 +56,7 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path('logout/', views.logout_view, name='logout'),
     path('resend_otp/', views.resend_otp, name="resend-otp"),
+    path('api/firebase/signup-verify/', firebase_signup_verify, name='firebase_signup_verify'),
     path('api/gemini/system-prompt/', api_gemini_system_prompt, name='api_gemini_system_prompt'),
     path('api/products/recommend/', api_products_recommend, name='api_products_recommend'),
     path('api/categories/', api_available_categories, name='api_available_categories'),
