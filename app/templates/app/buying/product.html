@@ -107,7 +107,7 @@
                         {% if p.total_bought and p.total_bought > 0 %}
                             <span class="product-tag tag-bestseller">Best Seller</span>
                         {% endif %}
-                        <button class="favorite_btn {% if p.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites" type="button" style="position: absolute; top: 10px; right: 10px; z-index: 20 !important; pointer-events: auto;">
+                        <button class="favorite_btn {% if p.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ p.id }}" aria-label="Add to favorites" type="button" style="position: absolute !important; top: 10px !important; right: 10px !important; z-index: 20 !important; pointer-events: auto !important;">
                             <i class="{% if p.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
                         </button>
                         <a href="{% url 'product_item' p.id %}" class="product-thumb" id="product-thumbs">

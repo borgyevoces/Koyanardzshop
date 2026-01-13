@@ -41,7 +41,7 @@
                                     {% endif %}
                                 {% endwith %}
                             {% endif %}
-                            <button class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite">
+                            <button type="button" class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite" style="position: absolute; top: 10px; right: 10px; z-index: 20 !important; pointer-events: auto !important;">
                                 <i class="{% if produkto.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
                             </button>
                             <a class="product-thumb" href="{% url 'product_item' produkto.id %}">

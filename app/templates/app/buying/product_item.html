@@ -1843,7 +1843,7 @@
                             {% endif %}
                             <button type="submit">💳 Buy Now</button>
                         </form>
-                        <button class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite"><i class="{% if produkto.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart" aria-hidden="true"></i></button>
+                        <button type="button" class="favorite_btn {% if produkto.id|stringformat:'s' in favorites %}favorited{% endif %}" data-product-id="{{ produkto.id }}" aria-label="Toggle favorite"><i class="{% if produkto.id|stringformat:'s' in favorites %}fa-solid{% else %}fa-regular{% endif %} fa-heart" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>

@@ -150,7 +150,7 @@
         }
     </script>
 </head>
-<body>
+<body data-cart-count="{{ cart_count }}">
 
     <header class="site-header">
         <div class="header-inner container">
@@ -180,7 +180,10 @@
             </nav>
 
             <div class="header-actions">
-                <a class="action-btn" href="{% url 'cart' %}" title="Cart"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></a>
+                <a class="action-btn cart-btn" href="{% url 'cart' %}" title="Cart">
+                    <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+                </a>
 
                 <div class="dropdown favorite-dropdown">
                     <button id="favToggle" class="action-btn" aria-haspopup="true" aria-expanded="false"><i class="fa-regular fa-heart" aria-hidden="true"></i></button>
@@ -206,18 +209,20 @@
 
                 <div class="dropdown user-dropdown">
                     {% if user.is_authenticated %}
-                        <button id="userToggle" class="action-btn"><i class="fa-solid fa-user" aria-hidden="true"></i></button>
-                        <div id="userDropdown" class="dropdown-panel">
+                        <button id="userToggle" class="action-btn user-btn">
+                            <i class="fa-solid fa-user" aria-hidden="true"></i>
+                        </button>
+                        <div id="userDropdown" class="dropdown-panel user-dropdown-panel">
                             <div class="user-card">
                                 {% if user.avatar %}
-                                    <img src="{% static 'images/icon/user-blue.png' %}" alt="{{ user.username }}" class="avatar-img">
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="avatar-img-large">
                                 {% else %}
-                                    <img src="{% static 'images/icon/user-blue.png' %}" alt="{{ user.username }}" class="avatar-img">
+                                    <i class="fa-solid fa-user-circle" aria-hidden="true" style="font-size: 2rem; color: #0b84c6;"></i>
                                 {% endif %}
                                 <div class="user-info" style="text-transform: capitalize;">{{ user.username }}</div>
                             </div>
-                            <a href="{% url 'profile' %}">Profile</a>
-                            <a href="{% url 'logout' %}">Logout</a>
+                            <a href="{% url 'profile' %}"><i class="fa-solid fa-user-gear" aria-hidden="true"></i>Profile</a>
+                            <a href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>Logout</a>
                         </div>
                     {% else %}
                         <a class="action-btn" href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i></a>
@@ -313,6 +318,26 @@
                 nav.classList.add('open');
                 userPanel && (userPanel.style.display = userPanel.style.display === 'block' ? 'none' : 'block');
             });
+
+            // Cart badge count
+            function updateCartBadge() {
+                const badge = document.getElementById('cartBadge');
+                const cartCount = document.body.getAttribute('data-cart-count') || '0';
+                const count = parseInt(cartCount);
+                
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+
+            // Initialize cart badge on page load
+            updateCartBadge();
+
+            // Listen for cart updates (custom event)
+            document.addEventListener('cartUpdated', updateCartBadge);
         })();
     </script>
 </body>

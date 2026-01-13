@@ -92,9 +92,12 @@ document.addEventListener('click', function (e) {
     // Favorite button on product cards
     const favBtn = e.target.closest && e.target.closest('.favorite_btn');
     if (favBtn) {
+        console.log('❤️ Favorite button clicked');
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         const productId = favBtn.getAttribute('data-product-id');
+        console.log('Product ID:', productId);
 
         function getCookie(name) {
             let cookieValue = null;
@@ -111,6 +114,7 @@ document.addEventListener('click', function (e) {
             return cookieValue;
         }
         const csrftoken = getCookie('csrftoken');
+        console.log('CSRF Token:', csrftoken);
 
         fetch(`/toggle_favorite/${productId}/`, {
             method: 'POST',
@@ -123,6 +127,7 @@ document.addEventListener('click', function (e) {
             body: JSON.stringify({})
         })
         .then(res => {
+            console.log('Response status:', res.status, res.ok);
             if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
@@ -130,7 +135,7 @@ document.addEventListener('click', function (e) {
         })
         .then(data => {
             const dropdown = document.getElementById('favoriteDropdown');
-            console.debug('toggle_favorite response', data);
+            console.log('✅ toggle_favorite response:', data);
 
             // If server provides authoritative dropdown HTML, replace it and return
             if (data.dropdown_html && dropdown) {
@@ -199,7 +204,7 @@ document.addEventListener('click', function (e) {
             }
         })
         .catch(err => {
-            console.error('Error toggling favorite:', err);
+            console.error('❌ Error toggling favorite:', err);
         });
     }
 
@@ -208,6 +213,7 @@ document.addEventListener('click', function (e) {
     if (removeBtn) {
         e.preventDefault();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         const productId = removeBtn.getAttribute('data-product-id');
 
         function getCookie(name) {

@@ -125,6 +125,42 @@
     cursor: not-allowed;
   }
 
+  /* Password input wrapper with toggle button */
+  .password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .password-input-wrapper input {
+    flex: 1;
+    padding-right: 45px;
+  }
+
+  .toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #0b84c6;
+    font-size: 18px;
+    padding: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toggle-password-btn:hover {
+    color: #0a6fa3;
+    transform: scale(1.1);
+  }
+
+  .toggle-password-btn:active {
+    transform: scale(0.95);
+  }
+
   .form-group textarea {
     resize: vertical;
     min-height: 100px;
@@ -444,19 +480,34 @@
         <form method="POST" enctype="multipart/form-data" id="passwordForm">
           {% csrf_token %}
           <div class="form-grid">
-            <div class="form-group">
+            <div class="form-group password-field">
               <label for="id_old_password">Current Password</label>
-              <input type="password" id="id_old_password" name="old_password" required>
+              <div class="password-input-wrapper">
+                <input type="password" id="id_old_password" name="old_password" required>
+                <button type="button" class="toggle-password-btn" data-target="id_old_password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-field">
               <label for="id_new_password1">New Password</label>
-              <input type="password" id="id_new_password1" name="new_password1" required>
+              <div class="password-input-wrapper">
+                <input type="password" id="id_new_password1" name="new_password1" required>
+                <button type="button" class="toggle-password-btn" data-target="id_new_password1">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
 
-            <div class="form-group">
+            <div class="form-group password-field">
               <label for="id_new_password2">Confirm Password</label>
-              <input type="password" id="id_new_password2" name="new_password2" required>
+              <div class="password-input-wrapper">
+                <input type="password" id="id_new_password2" name="new_password2" required>
+                <button type="button" class="toggle-password-btn" data-target="id_new_password2">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -470,6 +521,30 @@
 </div>
 
 <script>
+  // ===== PASSWORD SHOW/HIDE TOGGLE =====
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.toggle-password-btn');
+    
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        const icon = this.querySelector('i');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      });
+    });
+  });
+
   // ===== AVATAR CLICK HANDLER =====
   const profileHeaderAvatar = document.getElementById('profileHeaderAvatar');
   const headerAvatarInput = document.getElementById('headerAvatarInput');

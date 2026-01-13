@@ -20,7 +20,12 @@ def favorites_context(request):
         
         products = Product.objects.filter(id__in=favorite_ids) if favorite_ids else Product.objects.none()
     
+    # Get cart count from session
+    cart = request.session.get('cart', {})
+    cart_count = sum(item.get('quantity', 0) for item in cart.values())
+    
     return {
         'products_favorite': products,
-        'favorites': favorites_list  # Also provide the raw list for template checks
+        'favorites': favorites_list,  # Also provide the raw list for template checks
+        'cart_count': cart_count
     }
