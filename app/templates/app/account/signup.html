@@ -75,8 +75,19 @@
             });
         }
         
-        // OTP validity timer (5 minutes)
-        const otpExpiresAt = new Date(new Date().getTime() + 5 * 60 * 1000);
+        // Check if OTP timer was already started (from localStorage)
+        let otpExpiresAt = localStorage.getItem('otpExpiresAt');
+        let resendCooldownEnd = localStorage.getItem('resendCooldownEnd');
+        
+        // OTP validity timer (5 minutes from first load)
+        if (!otpExpiresAt) {
+            otpExpiresAt = new Date(new Date().getTime() + 5 * 60 * 1000).getTime();
+            localStorage.setItem('otpExpiresAt', otpExpiresAt);
+            console.log('Created new OTP timer, expires at:', new Date(otpExpiresAt));
+        } else {
+            otpExpiresAt = parseInt(otpExpiresAt);
+            console.log('Using existing OTP timer, expires at:', new Date(otpExpiresAt));
+        }
 
         const otpCountdown = setInterval(() => {
             if (!otpTimerDisplay) {
@@ -89,6 +100,7 @@
             if (distance <= 0) {
                 clearInterval(otpCountdown);
                 otpTimerDisplay.textContent = '⚠ OTP expired. Please request a new code.';
+                localStorage.removeItem('otpExpiresAt');
                 return;
             }
 
@@ -97,8 +109,15 @@
             otpTimerDisplay.textContent = `OTP expires in ${minutes}m ${seconds}s`;
         }, 1000);
 
-        // Resend cooldown (1 minute)
-        const resendCooldownEnd = new Date(new Date().getTime() + 60 * 1000);
+        // Resend cooldown (1 minute from first attempt)
+        if (!resendCooldownEnd) {
+            resendCooldownEnd = new Date(new Date().getTime() + 60 * 1000).getTime();
+            localStorage.setItem('resendCooldownEnd', resendCooldownEnd);
+            console.log('Created new resend cooldown, ends at:', new Date(resendCooldownEnd));
+        } else {
+            resendCooldownEnd = parseInt(resendCooldownEnd);
+            console.log('Using existing resend cooldown, ends at:', new Date(resendCooldownEnd));
+        }
         
         // Disable resend button initially
         if (resendBtn) {
@@ -127,6 +146,7 @@
                     resendBtn.style.opacity = '1';
                     resendBtn.style.cursor = 'pointer';
                 }
+                localStorage.removeItem('resendCooldownEnd');
             }
         }, 1000);
     }
@@ -136,47 +156,150 @@
         console.log('Resend click triggered');
         
         const resendBtn = document.getElementById('resend-btn');
-        const cooldownDisplay = document.getElementById('resend-cooldown');
-        const resendForm = document.getElementById('resend-otp-form');
+        let resendForm = document.getElementById('resend-otp-form');
+        let cooldownDisplay = document.getElementById('resend-cooldown');
         
-        console.log('Elements found:', { resendBtn, cooldownDisplay, resendForm });
+        console.log('Initial elements found:', { resendBtn, resendForm, cooldownDisplay });
         
-        if (!resendBtn || !cooldownDisplay || !resendForm) {
-            console.error('Missing required elements for resend click');
+        // Check the button exists
+        if (!resendBtn) {
+            console.error('Missing resend button element (id="resend-btn")');
+            alert('Error: Resend button not found.');
             return;
+        }
+        
+        // Fallback: if form not found by ID, try to find it from button's parent
+        if (!resendForm) {
+            console.warn('Form not found by ID, searching parent elements');
+            resendForm = resendBtn.closest('form');
+            console.log('Form found via closest():', resendForm);
+        }
+        
+        // Final check - if still no form, create a new request object
+        if (!resendForm) {
+            console.warn('Form still not found, will construct manual request');
+        }
+        
+        // Create cooldown display if it doesn't exist
+        if (!cooldownDisplay) {
+            console.warn('Cooldown display not found, creating one');
+            cooldownDisplay = document.createElement('div');
+            cooldownDisplay.id = 'resend-cooldown';
+            cooldownDisplay.className = 'resend-cooldown-text';
+            resendBtn.parentElement.insertBefore(cooldownDisplay, resendBtn);
         }
         
         // Disable button immediately
         resendBtn.disabled = true;
         resendBtn.style.opacity = '0.6';
         resendBtn.style.cursor = 'not-allowed';
+        const originalText = resendBtn.textContent;
+        resendBtn.textContent = 'Sending...';
         
-        console.log('Button disabled, starting 60 second cooldown');
+        console.log('Button disabled, preparing to send request');
         
-        // Start 60 second cooldown
-        const cooldownEnd = new Date(new Date().getTime() + 60 * 1000);
+        // Get form data
+        let csrfToken = null;
+        let otpEmail = null;
         
-        const cooldownTimer = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = cooldownEnd - now;
+        if (resendForm) {
+            const formData = new FormData(resendForm);
+            csrfToken = formData.get('csrfmiddlewaretoken');
+            otpEmail = formData.get('otp_email');
+            console.log('Got data from form:', { csrfToken: csrfToken ? 'present' : 'missing', otpEmail });
+        } else {
+            // Fallback: try to find CSRF token and email from page
+            const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            const emailInput = document.querySelector('input[name="otp_email"]');
+            csrfToken = csrfInput ? csrfInput.value : null;
+            otpEmail = emailInput ? emailInput.value : null;
+            console.log('Got data from document:', { csrfToken: csrfToken ? 'present' : 'missing', otpEmail });
+        }
+        
+        if (!csrfToken) {
+            console.error('Missing CSRF token');
+            alert('Error: CSRF token not found. Please refresh the page.');
+            resendBtn.disabled = false;
+            resendBtn.style.opacity = '1';
+            resendBtn.style.cursor = 'pointer';
+            resendBtn.textContent = originalText;
+            return;
+        }
+        
+        if (!otpEmail) {
+            console.error('Missing OTP email');
+            alert('Error: Email not found. Please refresh the page.');
+            resendBtn.disabled = false;
+            resendBtn.style.opacity = '1';
+            resendBtn.style.cursor = 'pointer';
+            resendBtn.textContent = originalText;
+            return;
+        }
+        
+        console.log('Sending request with:', { csrfToken: 'present', otpEmail });
+        
+        // Use fetch to send the resend request
+        fetch('{% url "resend-otp" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}&otp_email=${encodeURIComponent(otpEmail)}`
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response:', response);
             
-            if (distance <= 0) {
-                clearInterval(cooldownTimer);
-                cooldownDisplay.textContent = 'Ready to resend';
-                resendBtn.disabled = false;
-                resendBtn.style.opacity = '1';
-                resendBtn.style.cursor = 'pointer';
-                console.log('Cooldown complete, button re-enabled');
-                return;
+            if (response.ok) {
+                // Success - show message
+                cooldownDisplay.innerHTML = '<span style="color: #4caf50; font-weight: bold;">✓ New code sent! Check your email.</span>';
+                resendBtn.textContent = originalText;
+                
+                // Reset OTP timer - new code means new 5 minute timer
+                const newOtpExpiresAt = new Date(new Date().getTime() + 5 * 60 * 1000).getTime();
+                localStorage.setItem('otpExpiresAt', newOtpExpiresAt);
+                console.log('OTP timer reset. New expiration at:', new Date(newOtpExpiresAt));
+                
+                // Clear and restart resend cooldown from now
+                localStorage.removeItem('resendCooldownEnd');
+                const newCooldownEnd = new Date(new Date().getTime() + 60 * 1000).getTime();
+                localStorage.setItem('resendCooldownEnd', newCooldownEnd);
+                
+                // Start 60 second cooldown
+                const cooldownEnd = newCooldownEnd;
+                
+                const cooldownTimer = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = cooldownEnd - now;
+                    
+                    if (distance <= 0) {
+                        clearInterval(cooldownTimer);
+                        cooldownDisplay.innerHTML = '<span style="color: #666;">Ready to resend</span>';
+                        resendBtn.disabled = false;
+                        resendBtn.style.opacity = '1';
+                        resendBtn.style.cursor = 'pointer';
+                        localStorage.removeItem('resendCooldownEnd');
+                        console.log('Cooldown complete, button re-enabled');
+                        return;
+                    }
+                    
+                    const seconds = Math.floor(distance / 1000);
+                    cooldownDisplay.innerHTML = `<span style="color: #666;">You can resend in ${seconds}s</span>`;
+                }, 1000);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            const seconds = Math.floor(distance / 1000);
-            cooldownDisplay.textContent = `You can resend in ${seconds}s`;
-        }, 1000);
-        
-        // Submit the form
-        console.log('Submitting resend form');
-        resendForm.submit();
+        })
+        .catch(error => {
+            console.error('Resend error:', error);
+            resendBtn.disabled = false;
+            resendBtn.style.opacity = '1';
+            resendBtn.style.cursor = 'pointer';
+            resendBtn.textContent = originalText;
+            cooldownDisplay.innerHTML = '<span style="color: #c33; font-weight: bold;">✗ Error sending code. Please try again.</span>';
+            alert('Failed to resend code. Error: ' + error.message);
+        });
     }
 
     async function handleFirebaseSignup(event) {
