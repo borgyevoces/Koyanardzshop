@@ -851,6 +851,154 @@ Always be warm, helpful, and encourage customers to visit in person. Support bot
             });
             input.value = '';
 
+            // DURING BUILD MODE: Check if user is trying to select a product, view 3D, browse category, or skip
+            if (this.buildInProgress) {
+                const messageLowerForBuild = userMessage.toLowerCase();
+                
+                // 1. CHECK FOR SKIP COMPONENT COMMANDS: "skip", "skip this", "next", "no", "don't want"
+                const skipTriggers = [
+                    /\bskip\b/i,
+                    /\bskip this\b/i,
+                    /\bno\b/i,
+                    /\bdon't want\b/i,
+                    /\bdont want\b/i,
+                    /\bno thanks\b/i,
+                    /\bpass\b/i
+                ];
+                
+                const isSkipRequest = skipTriggers.some(regex => regex.test(messageLowerForBuild));
+                
+                // 2. CHECK FOR BROWSE/BROWSE COMPONENT COMMANDS: "browse", "show me", "what's available", "yes", "let's browse"
+                const browseTriggers = [
+                    /\bbrowse\b/i,
+                    /\bnext\b/i,
+                    /\bshow me\b/i,
+                    /\bwhat.*available/i,
+                    /\byeah\b/i,
+                    /\byes\b/i,
+                    /\byeah let's\b/i,
+                    /\blet's browse\b/i,
+                    /\blet me browse\b/i,
+                    /\bwhat do you have\b/i,
+                    /\bshow options\b/i
+                ];
+                
+                const isBrowseRequest = browseTriggers.some(regex => regex.test(messageLowerForBuild));
+                
+                // 3. CHECK FOR 3D VIEW COMMANDS: "3d", "show 3d", "view 3d", etc.
+                const view3DTriggers = [
+                    /\b3d\b/i,
+                    /\bshow 3d\b/i,
+                    /\bview 3d\b/i,
+                    /\bdisplay 3d\b/i,
+                    /\b3d model\b/i,
+                    /\bview.*model\b/i,
+                    /\bshow.*model\b/i
+                ];
+                
+                const is3DRequest = view3DTriggers.some(regex => regex.test(messageLowerForBuild));
+                
+                // 4. CHECK FOR SELECT COMMANDS: "select", "choose", "pick", "want this", etc.
+                const selectTriggers = [
+                    /\bselect\b/i,
+                    /\bchoose\b/i,
+                    /\bpick\b/i,
+                    /\bi'll take/i,
+                    /\bwant this\b/i,
+                    /\bgo with\b/i,
+                    /\bthis one\b/i,
+                    /\bproceed\b/i
+                ];
+                
+                const isSelectRequest = selectTriggers.some(regex => regex.test(messageLowerForBuild));
+                
+                // Priority: Check for browse/skip category buttons FIRST (they're shown when selecting components to browse)
+                if (isSkipRequest || isBrowseRequest) {
+                    // Look for Skip/Browse category buttons
+                    const skipBtn = document.querySelector('.skip-component-btn');
+                    const browseBtn = document.querySelector('.browse-component-btn');
+                    
+                    if (isSkipRequest && skipBtn) {
+                        console.log(`✅ Automatically clicking SKIP for user command: ${userMessage}`);
+                        setTimeout(() => {
+                            skipBtn.click();
+                        }, 300);
+                        return;
+                    }
+                    
+                    if (isBrowseRequest && browseBtn) {
+                        console.log(`✅ Automatically clicking BROWSE for user command: ${userMessage}`);
+                        setTimeout(() => {
+                            browseBtn.click();
+                        }, 300);
+                        return;
+                    }
+                }
+                
+                // Secondary: Check for product selection/3D (when product carousel is displayed)
+                if (is3DRequest || isSelectRequest) {
+                    // Try to match a product from currently displayed carousel
+                    const currentProducts = Array.from(document.querySelectorAll('.product-card-build'));
+                    
+                    if (currentProducts.length > 0) {
+                        let targetButton = null;
+                        let buttonType = null; // 'select' or '3d'
+                        
+                        // Extract potential product name or index from user message
+                        // For "select keyboard", match against product names
+                        // For just "select", try first product
+                        // For "3d", try first product with 3D
+                        
+                        if (userMessage.length > 10) {
+                            // User mentioned something specific, try to match product name
+                            const productCards = currentProducts;
+                            for (let card of productCards) {
+                                const productName = card.querySelector('.product-name')?.textContent?.toLowerCase() || '';
+                                const searchWords = messageLowerForBuild.split(/\s+/);
+                                
+                                // Check if any search words match the product name
+                                const matchCount = searchWords.filter(word => 
+                                    productName.includes(word) && word.length > 2
+                                ).length;
+                                
+                                if (matchCount > 0) {
+                                    // Found a matching product
+                                    if (is3DRequest) {
+                                        targetButton = card.querySelector('.product-3d-ask-btn');
+                                        buttonType = '3d';
+                                    } else {
+                                        targetButton = card.querySelector('.product-select-btn');
+                                        buttonType = 'select';
+                                    }
+                                    
+                                    if (targetButton) break;
+                                }
+                            }
+                        }
+                        
+                        // Fallback: if no specific product matched, try first available button of requested type
+                        if (!targetButton) {
+                            if (is3DRequest) {
+                                targetButton = currentProducts[0]?.querySelector('.product-3d-ask-btn');
+                                buttonType = '3d';
+                            } else if (isSelectRequest) {
+                                targetButton = currentProducts[0]?.querySelector('.product-select-btn');
+                                buttonType = 'select';
+                            }
+                        }
+                        
+                        // Click the matched button
+                        if (targetButton) {
+                            console.log(`✅ Automatically ${buttonType} button for user command: ${userMessage}`);
+                            setTimeout(() => {
+                                targetButton.click();
+                            }, 300);
+                            return;
+                        }
+                    }
+                }
+            }
+
             // Show typing indicator
             this.showTypingIndicator();
 

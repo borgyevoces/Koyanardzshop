@@ -1967,13 +1967,30 @@ class SellingPage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = SellingForm()
+        form = SellingForm()
+        
+        # Pre-fill form with authenticated user's data
+        if self.request.user.is_authenticated:
+            form.initial = {
+                'first_name': self.request.user.first_name,
+                'last_name': self.request.user.last_name,
+                'email': self.request.user.email,
+                'contact': self.request.user.phone_number if hasattr(self.request.user, 'phone_number') else '',
+                'address': self.request.user.address if hasattr(self.request.user, 'address') else '',
+            }
+        
+        context['form'] = form
         return context
     
     def post(self, request, *args, **kwargs):
         form = SellingForm(request.POST, request.FILES)
         if form.is_valid():
             selling_appointment = form.save(commit=False)
+            
+            # Ensure email matches authenticated user's email for proper tracking
+            if request.user.is_authenticated:
+                selling_appointment.email = request.user.email
+            
             selling_appointment.save()
 
             selling_appointment.reference_number = selling_appointment.reference_number

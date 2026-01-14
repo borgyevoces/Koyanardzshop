@@ -64,16 +64,14 @@
         const otpInput = document.querySelector('input[name="otp_code"]');
         const resendBtn = document.getElementById('resend-btn');
         const cooldownDisplay = document.getElementById('resend-cooldown');
-        const resendTimerDisplay = document.getElementById('resend-timer-display');
         const otpTimerDisplay = document.getElementById('otp-timer');
         
-        console.log('Elements found in startOTPCountdown:', { otpInput, resendBtn, cooldownDisplay, resendTimerDisplay });
+        console.log('Elements found in startOTPCountdown:', { otpInput, resendBtn, cooldownDisplay, otpTimerDisplay });
         
         // OTP input formatting - allow numbers and letters (for hex codes)
         if (otpInput) {
             otpInput.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9a-zA-Z]/gi, '');
-            });
             });
         }
         
@@ -119,16 +117,10 @@
                 if (cooldownDisplay) {
                     cooldownDisplay.textContent = `You can resend in ${resendSeconds}s`;
                 }
-                if (resendTimerDisplay) {
-                    resendTimerDisplay.textContent = `You can resend in ${resendSeconds}s`;
-                }
             } else {
                 clearInterval(countdown);
                 if (cooldownDisplay) {
                     cooldownDisplay.textContent = 'Ready to resend';
-                }
-                if (resendTimerDisplay) {
-                    resendTimerDisplay.textContent = 'Ready to resend';
                 }
                 if (resendBtn) {
                     resendBtn.disabled = false;
@@ -145,10 +137,9 @@
         
         const resendBtn = document.getElementById('resend-btn');
         const cooldownDisplay = document.getElementById('resend-cooldown');
-        const resendTimerDisplay = document.getElementById('resend-timer-display');
         const resendForm = document.getElementById('resend-otp-form');
         
-        console.log('Elements found:', { resendBtn, cooldownDisplay, resendTimerDisplay, resendForm });
+        console.log('Elements found:', { resendBtn, cooldownDisplay, resendForm });
         
         if (!resendBtn || !cooldownDisplay || !resendForm) {
             console.error('Missing required elements for resend click');
@@ -172,9 +163,6 @@
             if (distance <= 0) {
                 clearInterval(cooldownTimer);
                 cooldownDisplay.textContent = 'Ready to resend';
-                if (resendTimerDisplay) {
-                    resendTimerDisplay.textContent = 'Ready to resend';
-                }
                 resendBtn.disabled = false;
                 resendBtn.style.opacity = '1';
                 resendBtn.style.cursor = 'pointer';
@@ -184,9 +172,6 @@
             
             const seconds = Math.floor(distance / 1000);
             cooldownDisplay.textContent = `You can resend in ${seconds}s`;
-            if (resendTimerDisplay) {
-                resendTimerDisplay.textContent = `You can resend in ${seconds}s`;
-            }
         }, 1000);
         
         // Submit the form
@@ -588,9 +573,30 @@
         text-align: center;
         margin-top: 15px;
         margin-bottom: 20px;
-        font-size: 0.8rem;
+        padding: 12px 14px;
+        font-size: 0.9rem;
         color: #003d99;
         font-weight: 600;
+        background: #f0f4ff;
+        border-radius: 6px;
+        border-left: 3px solid #003d99;
+        display: block !important;
+        min-height: 20px;
+        visibility: visible !important;
+    }
+    
+    #resend-timer-display {
+        text-align: center;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 600;
+        background: #f5f5f5;
+        border-radius: 4px;
+        display: block !important;
+        min-height: 16px;
+        visibility: visible !important;
     }
     
     .otp-header {
@@ -1178,12 +1184,12 @@
                 {% if otp_code %}
                 <div class="resend-section" id="resend-section" style="display: {% if is_fresh_otp %}none{% else %}block{% endif %};">
                     <h4>⏱ Didn't receive the code?</h4>
+                    <div id="resend-cooldown" class="resend-cooldown-text"></div>
                     <form method="POST" action="{% url 'resend-otp' %}" id="resend-otp-form">
                         {% csrf_token %}
                         <input type="hidden" name="otp_email" value="{{ form.instance.email }}">
                         <button type="button" id="resend-btn" onclick="handleResendClick(event)">Request New Code</button>
                     </form>
-                    <div id="resend-cooldown" class="resend-cooldown-text"></div>
                 </div>
                 {% if is_fresh_otp %}
                 <script>

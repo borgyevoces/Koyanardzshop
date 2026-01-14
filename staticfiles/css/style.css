@@ -5481,7 +5481,7 @@ footer .footer .footer_shop {
 }
 
 .step-number {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 60px;
@@ -5491,7 +5491,10 @@ footer .footer .footer_shop {
     border-radius: 50%;
     font-weight: 700;
     font-size: 1.5rem;
-    margin-bottom: 20px;
+    margin: 0 auto 20px;
+    padding: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .step-icon {
@@ -5863,6 +5866,10 @@ footer .footer .footer_shop {
         font-size: 2rem;
     }
 
+    .step-number {
+        margin-top: -8px;
+    }
+
     .accept-items {
         grid-template-columns: repeat(2, 1fr);
         gap: 25px;
@@ -5920,6 +5927,10 @@ footer .footer .footer_shop {
     .conditions-container h2 {
         font-size: 1.5rem;
         margin-bottom: 40px;
+    }
+
+    .step-number {
+        margin-top: -10px;
     }
 
     .accept-items {

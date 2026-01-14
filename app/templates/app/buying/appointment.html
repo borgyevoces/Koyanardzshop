@@ -297,6 +297,16 @@
         opacity: 0.8;
     }
 
+    .appointment_body .appointment_right i {
+        width: 1.8rem;
+        height: auto;
+        margin-right: 12px;
+        vertical-align: middle;
+        opacity: 0.8;
+        font-size: 1.5rem;
+        color: #38728F;
+    }
+
     /* Form Input Styling */
     .apppointment_rightform {
         display: flex;
@@ -304,6 +314,12 @@
         gap: 12px;
         margin-bottom: 16px;
         width: 100%;
+    }
+
+    .apppointment_rightform i {
+        flex-shrink: 0;
+        font-size: 1.5rem;
+        color: #38728F;
     }
 
     .apppointment_rightform img {
@@ -547,25 +563,25 @@
                 </div>
             </div>
             <div class="appointment_right">
-                <p>👤 Your Information</p>
+                <p><i class="fas fa-user"></i> Your Information</p>
                 <form method="POST">
                     {% csrf_token %}
                     <div class="apppointment_rightform">
-                        <img src="{% static 'images/icon/appointment-user.png' %}" alt=""><p>{{ form.first_name }}</p>
+                        <i class="fas fa-user-circle"></i><p>{{ form.first_name }}</p>
                         <p>{{ form.last_name }}</p>
                     </div>
                     <div class="apppointment_rightform">
-                    <img src="{% static 'images/icon/appointment-phone.png' %}" alt=""><p>{{ form.contact }}</p>
+                    <i class="fas fa-phone"></i><p>{{ form.contact }}</p>
                     </div>
                     <div class="apppointment_rightform">
-                    <img src="{% static 'images/icon/appointment-gmail.png' %}" alt=""><p>{{ form.email }}</p>
+                    <i class="fas fa-envelope"></i><p>{{ form.email }}</p>
                     </div>
 
                     {{ form.date.as_hidden }}
                     {{ form.time.as_hidden }}
 
                     <div class="apppointment_rightform">
-                        <img src="{% static 'images/icon/appointment-phone.png' %}" alt="" style="width: 1.5rem;">
+                        <i class="fas fa-clock"></i>
                         <select id="id_time_select" disabled style="flex: 1; height: 44px; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; background-color: #f8f9fa; font-size: 1rem; font-family: Montserrat; cursor: pointer; transition: all 0.3s ease;">
                             <option value="">Select Time</option>
                         </select>
