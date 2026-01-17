@@ -37,6 +37,7 @@ urlpatterns = [
     path('admin_product/', AdminProduct.as_view(), name='admin_product'),
     path('add_product/', views.add_product_ajax, name='add_product'),
     path('update_product/<int:product_id>/', views.update_product_ajax, name='update_product'),
+    path('api/product/<int:product_id>/', views.get_product_details, name='get_product_details'),
     path('add_product_variant/<int:product_id>/', views.add_product_variant_ajax, name='add_product_variant'),
     path('delete_product/<int:product_id>/', views.delete_product_ajax, name='delete_product'),
     path('update_category/<int:category_id>/', views.update_category, name='update_category'),

@@ -5449,7 +5449,7 @@ footer .footer .footer_shop {
     font-weight: 600;
     font-size: 1rem;
     transition: all 0.3s ease;
-    border: 2px solid white;
+    border: 2px solid #0b84c6;
 }
 
 .btn-primary {
@@ -5893,6 +5893,9 @@ footer .footer .footer_shop {
     .btn-secondary {
         width: 100%;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .process-container h2,

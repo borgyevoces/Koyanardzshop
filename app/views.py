@@ -225,15 +225,25 @@ def add_product_ajax(request):
                 stock=int(stock)
             )
             
-            # Handle image upload
+            # Handle single image as main image (for backward compatibility)
             if 'image' in request.FILES:
                 product.image = request.FILES['image']
             
-            # Handle 3D model upload
+            # Handle 3D model upload (only one)
             if 'model_3d' in request.FILES:
                 product.model_3d = request.FILES['model_3d']
             
             product.save()
+            
+            # Handle multiple images
+            if 'images' in request.FILES:
+                for idx, image_file in enumerate(request.FILES.getlist('images')):
+                    ProductImage.objects.create(
+                        product=product,
+                        product_image=image_file,
+                        order=idx
+                    )
+            
             return JsonResponse({'status': 'success', 'message': 'Product added successfully'})
         
         else:
@@ -280,15 +290,27 @@ def update_product_ajax(request, product_id):
             if stock:
                 product.stock = int(stock)
         
-        # Handle image upload
+        # Handle image upload (single, for backward compatibility)
         if 'image' in request.FILES:
             product.image = request.FILES['image']
         
-        # Handle 3D model upload
+        # Handle 3D model upload (only one)
         if 'model_3d' in request.FILES:
             product.model_3d = request.FILES['model_3d']
         
         product.save()
+        
+        # Handle multiple images
+        if 'images' in request.FILES:
+            # Delete old images and add new ones
+            product.images.all().delete()
+            for idx, image_file in enumerate(request.FILES.getlist('images')):
+                ProductImage.objects.create(
+                    product=product,
+                    product_image=image_file,
+                    order=idx
+                )
+        
         return JsonResponse({'status': 'success', 'message': 'Product updated successfully'})
     
     except Exception as e:
@@ -347,6 +369,48 @@ def delete_product_ajax(request, product_id):
         product = get_object_or_404(Product, id=product_id)
         product.delete()
         return JsonResponse({'status': 'success', 'message': 'Product deleted successfully'})
+    
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+@csrf_exempt
+def get_product_details(request, product_id):
+    """AJAX endpoint for getting product details including images and 3D model"""
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+    
+    try:
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Get all images for the product
+        images = []
+        
+        # Add main product image if it exists
+        if product.image and product.image.name:
+            images.append({
+                'url': product.image.url,
+                'id': 0,  # Use 0 as a special ID for the main image
+                'is_main': True
+            })
+        
+        # Add ProductImage records
+        for img in product.images.all():
+            images.append({
+                'url': img.product_image.url,
+                'id': img.id,
+                'is_main': False
+            })
+        
+        # Get 3D model filename if exists
+        model_3d = None
+        if product.model_3d and product.model_3d.name:
+            model_3d = product.model_3d.name.split('/')[-1]  # Get just the filename
+        
+        return JsonResponse({
+            'status': 'success',
+            'images': images,
+            'model_3d': model_3d
+        })
     
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

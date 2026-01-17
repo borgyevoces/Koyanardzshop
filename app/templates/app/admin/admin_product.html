@@ -125,8 +125,9 @@
                         <input type="number" name="stock" placeholder="0" required>
                     </div>
                     <div class="form-group">
-                        <label>Product Image</label>
-                        <input type="file" name="image" accept="image/*">
+                        <label>Product Images (Multiple)</label>
+                        <input type="file" name="images" accept="image/*" multiple>
+                        <small>You can select multiple images</small>
                     </div>
                     <div class="form-group">
                         <label>3D Model File (Optional)</label>
@@ -181,12 +182,16 @@
                         <input type="number" id="edit_stock" name="stock" required>
                     </div>
                     <div class="form-group">
-                        <label>Product Image</label>
-                        <input type="file" id="edit_image" name="image" accept="image/*">
+                        <label>Product Images</label>
+                        <div id="current_images_container" style="margin-bottom: 10px;"></div>
+                        <input type="file" id="edit_images" name="images" accept="image/*" multiple>
+                        <small>Select new images to replace. Leave empty to keep current images.</small>
                     </div>
                     <div class="form-group">
                         <label>3D Model File</label>
+                        <div id="current_model_container" style="margin-bottom: 10px;"></div>
                         <input type="file" id="edit_model_3d" name="model_3d" accept=".glb,.gltf">
+                        <small>Select a new file to replace. Leave empty to keep current model.</small>
                     </div>
                     <button type="submit" class="modal-btn">Update Product</button>
                 </form>
@@ -305,7 +310,7 @@
                             </td>
                             <td data-label="Price" class="price-column">₱{{ produkto.price|intcomma }}</td>
                             <td data-label="Actions" class="actions-column">
-                                <button class="action-icon edit-icon" onclick="openEditProduct({{ produkto.id }}, '{{ produkto.product_name|escapejs }}', {{ produkto.category_name.id }}, {{ produkto.brand.id }}, '{{ produkto.description|escapejs }}', {{ produkto.price }}, {{ produkto.stock }})" title="Edit">✎</button>
+                                <button class="action-icon edit-icon" onclick="openEditProduct({{ produkto.id }}, '{{ produkto.product_name|escapejs }}', '{{ produkto.category_name.id }}', '{{ produkto.brand.id }}', '{{ produkto.description|escapejs }}', '{{ produkto.price }}', '{{ produkto.stock }}')" title="Edit">✎</button>
                                 <button class="action-icon variant-icon" onclick="openAddVariant({{ produkto.id }}, '{{ produkto.product_name|escapejs }}')" title="Add Variant">📦</button>
                                 <button class="action-icon delete-icon" onclick="deleteProduct({{ produkto.id }})" title="Delete">🗑</button>
                             </td>
@@ -427,13 +432,144 @@
         document.getElementById('edit_description').value = description;
         document.getElementById('edit_price').value = price;
         document.getElementById('edit_stock').value = stock;
+        
+        // Show the modal
         document.getElementById('edit_product_popup').classList.add('modal-show');
         document.body.style.overflow = 'hidden';
+        
+        // Initialize containers with loading state
+        setTimeout(() => {
+            console.log('=== Opening edit product modal for ID:', id);
+            const imagesContainer = document.getElementById('current_images_container');
+            const modelContainer = document.getElementById('current_model_container');
+            
+            if (imagesContainer) imagesContainer.innerHTML = '<small style="color: #999;">Loading images...</small>';
+            if (modelContainer) modelContainer.innerHTML = '<small style="color: #999;">Loading model...</small>';
+            
+            // Fetch current product images and 3D model
+            const apiUrl = `/api/product/${id}/`;
+            console.log('Fetching from:', apiUrl);
+            
+            fetch(apiUrl)
+                .then(res => {
+                    console.log('Response status:', res.status, 'Content-Type:', res.headers.get('content-type'));
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('Product data received:', data);
+                    console.log('Number of images:', data.images ? data.images.length : 0);
+                    
+                    // Display current images
+                    if (imagesContainer) {
+                        imagesContainer.innerHTML = '';
+                        if (data.images && data.images.length > 0) {
+                            const header = document.createElement('div');
+                            header.innerHTML = '<strong>Current Images:</strong>';
+                            header.style.marginBottom = '8px';
+                            imagesContainer.appendChild(header);
+                            
+                            const imagesList = document.createElement('div');
+                            imagesList.style.display = 'flex';
+                            imagesList.style.flexWrap = 'wrap';
+                            imagesList.style.gap = '10px';
+                            imagesList.style.marginTop = '5px';
+                            
+                            data.images.forEach(image => {
+                                const imgDiv = document.createElement('div');
+                                imgDiv.style.position = 'relative';
+                                imgDiv.style.display = 'inline-block';
+                                
+                                const img = document.createElement('img');
+                                img.src = image.url;
+                                img.alt = 'Product image';
+                                img.style.width = '80px';
+                                img.style.height = '80px';
+                                img.style.objectFit = 'cover';
+                                img.style.borderRadius = '4px';
+                                img.style.border = '2px solid #ddd';
+                                img.onerror = function() {
+                                    img.src = '{% static "images/placeholder.png" %}';
+                                };
+                                
+                                imgDiv.appendChild(img);
+                                
+                                // Add delete button
+                                const deleteBtn = document.createElement('button');
+                                deleteBtn.textContent = '✕';
+                                deleteBtn.type = 'button';
+                                deleteBtn.style.position = 'absolute';
+                                deleteBtn.style.top = '-8px';
+                                deleteBtn.style.right = '-8px';
+                                deleteBtn.style.width = '24px';
+                                deleteBtn.style.height = '24px';
+                                deleteBtn.style.padding = '0';
+                                deleteBtn.style.borderRadius = '50%';
+                                deleteBtn.style.backgroundColor = 'red';
+                                deleteBtn.style.color = 'white';
+                                deleteBtn.style.border = 'none';
+                                deleteBtn.style.cursor = 'pointer';
+                                deleteBtn.style.fontSize = '16px';
+                                deleteBtn.style.display = 'none';
+                                
+                                imgDiv.appendChild(deleteBtn);
+                                imgDiv.addEventListener('mouseenter', () => deleteBtn.style.display = 'block');
+                                imgDiv.addEventListener('mouseleave', () => deleteBtn.style.display = 'none');
+                                
+                                imagesList.appendChild(imgDiv);
+                            });
+                            
+                            imagesContainer.appendChild(imagesList);
+                            
+                            // Add note about replacement
+                            const note = document.createElement('div');
+                            note.style.fontSize = '12px';
+                            note.style.color = '#666';
+                            note.style.marginTop = '8px';
+                            note.innerHTML = 'Select new images above to replace the current ones.';
+                            imagesContainer.appendChild(note);
+                        } else {
+                            imagesContainer.innerHTML = '<small style="color: #999;">No images currently added</small>';
+                        }
+                    }
+                    
+                    // Display current 3D model
+                    if (modelContainer) {
+                        modelContainer.innerHTML = '';
+                        if (data.model_3d) {
+                            const modelDiv = document.createElement('div');
+                            const strong = document.createElement('strong');
+                            strong.textContent = 'Current 3D Model: ';
+                            const span = document.createElement('span');
+                            span.textContent = data.model_3d;
+                            span.style.color = '#333';
+                            span.style.fontWeight = 'normal';
+                            modelDiv.appendChild(strong);
+                            modelDiv.appendChild(span);
+                            modelContainer.appendChild(modelDiv);
+                        } else {
+                            modelContainer.innerHTML = '<small style="color: #999;">No 3D model currently added</small>';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching product details:', err);
+                    if (imagesContainer) {
+                        imagesContainer.innerHTML = '<small style="color: red;">Error: ' + err.message + '</small>';
+                    }
+                    if (modelContainer) {
+                        modelContainer.innerHTML = '<small style="color: red;">Error loading model</small>';
+                    }
+                });
+        }, 100);  // Small delay to ensure modal is rendered
     }
     
     function closeEditProduct() {
         document.getElementById('edit_product_popup').classList.remove('modal-show');
         document.body.style.overflow = 'auto';
+        document.getElementById('edit_form').reset();
     }
 
     function openEditCategory(id, name) {
@@ -648,18 +784,47 @@
         if (addProductForm) {
             addProductForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const formData = new FormData(this);
+                
+                // Create a fresh FormData object with all fields
+                const formData = new FormData();
                 formData.append('form_type', 'product');
+                formData.append('product_name', this.querySelector('input[name="product_name"]').value);
+                formData.append('category_name', this.querySelector('select[name="category_name"]').value);
+                formData.append('brand', this.querySelector('select[name="brand"]').value);
+                formData.append('description', this.querySelector('textarea[name="description"]').value);
+                formData.append('price', this.querySelector('input[name="price"]').value);
+                formData.append('stock', this.querySelector('input[name="stock"]').value);
+                
+                // Add CSRF token
+                const csrfToken = getCookie('csrftoken');
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                
+                // Add images
+                const imagesInput = this.querySelector('input[name="images"]');
+                if (imagesInput && imagesInput.files.length > 0) {
+                    for (let i = 0; i < imagesInput.files.length; i++) {
+                        formData.append('images', imagesInput.files[i]);
+                    }
+                    console.log('Add: Images added:', imagesInput.files.length);
+                }
+                
+                // Add 3D model
+                const modelInput = this.querySelector('input[name="model_3d"]');
+                if (modelInput && modelInput.files.length > 0) {
+                    formData.append('model_3d', modelInput.files[0]);
+                    console.log('Add: Model added:', modelInput.files[0].name);
+                }
                 
                 fetch('{% url "add_product" %}', {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': csrfToken
                     },
                     body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
+                    console.log('Add response:', data);
                     if (data.status === 'success') {
                         alert('Product added successfully!');
                         closeAddProduct();
@@ -680,18 +845,51 @@
         if (editForm) {
             editForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const formData = new FormData(this);
                 const productId = document.getElementById('edit_id').value;
+                
+                // Create a fresh FormData object
+                const formData = new FormData();
+                
+                // Add all form fields manually
+                formData.append('product_name', document.getElementById('edit_name').value);
+                formData.append('category_name', document.getElementById('edit_category').value);
+                formData.append('brand', document.getElementById('edit_brand').value);
+                formData.append('description', document.getElementById('edit_description').value);
+                formData.append('price', document.getElementById('edit_price').value);
+                formData.append('stock', document.getElementById('edit_stock').value);
+                
+                // Add CSRF token
+                const csrfToken = getCookie('csrftoken');
+                formData.append('csrfmiddlewaretoken', csrfToken);
+                
+                // Add images if selected
+                const imagesInput = document.getElementById('edit_images');
+                if (imagesInput && imagesInput.files.length > 0) {
+                    for (let i = 0; i < imagesInput.files.length; i++) {
+                        formData.append('images', imagesInput.files[i]);
+                    }
+                    console.log('Images added to form:', imagesInput.files.length);
+                }
+                
+                // Add 3D model if selected
+                const modelInput = document.getElementById('edit_model_3d');
+                if (modelInput && modelInput.files.length > 0) {
+                    formData.append('model_3d', modelInput.files[0]);
+                    console.log('Model added to form:', modelInput.files[0].name);
+                }
+                
+                console.log('Submitting product update');
                 
                 fetch(`/update_product/${productId}/`, {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
+                        'X-CSRFToken': csrfToken
                     },
                     body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
+                    console.log('Response:', data);
                     if (data.status === 'success') {
                         alert('Product updated successfully!');
                         closeEditProduct();
