@@ -562,6 +562,8 @@
         position: relative;
         margin-bottom: 0;
         width: 100%;
+        display: flex;
+        align-items: center;
     }
     
     .password-wrapper input {
@@ -574,6 +576,7 @@
         transition: all 0.3s ease;
         background: white;
         box-sizing: border-box;
+        flex: 1;
     }
     
     .password-wrapper input:focus {
@@ -592,10 +595,28 @@
         height: 18px;
         opacity: 0.6;
         transition: opacity 0.2s;
+        flex-shrink: 0;
     }
     
     .toggle-password:hover {
         opacity: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .toggle-password {
+            width: 16px;
+            height: 16px;
+            right: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .toggle-password {
+            width: 16px;
+            height: 16px;
+            right: 10px;
+            top: 50%;
+        }
     }
     
     .signup_leftbody label {
@@ -639,7 +660,8 @@
     .form_field i {
         position: absolute;
         right: 14px;
-        top: 12px;
+        top: 50%;
+        transform: translateY(-50%);
         color: #666;
         pointer-events: none;
         font-size: 1.1rem;
@@ -939,16 +961,17 @@
         .resend-section form {
             width: 100%;
             justify-content: center;
-            display: block;
+            display: flex;
             text-align: center;
+            align-items: center;
         }
         
         #resend-btn {
             padding: 9px 24px !important;
             font-size: 0.8rem !important;
             width: auto !important;
-            margin: 0 auto;
-            display: inline-block;
+            margin: 0 auto !important;
+            display: inline-block !important;
         }
 
         .resend-cooldown-text {
@@ -974,21 +997,20 @@
             font-size: 1.4rem;
         }
         
-        .otp-header h3 {
-            font-size: 1.2rem !important;
-        }
-        
-        .otp-header p {
-            font-size: 0.8rem !important;
-        }
-        
-        #otp-timer {
-            font-size: 0.7rem !important;
+        .resend-section form {
+            width: 100%;
+            justify-content: center;
+            display: flex;
+            text-align: center;
+            align-items: center;
         }
         
         #resend-btn {
             padding: 8px 12px !important;
             font-size: 0.7rem !important;
+            width: auto !important;
+            margin: 0 auto !important;
+            display: inline-block !important;
         }
     }
     
@@ -1121,9 +1143,17 @@
             font-size: 1.4rem;
         }
         
-        .form_field input, .password-input-wrapper input {
-            padding: 11px 36px 11px 14px;
-            font-size: 0.9rem;
+        .form_field input, .password-input-wrapper input, .password-wrapper input {
+            width: 100% !important;
+            padding: 11px 36px 11px 14px !important;
+            font-size: 0.9rem !important;
+            box-sizing: border-box !important;
+        }
+        
+        .toggle-password {
+            width: 16px !important;
+            height: 16px !important;
+            right: 12px !important;
         }
         
         .errorlist li {
@@ -1159,9 +1189,17 @@
             font-size: 1.2rem;
         }
         
-        .form_field input, .password-input-wrapper input {
-            padding: 10px 36px 10px 12px;
-            font-size: 0.85rem;
+        .form_field input, .password-input-wrapper input, .password-wrapper input {
+            width: 100% !important;
+            padding: 10px 36px 10px 12px !important;
+            font-size: 0.85rem !important;
+            box-sizing: border-box !important;
+        }
+        
+        .toggle-password {
+            width: 14px !important;
+            height: 14px !important;
+            right: 10px !important;
         }
         
         .form_field {

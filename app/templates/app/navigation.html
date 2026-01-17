@@ -174,8 +174,28 @@
                     </li>
                     <li><a href="{% url 'my_appointment' %}"><span>Appointment</span></a></li>
                     <li class="nav-actions-mobile"><a href="{% url 'cart' %}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i><span>Cart</span></a></li>
-                    <li class="nav-actions-mobile"><button id="favToggleMobile" class="action-btn-mobile"><i class="fa-regular fa-heart" aria-hidden="true"></i><span>Favorites</span></button></li>
-                    <li class="nav-actions-mobile">{% if user.is_authenticated %}<a href="{% url 'logout' %}" class="action-btn-mobile"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span></a>{% else %}<a href="{% url 'login' %}" class="action-btn-mobile"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Sign in</span></a>{% endif %}</li>
+                    <li class="nav-actions-mobile">
+                        <button id="favToggleMobile" class="action-btn-mobile"><i class="fa-regular fa-heart" aria-hidden="true"></i><span>Favorites</span></button>
+                        <div id="favoriteMobileDropdown" class="dropdown-panel">
+                            {% if products_favorite %}
+                                {% for produkto in products_favorite %}
+                                <div class="fav-item" data-product-id="{{ produkto.id }}">
+                                    <div class="fav-left">
+                                        <a href="{% url 'product_item' produkto.id %}"><img src="{{ produkto.image.url }}" alt="{{ produkto.product_name }}"></a>
+                                        <div class="fav-meta">{{ produkto.product_name }}</div>
+                                    </div>
+                                    <div class="fav-actions">
+                                        <button type="button" class="fav-remove-btn" data-product-id="{{ produkto.id }}" aria-label="Remove from favorites"><i class="fa-solid fa-trash-alt" aria-hidden="true"></i></button>
+                                        <form action="{% url 'add_to_cart' produkto.id %}" method="POST">{% csrf_token %}<button type="submit" aria-label="Add to cart"><i class="fa-solid fa-shopping-cart" aria-hidden="true"></i></button></form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="no-fav">No favorites yet</p>
+                            {% endif %}
+                        </div>
+                    </li>
+                    <li class="nav-actions-mobile">{% if user.is_authenticated %}<a href="{% url 'logout' %}"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span></a>{% else %}<a href="{% url 'login' %}"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Sign in</span></a>{% endif %}</li>
                 </ul>
             </nav>
 
@@ -307,12 +327,17 @@
 
             // Mobile buttons that live inside the nav overlay
             const favBtnMobile = document.getElementById('favToggleMobile');
+            const favMobilePanel = document.getElementById('favoriteMobileDropdown');
             const userBtnMobile = document.getElementById('userToggleMobile');
+            
             favBtnMobile && favBtnMobile.addEventListener('click', function(e){
                 e.stopPropagation();
-                // On mobile, redirect to the favorites page
-                window.location.href = "{% url 'favorite' %}";
+                // On mobile, show/hide the favorites dropdown
+                if (favMobilePanel) {
+                    favMobilePanel.classList.toggle('show');
+                }
             });
+            
             userBtnMobile && userBtnMobile.addEventListener('click', function(e){
                 e.stopPropagation();
                 nav.classList.add('open');

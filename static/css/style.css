@@ -3955,10 +3955,16 @@ footer .footer .footer_shop {
     
     /* Mobile nav actions for tablet */
     .nav-actions-mobile{display:block}
-    .action-btn-mobile{background:transparent;border:none;color:inherit;padding:0.7rem 0.8rem;font:inherit;cursor:pointer;display:flex;align-items:center;gap:0.5rem}
+    .action-btn-mobile{background:transparent;border:none;color:inherit;padding:0.7rem 0.8rem;font:inherit;cursor:pointer;display:flex;align-items:center;gap:0.5rem;width:100%;text-align:left}
     .action-btn-mobile i{font-size:1rem}
     .main-nav.open .nav-list .nav-actions-mobile{display:block}
     .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{width:100%;text-align:left}
+    
+    /* Mobile favorites dropdown within nav */
+    .nav-actions-mobile #favoriteMobileDropdown{position:static;right:auto;top:auto;background:#f5f5f5;color:#222;margin:0 0 0.5rem 0;padding:0;border-radius:0.25rem;box-shadow:none;width:100%;box-sizing:border-box}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-item{padding:0.6rem 0.8rem;border-bottom:1px solid #e0e0e0}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-item:last-child{border-bottom:none}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-item img{width:40px;height:40px}
     
     /* Cart page tablet */
     .cartbody{width:90%;flex-direction:column;gap:1.5rem;min-height:auto;margin:1rem auto}
@@ -4018,10 +4024,23 @@ footer .footer .footer_shop {
     .fav-actions button, .fav-actions form button{width:32px;height:32px;font-size:0.8rem}
     
     .nav-actions-mobile{display:block}
-    .action-btn-mobile{background:transparent;border:none;color:inherit;padding:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:0.9rem}
+    .action-btn-mobile{background:transparent;border:none;color:inherit;padding:0;font:inherit;cursor:pointer;display:flex;align-items:center;gap:.4rem;font-size:0.9rem;width:100%}
     .action-btn-mobile i{font-size:1rem}
     .main-nav.open .nav-list .nav-actions-mobile{display:block}
-    .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{width:100%;text-align:left}
+    .main-nav.open .nav-list .nav-actions-mobile a, .main-nav.open .nav-list .nav-actions-mobile button{width:100%;text-align:left;padding:.75rem 0.8rem;display:flex;align-items:center;gap:.4rem;color:whitesmoke}
+    
+    /* Mobile favorites dropdown */
+    .nav-actions-mobile #favoriteMobileDropdown{position:static;right:auto;top:auto;background:#fff;color:#222;margin:0;padding:0;border-radius:0;box-shadow:none;width:100%;box-sizing:border-box;display:none;flex-direction:column;max-height:400px;overflow-y:auto}
+    .nav-actions-mobile #favoriteMobileDropdown.show{display:flex}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-item{padding:1rem;border-bottom:1px solid #f0f0f0;flex-direction:row;align-items:center;gap:0.8rem;background:#fff}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-item:last-child{border-bottom:none}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-item img{width:44px;height:44px;border-radius:8px}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-left{gap:0.8rem;flex:1;display:flex;align-items:center}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-meta{font-size:0.9rem;color:#333;font-weight:500}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-actions{display:flex;gap:0.5rem;justify-content:flex-end}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-actions button, .nav-actions-mobile #favoriteMobileDropdown .fav-actions form button{width:32px;height:32px;padding:0.4rem;border:none;background:transparent;cursor:pointer;color:#666;transition:color 0.2s}
+    .nav-actions-mobile #favoriteMobileDropdown .fav-actions button:hover, .nav-actions-mobile #favoriteMobileDropdown .fav-actions form button:hover{color:#003d99}
+    .nav-actions-mobile #favoriteMobileDropdown .no-fav{padding:1rem;text-align:center;color:#999;font-size:0.9rem}
     
     /* Cart page mobile */
     .cartbody{width:95%;flex-direction:column;gap:1rem;min-height:auto;margin:0.5rem auto;padding:0.5rem}

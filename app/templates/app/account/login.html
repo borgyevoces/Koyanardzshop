@@ -149,6 +149,8 @@
         transition: all 0.3s ease !important;
         background: white !important;
         box-sizing: border-box !important;
+        display: block !important;
+        line-height: 1.4 !important;
     }
     
     .loginpage_rightbody form input:focus {
@@ -177,19 +179,23 @@
     }
     
     .password-wrapper input {
-        width: 100%;
-        padding: 12px 40px 12px 16px;
-        border: 1.5px solid #ddd;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-family: inherit;
-        transition: all 0.3s ease;
+        width: 100% !important;
+        padding: 12px 40px 12px 16px !important;
+        border: 1.5px solid #ddd !important;
+        border-radius: 8px !important;
+        font-size: 0.95rem !important;
+        font-family: inherit !important;
+        transition: all 0.3s ease !important;
+        background: white !important;
+        box-sizing: border-box !important;
+        display: block !important;
+        line-height: 1.4 !important;
     }
     
     .password-wrapper input:focus {
-        outline: none;
-        border-color: #003d99;
-        box-shadow: 0 0 0 3px rgba(0, 61, 153, 0.1);
+        outline: none !important;
+        border-color: #003d99 !important;
+        box-shadow: 0 0 0 3px rgba(0, 61, 153, 0.1) !important;
     }
     
     .toggle-password {
@@ -353,14 +359,14 @@
                     <div class="form_field">
                         <input type="text" name="username_or_email" placeholder="Username" required>
                         <i class="fa fa-user"></i>
-                        {% if messages %}
-                            <small style="color: #c33; display: block; margin-top: 6px;">
-                                {% for message in messages %}
-                                    {{ message }}<br>
-                                {% endfor %}
-                            </small>
-                        {% endif %}
                     </div>
+                    {% if messages %}
+                        <small style="color: #c33; display: block; margin-top: 6px; margin-bottom: 14px;">
+                            {% for message in messages %}
+                                {{ message }}<br>
+                            {% endfor %}
+                        </small>
+                    {% endif %}
                     <div class="password-wrapper">
                         <input type="password" name="password" id="password-field" placeholder="Password" required>
                         <img src="{% static 'images/icon/password-hide.png' %}" class="toggle-password" id="togglePassword" alt="Show Password">
